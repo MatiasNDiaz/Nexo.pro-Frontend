@@ -4,7 +4,7 @@ test("la portada se sirve en español y con encabezados de seguridad", async ({ 
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
 
-  await expect(page.getByRole("heading", { level: 1, name: "Repara Ya" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Lo que necesitás arreglar/ })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "es-AR");
 
   const headers = response!.headers();

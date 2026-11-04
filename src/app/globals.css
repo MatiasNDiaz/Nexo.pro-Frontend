@@ -1,3 +1,219 @@
 @import "tailwindcss";
 
-/* Los tokens de la identidad visual (colores, tipografía, radios, sombras) se definen en la etapa 1. */
+/*
+ * Identidad visual de Repara Ya. ÚNICO lugar donde se definen colores, tipografías, sombras y curvas.
+ * La paleta por defecto de Tailwind se desactiva (`--color-*: initial`): solo existen estos tokens,
+ * así ningún componente puede usar un color fuera de la identidad.
+ *
+ * Contrastes verificados (WCAG 2.2, texto normal ≥ 4,5:1; bordes de controles ≥ 3:1):
+ * - ink sobre canvas 15,1 · sobre blanco 16,1
+ * - muted (#64748B) solo sobre superficies blancas (4,76); sobre canvas usar muted-strong (5,57)
+ * - brand-700 con texto blanco 10,9 · night con texto blanco 16,5
+ * - electric-500 sobre blanco 3,68: solo acentos, íconos, foco y texto grande. Sobre night, texto en electric-400 (6,5)
+ * - amber-400 con texto night 7,99 (nunca texto blanco sobre ámbar: 2,07)
+ * - line-strong sobre blanco 3,08 (bordes de inputs)
+ */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Azul profesional: protagonista. 700 = #123B7A, 900 = azul noche #0B1F3A. */
+  --color-brand-50: #eef3fb;
+  --color-brand-100: #dce6f6;
+  --color-brand-200: #b9ccec;
+  --color-brand-300: #8aa8dc;
+  --color-brand-400: #5a82c6;
+  --color-brand-500: #2e5ea8;
+  --color-brand-600: #1d4a91;
+  --color-brand-700: #123b7a;
+  --color-brand-800: #0f3166;
+  --color-brand-900: #0b1f3a;
+  --color-brand-950: #07152a;
+
+  /* Azul eléctrico: acento secundario. */
+  --color-electric-50: #eef4ff;
+  --color-electric-100: #dbe8fe;
+  --color-electric-400: #60a5fa;
+  --color-electric-500: #3b82f6;
+  --color-electric-700: #1d4ed8;
+
+  /* Ámbar: acciones principales y lo que requiere atención. */
+  --color-amber-50: #fef6ea;
+  --color-amber-100: #fde7c6;
+  --color-amber-400: #f4a340;
+  --color-amber-500: #e8912a;
+  --color-amber-800: #8a4b00;
+
+  /* Superficies y texto. */
+  --color-canvas: #f5f8fc;
+  --color-surface: #ffffff;
+  --color-ink: #10213d;
+  --color-muted: #64748b;
+  --color-muted-strong: #56657a;
+  --color-line: #dce5f2;
+  --color-line-strong: #8494ac;
+
+  /* Estados (semánticos, fuera de la identidad: solo para resultados de acciones). */
+  --color-success-50: #e7f6ec;
+  --color-success-600: #15803d;
+  --color-success-800: #166534;
+  --color-danger-50: #fdecea;
+  --color-danger-600: #b42318;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Sombras teñidas de azul noche: más profundas y menos grises que las de Tailwind. */
+  --shadow-xs: 0 1px 2px 0 rgb(11 31 58 / 0.06);
+  --shadow-card: 0 1px 2px 0 rgb(11 31 58 / 0.05), 0 4px 16px -4px rgb(11 31 58 / 0.08);
+  --shadow-raised: 0 2px 4px 0 rgb(11 31 58 / 0.06), 0 16px 40px -12px rgb(11 31 58 / 0.18);
+  --shadow-cta: 0 8px 24px -8px rgb(244 163 64 / 0.55);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-soft: cubic-bezier(0.55, 0, 1, 0.45);
+
+  --animate-fade-up: fade-up 600ms var(--ease-out-soft) both;
+  --animate-fade-in: fade-in 400ms var(--ease-out-soft) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Contenedor de página: el mismo ancho y márgenes laterales en toda la app (16 px en celular). */
+@utility container-page {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem; /* Los anclajes no quedan tapados por el header fijo. */
+  }
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background-color: var(--color-electric-100);
+    color: var(--color-brand-900);
+  }
+  /* Foco visible y consistente para teclado en toda la app (nunca se quita sin reemplazo). */
+  :focus-visible {
+    outline: 2px solid var(--color-electric-500);
+    outline-offset: 2px;
+  }
+  /* Los <dialog> nativos animan su entrada y salida con CSS (sin librería). */
+  dialog {
+    color: inherit;
+  }
+  /* Con un modal abierto, la página de atrás no se desplaza. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+}
+
+/*
+ * Aparición al hacer scroll, solo con CSS (scroll-driven animations). Donde el navegador no lo
+ * soporta, o si la persona pidió menos movimiento, el contenido se ve directamente: nunca queda oculto.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+/* ---- Transiciones entre páginas (React <ViewTransition> + View Transitions API) ---- */
+
+::view-transition {
+  pointer-events: none; /* Los clics durante la transición llegan a la página. */
+}
+::view-transition-old(.page-exit) {
+  animation: 140ms var(--ease-in-soft) both page-out;
+}
+::view-transition-new(.page-enter) {
+  animation: 320ms var(--ease-out-soft) 100ms both page-in;
+}
+/* El header y la barra inferior quedan fijos: son el ancla visual mientras cambia el contenido. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

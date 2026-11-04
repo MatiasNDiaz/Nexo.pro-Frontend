@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 3000;
+// Puerto propio: así nunca se reutiliza por error un `next dev` abierto en el 3000.
+const PORT = 3100;
 const baseURL = `http://localhost:${PORT}`;
 
 /**
@@ -22,9 +23,9 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {
-    command: "npm run build && npm run start",
+    command: `npm run build && npm run start -- --port ${PORT}`,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 240_000,
     // `next build` no lee .env.development: las variables públicas se pasan explícitas.
     env: {
