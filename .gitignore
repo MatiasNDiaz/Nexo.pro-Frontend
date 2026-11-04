@@ -35,6 +35,9 @@ yarn-error.log*
 !.env.example
 !.env.development
 
+# scripts y capturas de verificación manual (no se versionan)
+/.local/
+
 # playwright
 /test-results/
 /playwright-report/
