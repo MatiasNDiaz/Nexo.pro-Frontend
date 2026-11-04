@@ -1,6 +1,6 @@
 # Backend: inventario de endpoints y contratos
 
-> Generado desde el código del backend (`Nexo.pro-Backend`, commit `2fd5b64`): decoradores de las rutas, DTOs con sus validaciones (class-validator + Swagger), firmas de los handlers, servicios llamados y excepciones con código. Las rutas `src/…` son relativas a `Nexo.pro-Backend/`. Lo que no se pudo inferir del código está marcado; las observaciones de estado salen de la lectura manual (ver `BACKEND_AUDIT.md`).
+> Generado desde el código del backend (`Nexo.pro-Backend`, commit `0997e21`): decoradores de las rutas, DTOs con sus validaciones (class-validator + Swagger), firmas de los handlers, servicios llamados y excepciones con código. Las rutas `src/…` son relativas a `Nexo.pro-Backend/`. Lo que no se pudo inferir del código está marcado; las observaciones de estado salen de la lectura manual (ver `BACKEND_AUDIT.md`).
 
 **Total: 199 endpoints.** Coincide 1 a 1 con `Nexo.pro-Backend/docs/endpoints.md`, que verifica la CI.
 
@@ -5134,6 +5134,7 @@ Todos los DTOs de entrada y salida que declara el backend, con sus validaciones 
 | Campo | Tipo | Obligatorio | Null | Validación y valores | Descripción |
 | --- | --- | --- | --- | --- | --- |
 | `slug` | `String` | — | — | — |  |
+| `professionalUserId` | `String` | — | — | — | Id de usuario del profesional: el que piden chat, favoritos, solicitudes y reportes de perfil |
 | `firstName` | `String` | — | — | — |  |
 | `lastName` | `String` | — | — | — |  |
 | `businessName` | `String` | — | Sí | — |  |
@@ -6505,6 +6506,7 @@ Todos los DTOs de entrada y salida que declara el backend, con sus validaciones 
 | Campo | Tipo | Obligatorio | Null | Validación y valores | Descripción |
 | --- | --- | --- | --- | --- | --- |
 | `slug` | `String` | — | — | — |  |
+| `professionalUserId` | `String` | — | — | — | Id de usuario del profesional: el que piden chat, favoritos, solicitudes y reportes de perfil |
 | `firstName` | `String` | — | — | — |  |
 | `lastName` | `String` | — | — | — |  |
 | `businessName` | `String` | — | Sí | — |  |

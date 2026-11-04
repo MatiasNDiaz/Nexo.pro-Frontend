@@ -224,7 +224,7 @@ Detalle y evidencia en [BACKEND_AUDIT.md](BACKEND_AUDIT.md).
 
 | # | Limitación | Impacto | Estado |
 | --- | --- | --- | --- |
-| H-01 | El catálogo y el perfil público **no devuelven el id de usuario del profesional**. Abrir chat, favorito, pedido a varios y reportar perfil piden ese id | Desde el catálogo no se pueden iniciar esas acciones | Confirmado; requiere cambio en el backend |
+| H-01 | ~~El catálogo y el perfil público no devolvían el id de usuario del profesional~~ | Usar `professionalUserId` para chat, favoritos, pedidos y reportes de perfil | **Resuelto** (backend `0997e21`) |
 | H-02 | Si la otra parte de un chat fue anonimizada, listar o abrir la conversación falla con 500 | Bandeja de chats rota para ese usuario | Confirmado por lectura del código (no reproducido); requiere corrección |
 | H-03 | No hay proveedor real de email | Sin verificación de email ni avisos por correo en producción; el backend no arranca con `NODE_ENV=production` | Confirmado |
 | H-04 | `GET /platform-reviews/me` responde `200` con cuerpo vacío si no hay opinión | Tratar el cuerpo vacío como `null` | Confirmado |

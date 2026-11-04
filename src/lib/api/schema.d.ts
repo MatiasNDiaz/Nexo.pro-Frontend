@@ -3498,6 +3498,11 @@ export interface components {
         };
         CatalogItemDto: {
             slug: string;
+            /**
+             * Format: uuid
+             * @description Id de usuario del profesional: el que piden chat, favoritos, solicitudes y reportes de perfil
+             */
+            professionalUserId: string;
             firstName: string;
             lastName: string;
             businessName: string | null;
@@ -3562,6 +3567,11 @@ export interface components {
         };
         PublicProfileDto: {
             slug: string;
+            /**
+             * Format: uuid
+             * @description Id de usuario del profesional: el que piden chat, favoritos, solicitudes y reportes de perfil
+             */
+            professionalUserId: string;
             firstName: string;
             lastName: string;
             businessName: string | null;

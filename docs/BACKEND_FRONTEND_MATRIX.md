@@ -1,6 +1,6 @@
 # Backend ↔ frontend: matriz de funcionalidades
 
-> Una fila por endpoint (199), agrupadas por módulo. Generada desde el código del backend (commit `2fd5b64`) y completada con la revisión manual. "Datos accesibles" es el contrato de respuesta (detalle en `BACKEND_ENDPOINTS.md`). "Interfaz futura" es una propuesta de pantalla o componente, no algo que exista.
+> Una fila por endpoint (199), agrupadas por módulo. Generada desde el código del backend (commit `0997e21`) y completada con la revisión manual. "Datos accesibles" es el contrato de respuesta (detalle en `BACKEND_ENDPOINTS.md`). "Interfaz futura" es una propuesta de pantalla o componente, no algo que exista.
 
 Estados: **Implementado** · **Parcial** (funciona pero no se puede usar completo desde el frontend) · **Problemático** (riesgo de error comprobado en el código) · **Apagado** · **Solo desarrollo** · **Solo backend** / **Solo infraestructura** (no los consume el frontend) · **Requiere credenciales**.
 

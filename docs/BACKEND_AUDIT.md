@@ -112,7 +112,6 @@
 | Aviso de disponibilidad de favoritos | Solo cuando el profesional se pone "Disponible" a mano; el cambio por horario no avisa | `favorites.service.ts`, ADR del módulo |
 | Panel del admin sobre solicitudes y contrataciones | No hay rutas de admin para listarlas o verlas | Inventario de rutas `/admin/*` |
 | Registro de auditoría | Se escribe (`audit_logs`) pero no hay ruta para consultarlo | Inventario de rutas |
-| Catálogo → acciones | No expone el id del profesional que piden chat, favoritos, solicitudes y reportes (H-01) | §4 |
 
 ### Pendiente (no existe en el código)
 
@@ -125,7 +124,7 @@
 
 | # | Clasificación | Severidad para el frontend | Hallazgo | Evidencia |
 | --- | --- | --- | --- | --- |
-| H-01 | Confirmado | **Alta** | `CatalogItemDto` y `PublicProfileDto` no incluyen el id de usuario del profesional ni el id del perfil. Sin embargo, `POST /chat/conversations` (`professionalId` = id de usuario), `PUT /favorites/:professionalId`, `POST /requests` (`professionalIds`) y `POST /reports` con `PROFILE` lo piden. **Desde el catálogo y el perfil público no se pueden iniciar esas acciones.** (El foro sí expone `userId` del autor; conversaciones y favoritos exponen ids.) | `src/catalog/catalog.service.ts` (armado del perfil cerca de la línea 296; `hydrate` cerca de la 374) |
+| H-01 | **Resuelto** (backend `0997e21`, 2026-11-04: `professionalUserId` en `CatalogItemDto` y `PublicProfileDto`, con e2e) | Alta | *Texto original:* `CatalogItemDto` y `PublicProfileDto` no incluyen el id de usuario del profesional ni el id del perfil. Sin embargo, `POST /chat/conversations` (`professionalId` = id de usuario), `PUT /favorites/:professionalId`, `POST /requests` (`professionalIds`) y `POST /reports` con `PROFILE` lo piden. **Desde el catálogo y el perfil público no se pueden iniciar esas acciones.** (El foro sí expone `userId` del autor; conversaciones y favoritos exponen ids.) | `src/catalog/catalog.service.ts` (armado del perfil cerca de la línea 296; `hydrate` cerca de la 374) |
 | H-02 | Confirmado por lectura (no reproducido) | **Alta** | `toConversation` busca a la otra parte con `findOneByOrFail` sin `withDeleted`. La anonimización marca al usuario como borrado (`deletedAt`) y no toca las conversaciones; `EntityNotFoundError` no está mapeado en el filtro de errores, así que sería un **500**. Afecta a `GET /chat/conversations` (falla la lista entera), `GET /chat/conversations/:id` y `POST /chat/conversations` para quien chateó con una cuenta eliminada. Las reseñas tenían el mismo problema y ya se corrigieron con `withDeleted` | `src/chat/chat.service.ts:441`, `:121`; `src/users/account-anonymizer.ts:39`; `src/common/filters/all-exceptions.filter.ts:74` |
 | H-03 | Confirmado | **Crítica para producción** | No hay proveedor real de email, y la validación del entorno rechaza `console` y `memory` en producción: **el backend no arranca con `NODE_ENV=production`**. Sin email tampoco hay verificación de cuenta, enlaces de Google ni avisos de seguridad | `src/config/env.validation.ts:34`, `:461` |
 | H-04 | Confirmado | Baja | `GET /platform-reviews/me` responde `200` con cuerpo vacío (no `null` en JSON) cuando no hay opinión | Controlador de opiniones de la plataforma |
@@ -153,7 +152,7 @@ La evidencia por recurso está en [BACKEND_ROLES_AND_PERMISSIONS.md](BACKEND_ROL
 
 ## 5. Inconsistencias
 
-- **Identificadores:** el profesional se identifica con el **id de usuario** en chat, favoritos, solicitudes y reportes, pero el catálogo publica el **slug** del perfil (ver H-01).
+- **Identificadores:** el profesional se identifica con el **id de usuario** en chat, favoritos, solicitudes y reportes, y con el **slug** en las URLs públicas. Desde H-01 (resuelto) el catálogo devuelve los dos: `slug` y `professionalUserId`.
 - **Paginación:** hay tres formas (`{data, meta}`, por fecha hacia atrás y lista completa), según el módulo.
 - **"Sin plan":** no hay un código único (`SUBSCRIPTION_REQUIRED`, `PLAN_FEATURE_REQUIRED`, `PROFESSIONAL_UNAVAILABLE`, `PLAN_LIMIT_REACHED`, etc.).
 - **Plan en solicitudes:** `GET /requests/:id` no exige plan y `GET /requests/received` sí (H-06).
@@ -166,7 +165,6 @@ La evidencia por recurso está en [BACKEND_ROLES_AND_PERMISSIONS.md](BACKEND_ROL
 | --- | --- | --- |
 | Salir a producción sin email | Hecho (H-03) | Bloqueante: el backend no arranca |
 | Bandeja de chat rota tras la primera anonimización | Hecho por lectura (H-02) | Aparece a los 30 días de la primera baja con conversaciones |
-| Frontend sin poder iniciar contacto desde el catálogo | Hecho (H-01) | Bloquea el flujo principal cliente → profesional |
 | Despliegue en dominios distintos | Hecho (H-12) | La sesión no funcionaría |
 | Tiempo real con un solo proceso | Hipótesis | Las salas viven en memoria de un proceso; con varias réplicas, los avisos no llegarían a sockets de otra réplica. No hay adaptador de Redis. Hoy no es un problema si corre una sola instancia |
 | Alertas de seguridad duplicadas con varias instancias | Hipótesis | La tarea de alertas no usa bloqueo; con más de una instancia podría avisar dos veces. Con una sola instancia no ocurre |
@@ -196,7 +194,7 @@ Resumen; el detalle está en [BACKEND_FRONTEND_CONTRACT.md](BACKEND_FRONTEND_CON
 
 Ordenadas por impacto. Todas son **recomendaciones**: ninguna se implementó. Las que cambian el backend requieren tu aprobación, y las que cambian la base, mostrarte el cambio antes.
 
-1. **Exponer el id del profesional en catálogo y perfil público** (H-01). Es un cambio solo de DTO, sin tocar la base.
+1. ~~**Exponer el id del profesional en catálogo y perfil público** (H-01).~~ Hecho el 2026-11-04 (backend `0997e21`).
 2. **Corregir `toConversation` con `withDeleted`** y una prueba e2e con la otra parte anonimizada (H-02). Revisar los demás `findOneByOrFail` sobre usuarios (H-13).
 3. **Elegir e integrar un proveedor de email** detrás de la interfaz existente (H-03). Requiere cuenta y credenciales tuyas.
 4. **Definir el dominio de producción** con frontend y API en el mismo sitio (H-12).
