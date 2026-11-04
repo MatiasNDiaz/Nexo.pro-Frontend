@@ -2166,7 +2166,7 @@ Envía un mensaje (texto y/o hasta 5 adjuntos CHAT_ATTACHMENT). Avisa en tiempo 
 | Body | [`SendMessageDto`](BACKEND_ENDPOINTS.md#dto-sendmessagedto) |
 | Headers | `Origin`, `X-Requested-With: XMLHttpRequest`, `X-CSRF-Token` |
 | Respuesta | `201` · [`MessageDto`](BACKEND_ENDPOINTS.md#dto-messagedto-auth-dto-auth-responses-dto-ts) |
-| Errores | `400 EMPTY_MESSAGE`, `400 WRONG_FILE_PURPOSE`, `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 SUBSCRIPTION_REQUIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `403 ORIGIN_NOT_ALLOWED / MISSING_REQUESTED_WITH`, `403 CSRF_INVALID`, `404 CONVERSATION_NOT_FOUND`, `404 FILE_NOT_FOUND`, `409 FILE_NOT_READY`, `409 PROFESSIONAL_UNAVAILABLE`, `429 TOO_MANY_REQUESTS` |
+| Errores | `400 EMPTY_MESSAGE`, `400 WRONG_FILE_PURPOSE`, `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 SUBSCRIPTION_REQUIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `403 ORIGIN_NOT_ALLOWED / MISSING_REQUESTED_WITH`, `403 CSRF_INVALID`, `404 CONVERSATION_NOT_FOUND`, `404 FILE_NOT_FOUND`, `409 FILE_NOT_READY`, `409 PROFESSIONAL_UNAVAILABLE`, `409 CUSTOMER_UNAVAILABLE`, `429 TOO_MANY_REQUESTS` |
 | Estado | Implementado |
 | Interfaz | Mensajes (lista de chats y conversación) |
 
@@ -5299,7 +5299,7 @@ Todos los DTOs de entrada y salida que declara el backend, con sus validaciones 
 | `lastMessage` | [`MessageDto`](BACKEND_ENDPOINTS.md#dto-messagedto-auth-dto-auth-responses-dto-ts) | — | Sí | — |  |
 | `unread` | `Number` | — | — | — |  |
 | `counterpartReadAt` | `Date` | — | Sí | — | Hasta dónde leyó el otro |
-| `canWrite` | `Boolean` | — | — | — | false si no se pueden mandar mensajes (profesional sin plan) |
+| `canWrite` | `Boolean` | — | — | — | false si no se pueden mandar mensajes (profesional sin plan o cuenta dada de baja) |
 | `lastMessageAt` | `Date` | — | Sí | — |  |
 
 <a id="dto-conversationmessagedto"></a>
@@ -5332,7 +5332,8 @@ Todos los DTOs de entrada y salida que declara el backend, con sus validaciones 
 | `firstName` | `String` | — | — | — |  |
 | `lastName` | `String` | — | — | — |  |
 | `avatarUrl` | `String` | — | Sí | — |  |
-| `slug` | `Object` | — | — | — | Solo si es profesional |
+| `deactivated` | `Boolean` | — | — | — | true si dio de baja su cuenta: el chat queda de solo lectura. Anonimizada, se llama «Cuenta eliminada» |
+| `slug` | `String` | — | Sí | — | Solo si es profesional; null si dio de baja su cuenta |
 | `businessName` | `String` | — | Sí | — |  |
 | `neighborhoodName` | `Object` | — | — | — | Solo si es cliente (C-13) |
 | `extraInfo` | `String` | — | Sí | — |  |
@@ -7585,6 +7586,7 @@ Códigos con los que responde la API (campo `code`). Los de validación, sesión
 | `CONTRACT_NOT_COMPLETED` | 409 | Podés reseñar cuando el profesional marque el trabajo como terminado. | `src/reviews/reviews.service.ts:71` |
 | `CONTRACT_NOT_FOUND` | 404 | La contratación no existe. | `src/requests/requests.service.ts:432`<br>`src/requests/requests.service.ts:551`<br>`src/reviews/reviews.service.ts:65` |
 | `CONVERSATION_NOT_FOUND` | 404 | La conversación no existe. | `src/chat/chat.service.ts:46` |
+| `CUSTOMER_UNAVAILABLE` | 409 | El cliente dio de baja su cuenta. Podés leer la conversación. | `src/chat/chat.service.ts:390` |
 | `DELETION_ALREADY_SCHEDULED` | 409 | La cuenta ya tiene una baja en curso. | `src/users/accounts.service.ts:408` |
 | `EDIT_WINDOW_EXPIRED` | 409 | Los mensajes se pueden editar durante 15 minutos. | `src/chat/chat.service.ts:227` |
 | `EMAIL_NOT_VERIFIED` | redirección de Google |  | `src/auth/google/google-auth.service.ts:300` |
@@ -7662,7 +7664,7 @@ Códigos con los que responde la API (campo `code`). Los de validación, sesión
 | `PROFESSION_NOT_OFFERED` | 400 | Alguno de los profesionales no ofrece ese oficio. | `src/requests/requests.service.ts:620` |
 | `PROFESSIONAL_DATA_REQUIRED` | 400 | Para pasar a profesional hacen falta la profesión y las zonas de trabajo. | `src/users/accounts.service.ts:393` |
 | `PROFESSIONAL_NOT_AVAILABLE` | 404 | Ese profesional no está disponible. | `src/chat/chat.service.ts:95`<br>`src/favorites/favorites.service.ts:77` |
-| `PROFESSIONAL_UNAVAILABLE` | 409 | El profesional no está disponible por ahora. Podés leer la conversación. | `src/chat/chat.service.ts:373`<br>`src/requests/requests.service.ts:635` |
+| `PROFESSIONAL_UNAVAILABLE` | 409 | El profesional no está disponible por ahora. Podés leer la conversación. | `src/chat/chat.service.ts:376`<br>`src/requests/requests.service.ts:635` |
 | `PROFILE_INCOMPLETE` | 422 | Completá tu perfil antes de verificar la identidad. | `src/identity-verification/identity-verification.service.ts:511` |
 | `PROFILE_NOT_FOUND` | 404 | El perfil no existe. | `src/catalog/catalog.service.ts:236`<br>`src/metrics/metrics.service.ts:106`<br>`src/professionals/profile.service.ts:807`<br>`src/reviews/reviews.service.ts:183` |
 | `PUSH_DISABLED` | 503 | Las notificaciones push no están disponibles. | `src/notifications/push.service.ts:64` |

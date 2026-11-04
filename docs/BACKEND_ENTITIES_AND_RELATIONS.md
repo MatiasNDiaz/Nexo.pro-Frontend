@@ -13,7 +13,7 @@
   - **Las N:M** son tablas explícitas con datos propios: `professional_professions`, `forum_post_professions`, `favorites`, `forum_post_likes` y `forum_reply_likes`.
 - **`ON DELETE`:** casi todas las FK son `RESTRICT`. Solo son `CASCADE` las tablas descartables de sesión: `auth_sessions`, `one_time_tokens`, `user_mfa_settings`, `push_subscriptions` y `notification_preferences`. Los usuarios nunca se borran físicamente, así que en la práctica no se dispara ninguna cascada.
 - **Borrado lógico:**
-  - **`users.deleted_at`:** marca la cuenta anonimizada (`@DeleteDateColumn`). TypeORM excluye esas filas de los `find` salvo con `withDeleted`; esto tiene consecuencias, ver el hallazgo H-02 en `BACKEND_AUDIT.md`.
+  - **`users.deleted_at`:** marca la cuenta anonimizada (`@DeleteDateColumn`). TypeORM excluye esas filas de los `find` salvo con `withDeleted`; esto tiene consecuencias, ver los hallazgos H-02 y H-13 en `BACKEND_AUDIT.md` (resueltos: las lecturas de la otra parte del chat y de sanciones usan `withDeleted`).
   - **Contenido:** `forum_posts`, `forum_replies`, `reviews` y `messages` usan `deleted_at` y además un `status` de moderación (`VISIBLE` / `HIDDEN_BY_ADMIN`).
 - **Auditoría:** `admin_audit_logs` es append-only (un trigger rechaza UPDATE, DELETE y TRUNCATE). **Ningún endpoint la expone.**
 - **Historiales:** `subscription_history`, `service_contract_history` y los eventos de proveedores (`payment_events`, `identity_provider_events`).

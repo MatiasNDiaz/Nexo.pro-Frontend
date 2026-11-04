@@ -180,6 +180,7 @@ stateDiagram-v2
 - **Si el profesional no tiene plan:**
   - el cliente sigue leyendo; `canWrite: false` y `PROFESSIONAL_UNAVAILABLE` al escribir;
   - excepción: con una contratación en curso hablan los dos hasta que se cierre (C-12).
+- **Si la otra parte dio de baja su cuenta** (incluidos los 30 días para arrepentirse): el chat se sigue viendo, de solo lectura (`counterpart.deactivated: true`, `canWrite: false`). Al escribir, `PROFESSIONAL_UNAVAILABLE` o `CUSTOMER_UNAVAILABLE`. Una vez anonimizada, se llama «Cuenta eliminada», sin foto, y el profesional no tiene `slug`.
 - **Lectura:** `POST /chat/conversations/:id/read` avisa al otro (`conversation:read`). Hay una sola notificación de "mensaje nuevo" por chat hasta que se lea.
 - **Tiempo real:** solo avisa (`message:new`, `message:updated`, `conversation:read`, `notification:new`). Los mensajes se envían siempre por REST.
 

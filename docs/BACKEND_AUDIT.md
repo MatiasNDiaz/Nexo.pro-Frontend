@@ -125,7 +125,7 @@
 | # | Clasificación | Severidad para el frontend | Hallazgo | Evidencia |
 | --- | --- | --- | --- | --- |
 | H-01 | **Resuelto** (backend `0997e21`, 2026-11-04: `professionalUserId` en `CatalogItemDto` y `PublicProfileDto`, con e2e) | Alta | *Texto original:* `CatalogItemDto` y `PublicProfileDto` no incluyen el id de usuario del profesional ni el id del perfil. Sin embargo, `POST /chat/conversations` (`professionalId` = id de usuario), `PUT /favorites/:professionalId`, `POST /requests` (`professionalIds`) y `POST /reports` con `PROFILE` lo piden. **Desde el catálogo y el perfil público no se pueden iniciar esas acciones.** (El foro sí expone `userId` del autor; conversaciones y favoritos exponen ids.) | `src/catalog/catalog.service.ts` (armado del perfil cerca de la línea 296; `hydrate` cerca de la 374) |
-| H-02 | Confirmado por lectura (no reproducido) | **Alta** | `toConversation` busca a la otra parte con `findOneByOrFail` sin `withDeleted`. La anonimización marca al usuario como borrado (`deletedAt`) y no toca las conversaciones; `EntityNotFoundError` no está mapeado en el filtro de errores, así que sería un **500**. Afecta a `GET /chat/conversations` (falla la lista entera), `GET /chat/conversations/:id` y `POST /chat/conversations` para quien chateó con una cuenta eliminada. Las reseñas tenían el mismo problema y ya se corrigieron con `withDeleted` | `src/chat/chat.service.ts:441`, `:121`; `src/users/account-anonymizer.ts:39`; `src/common/filters/all-exceptions.filter.ts:74` |
+| H-02 | **Resuelto** (backend `4e4f810`, 2026-11-04: reproducido con e2e antes del arreglo; la otra parte se lee con `withDeleted` y se muestra como «Cuenta eliminada»; `CounterpartDto.deactivated`; el profesional recibe `409 CUSTOMER_UNAVAILABLE` si el cliente dio de baja su cuenta) | **Alta** | *Texto original:* `toConversation` busca a la otra parte con `findOneByOrFail` sin `withDeleted`. La anonimización marca al usuario como borrado (`deletedAt`) y no toca las conversaciones; `EntityNotFoundError` no está mapeado en el filtro de errores, así que sería un **500**. Afecta a `GET /chat/conversations` (falla la lista entera), `GET /chat/conversations/:id` y `POST /chat/conversations` para quien chateó con una cuenta eliminada. Las reseñas tenían el mismo problema y ya se corrigieron con `withDeleted` | `src/chat/chat.service.ts:441`, `:121`; `src/users/account-anonymizer.ts:39`; `src/common/filters/all-exceptions.filter.ts:74` |
 | H-03 | Confirmado | **Crítica para producción** | No hay proveedor real de email, y la validación del entorno rechaza `console` y `memory` en producción: **el backend no arranca con `NODE_ENV=production`**. Sin email tampoco hay verificación de cuenta, enlaces de Google ni avisos de seguridad | `src/config/env.validation.ts:34`, `:461` |
 | H-04 | Confirmado | Baja | `GET /platform-reviews/me` responde `200` con cuerpo vacío (no `null` en JSON) cuando no hay opinión | Controlador de opiniones de la plataforma |
 | H-05 | Confirmado | Media | `RequestDto` y `ContractDto` devuelven ids de cliente y profesional, sin nombres ni foto. Para mostrarlos hay que cruzar con la conversación | `src/requests/dto/*` |
@@ -136,7 +136,7 @@
 | H-10 | Confirmado | Baja (documentación) | `docs/revision-seguridad.md` del backend habla de 187 rutas (hoy son 199) y su §8.2 sigue listando como pendiente el aviso de dispositivo nuevo, que ya está implementado (ADR 0031) | `docs/revision-seguridad.md` |
 | H-11 | Confirmado | Mínima | Comentario con un error de tipeo ("(\nameUnderReview)") | `src/users/users.controller.ts:36-37` |
 | H-12 | Confirmado | Restricción de despliegue | Las cookies son `SameSite=Lax`: el frontend y la API tienen que estar en el mismo sitio (mismo dominio registrable) o la sesión no viaja en `fetch` | `src/auth/services/auth-cookies.service.ts:40` |
-| H-13 | Requiere verificación | Media | Otras lecturas con `findOneByOrFail` sobre usuarios podrían fallar igual que H-02 si el usuario fue anonimizado. Por ejemplo, `sanctions.service.ts:223` al levantar una sanción. En la mayoría de los casos el usuario es el de la sesión, que no puede estar anonimizado | Búsqueda de `getRepository(User).findOneByOrFail` |
+| H-13 | **Resuelto** (backend `4e4f810`, 2026-11-04: se revisaron todas. Levantar una sanción de una cuenta anonimizada respondía 500: ahora se levanta y se audita sin reactivar la cuenta. La decisión de una verificación ya respondía 404 por `lockSubject`, que excluye las cuentas borradas. Las demás leen al usuario de la sesión o a uno recién escrito) | Media | *Texto original:* Otras lecturas con `findOneByOrFail` sobre usuarios podrían fallar igual que H-02 si el usuario fue anonimizado. Por ejemplo, `sanctions.service.ts:223` al levantar una sanción. En la mayoría de los casos el usuario es el de la sesión, que no puede estar anonimizado | Búsqueda de `getRepository(User).findOneByOrFail` |
 
 **Lo que se verificó y está bien:** la propiedad de recursos se valida en:
 - chat (participación);
@@ -164,7 +164,7 @@ La evidencia por recurso está en [BACKEND_ROLES_AND_PERMISSIONS.md](BACKEND_ROL
 | Riesgo | Tipo | Comentario |
 | --- | --- | --- |
 | Salir a producción sin email | Hecho (H-03) | Bloqueante: el backend no arranca |
-| Bandeja de chat rota tras la primera anonimización | Hecho por lectura (H-02) | Aparece a los 30 días de la primera baja con conversaciones |
+| ~~Bandeja de chat rota tras la primera anonimización~~ | Resuelto (H-02) | Reproducido con e2e y corregido en el backend `4e4f810` |
 | Despliegue en dominios distintos | Hecho (H-12) | La sesión no funcionaría |
 | Tiempo real con un solo proceso | Hipótesis | Las salas viven en memoria de un proceso; con varias réplicas, los avisos no llegarían a sockets de otra réplica. No hay adaptador de Redis. Hoy no es un problema si corre una sola instancia |
 | Alertas de seguridad duplicadas con varias instancias | Hipótesis | La tarea de alertas no usa bloqueo; con más de una instancia podría avisar dos veces. Con una sola instancia no ocurre |
@@ -195,7 +195,7 @@ Resumen; el detalle está en [BACKEND_FRONTEND_CONTRACT.md](BACKEND_FRONTEND_CON
 Ordenadas por impacto. Todas son **recomendaciones**: ninguna se implementó. Las que cambian el backend requieren tu aprobación, y las que cambian la base, mostrarte el cambio antes.
 
 1. ~~**Exponer el id del profesional en catálogo y perfil público** (H-01).~~ Hecho el 2026-11-04 (backend `0997e21`).
-2. **Corregir `toConversation` con `withDeleted`** y una prueba e2e con la otra parte anonimizada (H-02). Revisar los demás `findOneByOrFail` sobre usuarios (H-13).
+2. ~~**Corregir `toConversation` con `withDeleted`** y una prueba e2e con la otra parte anonimizada (H-02). Revisar los demás `findOneByOrFail` sobre usuarios (H-13).~~ Hecho el 2026-11-04 (backend `4e4f810`).
 3. **Elegir e integrar un proveedor de email** detrás de la interfaz existente (H-03). Requiere cuenta y credenciales tuyas.
 4. **Definir el dominio de producción** con frontend y API en el mismo sitio (H-12).
 5. **Agregar nombres y foto** a `RequestDto` y `ContractDto`, o una ruta resumen (H-05).

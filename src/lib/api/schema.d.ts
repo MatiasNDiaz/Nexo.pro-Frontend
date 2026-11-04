@@ -3694,8 +3694,10 @@ export interface components {
             firstName: string;
             lastName: string;
             avatarUrl: string | null;
-            /** @description Solo si es profesional */
-            slug?: Record<string, never>;
+            /** @description true si dio de baja su cuenta: el chat queda de solo lectura. Anonimizada, se llama «Cuenta eliminada» */
+            deactivated: boolean;
+            /** @description Solo si es profesional; null si dio de baja su cuenta */
+            slug?: string | null;
             businessName?: string | null;
             /** @description Solo si es cliente (C-13) */
             neighborhoodName?: Record<string, never>;
@@ -3713,7 +3715,7 @@ export interface components {
              * @description Hasta dónde leyó el otro
              */
             counterpartReadAt: string | null;
-            /** @description false si no se pueden mandar mensajes (profesional sin plan) */
+            /** @description false si no se pueden mandar mensajes (profesional sin plan o cuenta dada de baja) */
             canWrite: boolean;
             /** Format: date-time */
             lastMessageAt: string | null;

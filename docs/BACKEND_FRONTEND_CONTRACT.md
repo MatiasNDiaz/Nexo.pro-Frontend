@@ -184,6 +184,8 @@ Hay tres formas, según la ruta (cada una está en [BACKEND_ENDPOINTS.md](BACKEN
   - `PLAN_LIMIT_REACHED` y `THEME_NOT_IN_PLAN` en el perfil;
   - `PROFESSIONAL_UNAVAILABLE` en chat y pedidos.
 
+  En el chat, el profesional recibe `409 CUSTOMER_UNAVAILABLE` si el cliente dio de baja su cuenta (no tiene que ver con el plan).
+
   El código exacto de cada ruta está en [BACKEND_ENDPOINTS.md](BACKEND_ENDPOINTS.md).
 - **Para decidir qué mostrar:** `GET /subscriptions/me` trae `live` (si el plan está vigente), el plan con sus límites y el vencimiento; `GET /subscriptions/plans` dice qué se puede pagar.
 
@@ -225,7 +227,7 @@ Detalle y evidencia en [BACKEND_AUDIT.md](BACKEND_AUDIT.md).
 | # | Limitación | Impacto | Estado |
 | --- | --- | --- | --- |
 | H-01 | ~~El catálogo y el perfil público no devolvían el id de usuario del profesional~~ | Usar `professionalUserId` para chat, favoritos, pedidos y reportes de perfil | **Resuelto** (backend `0997e21`) |
-| H-02 | Si la otra parte de un chat fue anonimizada, listar o abrir la conversación falla con 500 | Bandeja de chats rota para ese usuario | Confirmado por lectura del código (no reproducido); requiere corrección |
+| H-02 | ~~Si la otra parte de un chat fue anonimizada, listar o abrir la conversación fallaba con 500~~ | Con la otra parte dada de baja: `counterpart.deactivated: true`, `canWrite: false` y, anonimizada, el nombre «Cuenta eliminada». Mostrar el chat de solo lectura | **Resuelto** (backend `4e4f810`) |
 | H-03 | No hay proveedor real de email | Sin verificación de email ni avisos por correo en producción; el backend no arranca con `NODE_ENV=production` | Confirmado |
 | H-04 | `GET /platform-reviews/me` responde `200` con cuerpo vacío si no hay opinión | Tratar el cuerpo vacío como `null` | Confirmado |
 | H-05 | Las solicitudes y contrataciones devuelven ids, no nombres | Hay que cruzar con la conversación o pedir otros datos | Confirmado |
