@@ -25,8 +25,9 @@ export function ScrollReveal() {
           intersection.unobserve(entry.target);
         }
       },
-      // Se dispara un poco antes de que el elemento esté entero en pantalla.
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.12 },
+      // Aparece apenas asoman 40 px en pantalla (sin exigir un porcentaje): un bloque alto que entra
+      // por el borde inferior no queda como una franja vacía hasta que la persona baje.
+      { rootMargin: "0px 0px -40px 0px", threshold: 0 },
     );
 
     const observeWithin = (node: ParentNode) => {

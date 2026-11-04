@@ -82,6 +82,68 @@ const review = (n) => ({
 });
 const REVIEWS = Array.from({ length: 12 }, (_, i) => review(i + 1));
 
+const author = (n, role = "CUSTOMER") => ({
+  userId: `00000000-0000-4000-8000-0000000000b${n}`,
+  firstName: n === 1 ? "Lucía" : "Juan",
+  lastName: n === 1 ? "Gómez" : "López",
+  avatarUrl: null,
+  role,
+  memberSince: "2026-10-01T12:00:00.000Z",
+});
+
+const POSTS = [
+  {
+    id: "aaaaaaaa-0000-4000-8000-000000000001",
+    type: "PROFESSIONAL_WANTED",
+    body: "Busco electricista para cambiar el tablero. <script>window.__xss = true</script>",
+    author: author(1),
+    professions: [{ id: PROFESSIONS[0].id, name: "Electricista" }],
+    locality: { id: LOCALITY.id, name: "Córdoba" },
+    neighborhood: { id: "44444444-4444-4444-8444-444444444444", name: "Nueva Córdoba" },
+    budgetEstimate: "50000.00",
+    deadline: "2026-12-15",
+    resolved: false,
+    media: [],
+    likeCount: 3,
+    replyCount: 3,
+    edited: false,
+    createdAt: "2026-11-02T12:00:00.000Z",
+  },
+  {
+    id: "aaaaaaaa-0000-4000-8000-000000000002",
+    type: "QUESTION",
+    body: "¿Cada cuánto conviene revisar la instalación de gas?",
+    author: author(2),
+    professions: [],
+    locality: null,
+    neighborhood: null,
+    budgetEstimate: null,
+    deadline: null,
+    resolved: true,
+    media: [],
+    likeCount: 0,
+    replyCount: 0,
+    edited: false,
+    createdAt: "2026-11-01T12:00:00.000Z",
+  },
+];
+
+const REPLIES = [
+  { id: "bbbbbbbb-0000-4000-8000-000000000001", parentReplyId: null, author: author(2, "PROFESSIONAL"), body: "Te lo hago esta semana.", proposedPrice: "45000.00", removed: false, likeCount: 1, edited: false, createdAt: "2026-11-02T13:00:00.000Z" },
+  { id: "bbbbbbbb-0000-4000-8000-000000000002", parentReplyId: null, author: null, body: "", proposedPrice: null, removed: true, likeCount: 0, edited: false, createdAt: "2026-11-02T14:00:00.000Z" },
+  { id: "bbbbbbbb-0000-4000-8000-000000000003", parentReplyId: "bbbbbbbb-0000-4000-8000-000000000002", author: author(1), body: "Respuesta a un mensaje borrado.", proposedPrice: null, removed: false, likeCount: 0, edited: false, createdAt: "2026-11-02T15:00:00.000Z" },
+];
+
+function forum(query) {
+  let data = POSTS;
+  if (query.get("type")) data = data.filter((p) => p.type === query.get("type"));
+  if (query.get("resolved")) data = data.filter((p) => String(p.resolved) === query.get("resolved"));
+  if (query.get("professionId")) data = data.filter((p) => p.professions.some((x) => x.id === query.get("professionId")));
+  const page = Number(query.get("page") ?? 1);
+  const limit = Number(query.get("limit") ?? 20);
+  return { data: data.slice((page - 1) * limit, page * limit), page, limit, total: data.length };
+}
+
 function catalog(query) {
   let data = ITEMS;
   if (query.get("professionId")) data = data.filter((i) => i.professions.some((p) => p.id === query.get("professionId")));
@@ -92,7 +154,16 @@ function catalog(query) {
 }
 
 function route(method, path, query) {
+  if (method === "POST" && path === "/support/contact") return [202, { received: true }];
   if (method !== "GET") return [404, { statusCode: 404, code: "NOT_FOUND", message: "Sin simulación" }];
+  if (path === "/forum/posts") return [200, forum(query)];
+  const forumPost = /^\/forum\/posts\/([^/]+)$/.exec(path);
+  if (forumPost) {
+    const post = POSTS.find((p) => p.id === forumPost[1]);
+    return post
+      ? [200, { ...post, replies: post.id === POSTS[0].id ? REPLIES : [] }]
+      : [404, { statusCode: 404, code: "FORUM_POST_NOT_FOUND", message: "La publicación no existe." }];
+  }
   if (path === "/auth/csrf") return [401, { statusCode: 401, code: "UNAUTHORIZED", message: "Iniciá sesión." }];
   if (path === "/professions") return [200, PROFESSIONS];
   if (path === "/locations/provinces") return [200, [PROVINCE]];
