@@ -2,6 +2,7 @@
 
 import { Ban, Camera, CheckCircle2, Circle, Clock, Fingerprint, MailCheck, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { ButtonLink } from "@/components/ui/button";
 import { Alert, Badge } from "@/components/ui/feedback";
 import { Card } from "@/components/ui/card";
 import type { Me } from "@/features/session/api";
@@ -28,7 +29,7 @@ export function AccountStatus({ user }: { user: Me }) {
     return (
       <Alert tone="danger" title={user.status === "SUSPENDED" ? "Tu cuenta está suspendida" : "Tu cuenta está bloqueada"}>
         {user.statusReason && <p>Motivo: {user.statusReason}</p>}
-        <p>Mientras tanto no podés usar las funciones de la plataforma. Vas a poder apelar la decisión desde tu panel.</p>
+        <p>Mientras tanto no podés usar las funciones de la plataforma. Muy pronto vas a poder apelar la decisión desde tu panel.</p>
       </Alert>
     );
   }
@@ -62,7 +63,14 @@ export function AccountStatus({ user }: { user: Me }) {
           icon={Camera}
           done={photoDone}
           title="Cargá tu foto de perfil"
-          detail={photoDone ? "Listo." : "Muy pronto vas a poder cargarla desde acá."}
+          detail={photoDone ? "Listo." : "Una foto donde se vea bien tu cara."}
+          action={
+            !photoDone && (
+              <ButtonLink href="/panel/cuenta" variant="secondary" size="sm" className="self-start">
+                Cargar foto
+              </ButtonLink>
+            )
+          }
         />
         <Step
           icon={Fingerprint}
@@ -73,8 +81,16 @@ export function AccountStatus({ user }: { user: Me }) {
             identityInReview
               ? "Nuestro equipo la está revisando. Te avisamos cuando esté lista."
               : user.verificationStatus === "REJECTED"
-                ? "No pudimos aprobarla. Vas a poder intentarlo de nuevo."
-                : "Muy pronto vas a poder iniciarla desde acá."
+                ? "No pudimos aprobarla. Podés intentarlo de nuevo."
+                : "Necesitás el email verificado y la foto cargada."
+          }
+          action={
+            !identityInReview &&
+            user.verificationStatus !== "APPROVED" && (
+              <ButtonLink href="/panel/verificacion" variant="secondary" size="sm" className="self-start">
+                Ir a verificación
+              </ButtonLink>
+            )
           }
         />
       </ol>

@@ -28,7 +28,7 @@ Archivos: `src/integrations/storage/*` y `src/uploads/*`. Variables: `STORAGE_PR
 
 - **Subida directa del navegador:** el archivo no pasa por la API. `POST /uploads` devuelve un ticket (`UploadTicketDto`: `method`, `url`, `fields`, `maxBytes`, `expiresAt`); dura 30 minutos (`UPLOAD_TICKET_TTL_MS`).
   - **Con Cloudinary:** `method: "POST"` a `https://api.cloudinary.com/v1_1/<cloud>/<tipo>/upload`, en `multipart/form-data`, con todos los `fields` tal cual más el campo `file`. La firma la arma el backend. **No mandar cookies ni `X-CSRF-Token` a Cloudinary.**
-  - **Con disco local:** `method: "PUT"` a la ruta **relativa** `/api/v1/uploads/:id/content`, a la que hay que anteponer el origen de la API. Como es la propia API, exige cookies, `X-CSRF-Token`, `X-Requested-With: XMLHttpRequest` y `Origin`. Solo existe en desarrollo.
+  - **Con disco local:** `method: "PUT"` a la ruta **relativa** `/api/v1/uploads/:id/content`, a la que hay que anteponer el origen de la API, también en `multipart/form-data` con el campo `file` (E-193). Como es la propia API, exige cookies, `X-CSRF-Token`, `X-Requested-With: XMLHttpRequest` y `Origin`. Solo existe en desarrollo.
 - **Confirmación:** `POST /uploads/:id/complete`. El backend inspecciona el archivo real (tipo por contenido, peso y duración del video) y lo deja `READY` o `REJECTED`.
 - **Archivos públicos:** la `url` sale en `FileResponseDto.url` y en los DTO que los usan. Con disco local es una ruta de la API (anteponer su origen).
 - **Archivos privados** (adjuntos del chat y evidencias de reportes):

@@ -13,6 +13,8 @@ interface SessionActions {
   refreshSession: () => Promise<void>;
   /** Cierra la sesión de este dispositivo y descarta todos los datos privados en memoria. */
   signOut: () => Promise<void>;
+  /** La sesión ya terminó en el backend (cerrar todos los dispositivos, baja): solo limpia el estado. */
+  sessionEnded: () => void;
 }
 
 const SessionActionsContext = createContext<SessionActions | null>(null);
@@ -55,14 +57,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     await queryClient.invalidateQueries({ queryKey: sessionQueryKey });
   }, [queryClient]);
 
+  const sessionEnded = useCallback(() => {
+    setSignedOut(true);
+    becomeAnonymous();
+  }, [becomeAnonymous]);
+
   const signOut = useCallback(async () => {
     try {
       await logoutRequest();
     } finally {
-      setSignedOut(true);
-      becomeAnonymous();
+      sessionEnded();
     }
-  }, [becomeAnonymous]);
+  }, [sessionEnded]);
 
   const viewer: Viewer = useMemo(() => {
     if (session.data) return { status: "authenticated", user: session.data };
@@ -71,7 +77,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return { status: "loading" };
   }, [session.data, session.isError, signedOut]);
 
-  const actions = useMemo(() => ({ refreshSession, signOut }), [refreshSession, signOut]);
+  const actions = useMemo(() => ({ refreshSession, signOut, sessionEnded }), [refreshSession, signOut, sessionEnded]);
 
   return (
     <SessionActionsContext.Provider value={actions}>

@@ -9,7 +9,7 @@ import { z } from "zod";
 const email = z.email("Ingresá un email válido.").max(254, "El email es demasiado largo.");
 
 /** Mismo patrón que el backend: empieza con letra; letras, espacios, apóstrofo, punto y guion. */
-const personName = (label: string) =>
+export const personName = (label: string) =>
   z
     .string()
     .trim()
@@ -48,7 +48,7 @@ export const mfaSchema = z.discriminatedUnion("method", [
 ]);
 export type MfaValues = z.infer<typeof mfaSchema>;
 
-const neighborhoodName = z
+export const neighborhoodName = z
   .string()
   .trim()
   .min(2, "El barrio tiene que tener al menos 2 caracteres.")

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectNoHorizontalScroll } from "./support/layout";
 
 test("la portada se sirve en español y con encabezados de seguridad", async ({ page }) => {
   const response = await page.goto("/");
@@ -14,10 +15,10 @@ test("la portada se sirve en español y con encabezados de seguridad", async ({ 
   expect(headers["x-powered-by"]).toBeUndefined();
 });
 
-test("no hay scroll horizontal", async ({ page }) => {
-  await page.goto("/");
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(0);
-});
+for (const path of ["/", "/profesionales", "/foro", "/contacto", "/ingresar", "/registro"] as const) {
+  test(`no hay scroll horizontal en ${path}`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+    await expectNoHorizontalScroll(page);
+  });
+}

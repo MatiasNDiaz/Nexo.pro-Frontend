@@ -95,7 +95,9 @@ export async function parseError(response: Response): Promise<ApiError> {
 async function send(path: string, options: RequestOptions): Promise<Response> {
   const method = options.method ?? "GET";
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (options.body !== undefined) headers["Content-Type"] = "application/json";
+  // Con FormData el navegador arma el `multipart/form-data` con su separador: no se fija el tipo.
+  const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (options.body !== undefined && !isForm) headers["Content-Type"] = "application/json";
   if (method !== "GET") {
     // Sin este encabezado la API rechaza toda escritura (403 MISSING_REQUESTED_WITH).
     headers["X-Requested-With"] = "XMLHttpRequest";
@@ -105,7 +107,7 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
     return await fetch(buildUrl(path, options.query), {
       method,
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: options.body === undefined ? undefined : isForm ? (options.body as FormData) : JSON.stringify(options.body),
       credentials: "include", // La sesión viaja solo en cookies HttpOnly de la API.
       cache: "no-store",
       signal: options.signal,
