@@ -152,16 +152,34 @@
 }
 
 /*
- * Aparición al hacer scroll, solo con CSS (scroll-driven animations). Donde el navegador no lo
- * soporta, o si la persona pidió menos movimiento, el contenido se ve directamente: nunca queda oculto.
+ * Aparición al hacer scroll (ver components/motion/scroll-reveal.tsx). Los elementos con
+ * `data-reveal` arrancan ocultos SOLO cuando el observador ya está activo (`html.reveal-on`): sin
+ * JavaScript, o si la persona pidió menos movimiento, el contenido se ve directamente.
+ * Variantes: data-reveal="" (sube), "left", "right", "scale". Escalonado con --reveal-delay.
  */
 @media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .reveal {
-      animation: fade-up linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 60%;
-    }
+  .reveal-on [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0);
+    transition:
+      opacity 700ms var(--ease-out-soft),
+      transform 900ms var(--ease-out-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  .reveal-on [data-reveal="left"] {
+    transform: translate3d(-40px, 0, 0);
+  }
+  .reveal-on [data-reveal="right"] {
+    transform: translate3d(40px, 0, 0);
+  }
+  .reveal-on [data-reveal="scale"] {
+    transform: scale(0.94);
+  }
+  .reveal-on [data-reveal][data-revealed] {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
   }
 }
 

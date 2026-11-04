@@ -1,10 +1,12 @@
 "use client";
 
-import { LayoutDashboard, Menu } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { useSessionActions } from "@/features/session/session-provider";
+import { AccountMenu } from "./account-menu";
 import { Sheet } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/feedback";
 import { isActive, mainNavFor, type NavItem } from "@/config/navigation";
@@ -99,7 +101,33 @@ function DesktopLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
-/** Ingresar/Registrarse sin sesión; acceso al panel con sesión; un lugar reservado mientras se resuelve. */
+function SignOutButton({ onDone }: { onDone?: () => void }) {
+  const { signOut } = useSessionActions();
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  return (
+    <Button
+      variant="secondary"
+      fullWidth
+      loading={pending}
+      onClick={async () => {
+        setPending(true);
+        try {
+          await signOut();
+        } finally {
+          setPending(false);
+          onDone?.();
+          router.push("/");
+        }
+      }}
+    >
+      <LogOut className="size-4" aria-hidden="true" />
+      Cerrar sesión
+    </Button>
+  );
+}
+
+/** Ingresar/Registrarse sin sesión; menú de la cuenta con sesión; un lugar reservado mientras se resuelve. */
 function AccountActions({
   viewer,
   stacked = false,
@@ -113,11 +141,18 @@ function AccountActions({
     return <Skeleton className={stacked ? "h-11 w-full" : "h-10 w-44"} />;
   }
   if (viewer.status === "authenticated") {
+    if (!stacked) return <AccountMenu user={viewer.user} />;
     return (
-      <ButtonLink href="/panel" onClick={onNavigate} variant="secondary" size={stacked ? "md" : "sm"} fullWidth={stacked}>
-        <LayoutDashboard className="size-4" aria-hidden="true" />
-        Hola, {viewer.firstName}
-      </ButtonLink>
+      <>
+        <p className="px-1 text-sm text-muted">
+          Ingresaste como <span className="font-semibold text-ink">{viewer.user.firstName}</span>
+        </p>
+        <ButtonLink href="/panel" onClick={onNavigate} variant="primary" fullWidth>
+          <LayoutDashboard className="size-4" aria-hidden="true" />
+          Mi panel
+        </ButtonLink>
+        <SignOutButton onDone={onNavigate} />
+      </>
     );
   }
   return (

@@ -25,7 +25,7 @@ const swatches: { name: string; token: string; className: string; dark?: boolean
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-5">
+    <section data-reveal className="flex flex-col gap-5">
       <h2 className="text-xl font-semibold text-brand-900">{title}</h2>
       {children}
     </section>

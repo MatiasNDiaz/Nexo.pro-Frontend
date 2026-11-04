@@ -41,7 +41,13 @@ export function LegalPage({ document }: { document: LegalDocument }) {
           )}
 
           {document.sections.map((section, index) => (
-            <section key={section.id} id={section.id} aria-labelledby={`${section.id}-titulo`} className="flex flex-col gap-3">
+            <section
+              key={section.id}
+              id={section.id}
+              aria-labelledby={`${section.id}-titulo`}
+              data-reveal
+              className="flex flex-col gap-3"
+            >
               <h2 id={`${section.id}-titulo`} className="text-xl font-semibold text-brand-900">
                 {index + 1}. {section.title}
               </h2>
@@ -57,7 +63,11 @@ export function LegalPage({ document }: { document: LegalDocument }) {
             </section>
           ))}
 
-          <section aria-labelledby="consultas" className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-6">
+          <section
+            aria-labelledby="consultas"
+            data-reveal
+            className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-6"
+          >
             <h2 id="consultas" className="text-lg font-semibold text-brand-900">
               Consultas
             </h2>

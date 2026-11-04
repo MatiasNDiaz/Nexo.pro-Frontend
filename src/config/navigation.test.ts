@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isActive, mainNavFor } from "./navigation";
 import { whatsappUrl } from "./site";
+import { makeMe } from "@/test/fixtures";
 
 const labels = (items: { label: string }[]) => items.map((item) => item.label);
 
@@ -14,7 +15,7 @@ describe("mainNavFor", () => {
   });
 
   it("profesional: Clientes en lugar de Profesionales, y Panel", () => {
-    expect(labels(mainNavFor({ status: "authenticated", role: "PROFESSIONAL", firstName: "Ana" }))).toEqual([
+    expect(labels(mainNavFor({ status: "authenticated", user: makeMe({ role: "PROFESSIONAL" }) }))).toEqual([
       "Inicio",
       "Clientes",
       "Foro",
@@ -24,7 +25,7 @@ describe("mainNavFor", () => {
   });
 
   it("cliente: Profesionales y Panel", () => {
-    expect(labels(mainNavFor({ status: "authenticated", role: "CUSTOMER", firstName: "Juan" }))).toEqual([
+    expect(labels(mainNavFor({ status: "authenticated", user: makeMe({ role: "CUSTOMER" }) }))).toEqual([
       "Inicio",
       "Profesionales",
       "Foro",

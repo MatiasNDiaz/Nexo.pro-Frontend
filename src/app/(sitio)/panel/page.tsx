@@ -1,13 +1,8 @@
-import { ComingSoon, comingSoonMetadata } from "@/components/layout/coming-soon";
+import type { Metadata } from "next";
+import { PanelHome } from "@/features/account/panel-home";
 
-export const metadata = comingSoonMetadata("Panel");
+export const metadata: Metadata = { title: "Mi panel", robots: { index: false, follow: false } };
 
-export default function Page() {
-  return (
-    <ComingSoon
-      title="Panel"
-      description="Tu espacio para gestionar pedidos, conversaciones y tu cuenta."
-      stage="etapa 5"
-    />
-  );
+export default function PanelPage() {
+  return <PanelHome />;
 }

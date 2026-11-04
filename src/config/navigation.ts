@@ -23,7 +23,7 @@ const dashboard: NavItem = { href: "/panel", label: "Panel" };
  */
 export function mainNavFor(viewer: Viewer): NavItem[] {
   if (viewer.status !== "authenticated") return [home, professionals, forum, contact];
-  switch (viewer.role) {
+  switch (viewer.user.role) {
     case "PROFESSIONAL":
       return [home, clients, forum, contact, dashboard];
     case "CUSTOMER":

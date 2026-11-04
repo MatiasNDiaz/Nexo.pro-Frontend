@@ -3,6 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
+import { revealDelay } from "@/components/motion/reveal";
 import { InstagramIcon, LinkedinIcon, WhatsappIcon } from "@/components/brand/social-icons";
 import { site, whatsappUrl } from "@/config/site";
 
@@ -35,12 +36,12 @@ export function SiteFooter() {
         className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[48rem] -translate-x-1/2 rounded-full bg-brand-600/25 blur-3xl"
       />
       <div className="container-page relative grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_1.4fr_0.8fr]">
-        <div className="flex flex-col gap-4">
+        <div data-reveal className="flex flex-col gap-4">
           <Logo tone="dark" />
           <p className="max-w-xs text-sm leading-relaxed">{site.tagline}</p>
         </div>
 
-        <nav aria-labelledby="footer-explorar" className="flex flex-col gap-3">
+        <nav aria-labelledby="footer-explorar" data-reveal style={revealDelay(1)} className="flex flex-col gap-3">
           <FooterHeading>
             <span id="footer-explorar">Explorar</span>
           </FooterHeading>
@@ -55,7 +56,7 @@ export function SiteFooter() {
           </ul>
         </nav>
 
-        <div className="flex flex-col gap-3">
+        <div data-reveal style={revealDelay(2)} className="flex flex-col gap-3">
           <FooterHeading>Contacto</FooterHeading>
           <ul className="flex flex-col">
             <li>
@@ -76,7 +77,7 @@ export function SiteFooter() {
           </ul>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div data-reveal style={revealDelay(3)} className="flex flex-col gap-3">
           <FooterHeading>Seguinos</FooterHeading>
           <ul className="flex gap-2">
             <li>

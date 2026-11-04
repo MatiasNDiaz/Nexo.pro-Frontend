@@ -18,7 +18,7 @@ export function ComingSoon({ title, description, stage }: { title: string; descr
   return (
     <>
       <PageHeader title={title} description={description} />
-      <div className="container-page py-12">
+      <div data-reveal="scale" className="container-page py-12">
         <EmptyState
           icon={Hammer}
           title="Estamos construyendo esta sección"

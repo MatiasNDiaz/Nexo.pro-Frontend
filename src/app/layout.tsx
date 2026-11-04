@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { env } from "@/config/env";
 import "./globals.css";
+import { Providers } from "./providers";
 
 // Fuentes variables autoalojadas por next/font (sin pedidos a Google desde el navegador y sin saltos
 // de layout). Inter para textos largos e interfaz; Plus Jakarta Sans para títulos.
@@ -27,7 +28,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es-AR" className={`${inter.variable} ${jakarta.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

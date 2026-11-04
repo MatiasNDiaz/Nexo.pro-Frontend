@@ -12,6 +12,11 @@ const schema = z.object({
   NEXT_PUBLIC_SITE_URL: origin,
   /** Clave pública del widget de Cloudflare Turnstile. Sin ella no se muestra el CAPTCHA. */
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),
+  /**
+   * "true" si el backend tiene el login con Google activado (GOOGLE_PROVIDER distinto de `disabled`).
+   * El frontend no puede averiguarlo sin intentarlo: con Google apagado, el botón llevaría a un 404.
+   */
+  NEXT_PUBLIC_GOOGLE_LOGIN: z.enum(["true", "false"]).optional(),
 });
 
 export type PublicEnv = z.infer<typeof schema>;
@@ -35,6 +40,7 @@ const parsed = parsePublicEnv({
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || undefined,
+  NEXT_PUBLIC_GOOGLE_LOGIN: process.env.NEXT_PUBLIC_GOOGLE_LOGIN || undefined,
 });
 
 export const env = {
@@ -43,4 +49,5 @@ export const env = {
   apiBaseUrl: `${parsed.NEXT_PUBLIC_API_URL}/api/v1`,
   siteUrl: parsed.NEXT_PUBLIC_SITE_URL,
   turnstileSiteKey: parsed.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? null,
+  googleLogin: parsed.NEXT_PUBLIC_GOOGLE_LOGIN === "true",
 } as const;

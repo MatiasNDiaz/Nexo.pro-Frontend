@@ -10,6 +10,7 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
+import { revealDelay } from "@/components/motion/reveal";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/feedback";
 
@@ -58,7 +59,7 @@ function Hero() {
               <Search className="size-5" aria-hidden="true" />
               Buscar profesionales
             </ButtonLink>
-            <ButtonLink href="/registro" variant="secondary" size="lg">
+            <ButtonLink href="/registro?rol=profesional" variant="secondary" size="lg">
               Soy profesional
             </ButtonLink>
           </div>
@@ -135,7 +136,7 @@ function HowItWorks() {
   return (
     <section aria-labelledby="como-funciona" className="border-y border-line bg-surface">
       <div className="container-page py-16 sm:py-20">
-        <div className="reveal mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
+        <div data-reveal className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
           <p className="text-sm font-semibold tracking-wide text-brand-600 uppercase">Cómo funciona</p>
           <h2 id="como-funciona" className="text-3xl font-bold text-brand-900 sm:text-4xl">
             De la búsqueda al trabajo terminado
@@ -143,9 +144,14 @@ function HowItWorks() {
         </div>
         <ol className="mt-12 grid gap-5 md:grid-cols-3">
           {steps.map((step, index) => (
-            <li key={step.title} className="reveal relative flex flex-col gap-4 rounded-2xl border border-line bg-canvas/60 p-6">
+            <li
+              key={step.title}
+              data-reveal
+              style={revealDelay(index, 120)}
+              className="group relative flex flex-col gap-4 rounded-2xl border border-line bg-canvas/60 p-6 transition-[border-color,box-shadow,background-color] duration-300 hover:border-brand-200 hover:bg-surface hover:shadow-card"
+            >
               <div className="flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-2xl bg-brand-700 text-white shadow-card">
+                <span className="grid size-12 place-items-center rounded-2xl bg-brand-700 text-white shadow-card transition-transform duration-300 ease-out-soft group-hover:-translate-y-0.5 group-hover:rotate-[-4deg]">
                   <step.icon className="size-6" aria-hidden="true" />
                 </span>
                 <span className="font-display text-sm font-bold text-brand-600">Paso {index + 1}</span>
@@ -170,8 +176,11 @@ const proBenefits: { icon: LucideIcon; text: string }[] = [
 function ForProfessionals() {
   return (
     <section aria-labelledby="para-profesionales" className="container-page py-16 sm:py-24">
-      <div className="reveal grid items-center gap-10 overflow-hidden rounded-3xl bg-brand-900 p-6 shadow-raised sm:p-10 lg:grid-cols-2 lg:p-14">
-        <div className="flex flex-col items-start gap-5">
+      <div
+        data-reveal="scale"
+        className="grid items-center gap-10 overflow-hidden rounded-3xl bg-brand-900 p-6 shadow-raised sm:p-10 lg:grid-cols-2 lg:p-14"
+      >
+        <div data-reveal="left" style={revealDelay(1, 150)} className="flex flex-col items-start gap-5">
           <Badge tone="amber">30 días de prueba</Badge>
           <h2 id="para-profesionales" className="text-3xl font-bold text-white sm:text-4xl">
             ¿Sos profesional? Mostrá tu trabajo y conseguí clientes en tu zona.
@@ -179,13 +188,18 @@ function ForProfessionals() {
           <p className="text-lg leading-relaxed text-brand-200">
             Creá tu perfil, verificá tu identidad y empezá a recibir pedidos. Probalo 30 días antes de elegir tu plan.
           </p>
-          <ButtonLink href="/registro" variant="accent" size="lg">
+          <ButtonLink href="/registro?rol=profesional" variant="accent" size="lg">
             Crear mi perfil profesional
           </ButtonLink>
         </div>
         <ul className="grid gap-3 sm:grid-cols-2">
-          {proBenefits.map((benefit) => (
-            <li key={benefit.text} className="flex flex-col gap-3 rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+          {proBenefits.map((benefit, index) => (
+            <li
+              key={benefit.text}
+              data-reveal="right"
+              style={revealDelay(index + 2, 110)}
+              className="flex flex-col gap-3 rounded-2xl bg-white/5 p-5 ring-1 ring-white/10 transition-colors duration-300 hover:bg-white/10"
+            >
               <benefit.icon className="size-6 text-electric-400" aria-hidden="true" />
               <p className="leading-relaxed text-brand-100">{benefit.text}</p>
             </li>
@@ -199,7 +213,10 @@ function ForProfessionals() {
 function FinalCta() {
   return (
     <section aria-labelledby="empeza" className="container-page pb-20">
-      <div className="reveal flex flex-col items-center gap-5 rounded-3xl border border-line bg-surface px-6 py-12 text-center shadow-card sm:py-16">
+      <div
+        data-reveal
+        className="flex flex-col items-center gap-5 rounded-3xl border border-line bg-surface px-6 py-12 text-center shadow-card sm:py-16"
+      >
         <h2 id="empeza" className="max-w-2xl text-3xl font-bold text-brand-900 sm:text-4xl">
           Encontrá a la persona indicada para tu próximo arreglo
         </h2>

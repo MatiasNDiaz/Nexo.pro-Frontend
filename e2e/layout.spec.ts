@@ -70,6 +70,28 @@ test.describe("footer", () => {
   });
 });
 
+test.describe("animaciones al hacer scroll", () => {
+  test("los bloques aparecen al llegar a ellos", async ({ page }) => {
+    await page.goto("/");
+    const finalCta = page.locator("section[aria-labelledby='empeza'] [data-reveal]");
+    // Abajo de todo: todavía oculto (opacidad 0) hasta que se llega con el scroll.
+    await expect(finalCta).not.toHaveAttribute("data-revealed");
+    await expect(finalCta).toHaveCSS("opacity", "0");
+    await finalCta.scrollIntoViewIfNeeded();
+    await expect(finalCta).toHaveAttribute("data-revealed", "");
+    await expect(finalCta).toHaveCSS("opacity", "1");
+  });
+
+  test("con movimiento reducido, todo se ve sin animación", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce", baseURL: "http://localhost:3100" });
+    const page = await context.newPage();
+    await page.goto("/");
+    await expect(page.locator("html")).not.toHaveClass(/reveal-on/);
+    await expect(page.locator("section[aria-labelledby='empeza'] [data-reveal]")).toHaveCSS("opacity", "1");
+    await context.close();
+  });
+});
+
 test("una ruta inexistente responde 404 con navegación para seguir", async ({ page }) => {
   const response = await page.goto("/no-existe");
   expect(response?.status()).toBe(404);

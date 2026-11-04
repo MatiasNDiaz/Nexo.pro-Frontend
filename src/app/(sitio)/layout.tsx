@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 
 /** Páginas del sitio con la navegación principal y el footer. */
 export default function SiteLayout({ children }: LayoutProps<"/">) {
@@ -16,6 +17,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <SiteFooter />
+      <ScrollReveal />
     </>
   );
 }
