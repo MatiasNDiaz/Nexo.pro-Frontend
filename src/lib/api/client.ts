@@ -30,7 +30,7 @@ export class ApiError extends Error {
 export const NETWORK_ERROR = "NETWORK_ERROR";
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-type Query = Record<string, string | number | boolean | null | undefined>;
+export type Query = Record<string, string | number | boolean | null | undefined>;
 
 export interface RequestOptions {
   method?: Method;
@@ -63,7 +63,7 @@ export function onSessionLost(listener: () => void): () => void {
   return () => sessionLostListeners.delete(listener);
 }
 
-function buildUrl(path: string, query?: Query): string {
+export function buildUrl(path: string, query?: Query): string {
   const url = new URL(`${env.apiBaseUrl}${path}`);
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
@@ -71,7 +71,8 @@ function buildUrl(path: string, query?: Query): string {
   return url.toString();
 }
 
-async function parseError(response: Response): Promise<ApiError> {
+/** Convierte una respuesta de error del backend en ApiError (la usan el cliente y el servidor). */
+export async function parseError(response: Response): Promise<ApiError> {
   try {
     const body = (await response.json()) as Partial<{
       code: string;

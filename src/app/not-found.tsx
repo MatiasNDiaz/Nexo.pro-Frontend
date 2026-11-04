@@ -1,8 +1,5 @@
-import { Compass } from "lucide-react";
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
-import { ButtonLink } from "@/components/ui/button";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Página no encontrada",
@@ -10,30 +7,17 @@ export const metadata: Metadata = {
 };
 
 /**
- * 404 global. Se renderiza dentro del layout raíz (no del grupo del sitio), así que incluye la
- * navegación para que la persona pueda seguir desde acá.
+ * Último recurso, fuera del layout del sitio. Next incluye este componente en lo que manda a cada
+ * página por si hace falta mostrarlo: por eso es mínimo (sin header ni footer). El 404 completo es
+ * `(sitio)/not-found.tsx`.
  */
-export default function NotFound() {
+export default function RootNotFound() {
   return (
-    <>
-      <SiteHeader />
-      <main id="contenido" className="container-page flex flex-1 flex-col items-center justify-center gap-5 py-20 text-center">
-        <span className="grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-700">
-          <Compass className="size-7" aria-hidden="true" />
-        </span>
-        <p className="font-display text-sm font-bold tracking-wide text-brand-600">ERROR 404</p>
-        <h1 className="text-3xl font-bold text-brand-900 sm:text-4xl">No encontramos esta página</h1>
-        <p className="max-w-md text-lg text-muted-strong">
-          Puede que el enlace esté mal escrito o que la página ya no exista.
-        </p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <ButtonLink href="/">Ir al inicio</ButtonLink>
-          <ButtonLink href="/profesionales" variant="secondary">
-            Buscar profesionales
-          </ButtonLink>
-        </div>
-      </main>
-      <SiteFooter />
-    </>
+    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+      <h1 className="text-2xl font-bold text-brand-900">No encontramos esta página</h1>
+      <Link href="/" className="font-semibold text-brand-700 underline underline-offset-4">
+        Ir al inicio
+      </Link>
+    </main>
   );
 }

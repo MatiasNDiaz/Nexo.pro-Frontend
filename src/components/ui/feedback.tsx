@@ -74,20 +74,26 @@ export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden="true" className={cn("animate-pulse rounded-lg bg-brand-100/70", className)} />;
 }
 
-/** Estado vacío: explica qué pasa y cuál es el siguiente paso. */
+/**
+ * Estado vacío: explica qué pasa y cuál es el siguiente paso. `headingLevel={1}` cuando es el
+ * contenido principal de la página (p. ej. "no encontrado"): toda página necesita su h1.
+ */
 export function EmptyState({
   icon: Icon,
   title,
   description,
   action,
   className,
+  headingLevel = 2,
 }: {
   icon: LucideIcon;
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   className?: string;
+  headingLevel?: 1 | 2;
 }) {
+  const Heading = headingLevel === 1 ? "h1" : "h2";
   return (
     <div
       className={cn(
@@ -98,7 +104,7 @@ export function EmptyState({
       <span className="grid size-12 place-items-center rounded-2xl bg-brand-50 text-brand-700">
         <Icon className="size-6" aria-hidden="true" />
       </span>
-      <h2 className="text-lg font-semibold text-ink">{title}</h2>
+      <Heading className="text-lg font-semibold text-ink">{title}</Heading>
       {description && <p className="max-w-md text-sm text-muted">{description}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>

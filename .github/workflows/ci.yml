@@ -13,9 +13,10 @@ jobs:
     name: Lint, tipos, tests y e2e
     runs-on: ubuntu-latest
     env:
-      # Valores públicos de prueba: el build los exige (src/config/env.ts). Ninguno es secreto.
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      # Valores públicos de prueba: el build de `npm run build` los exige (src/config/env.ts). Ninguno es
+      # secreto. Las pruebas e2e compilan con los suyos (playwright.config.ts).
+      NEXT_PUBLIC_API_URL: http://localhost:3199
+      NEXT_PUBLIC_SITE_URL: http://localhost:3100
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

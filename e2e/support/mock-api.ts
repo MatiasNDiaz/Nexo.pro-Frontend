@@ -5,7 +5,8 @@ import type { Page, Request, Route } from "@playwright/test";
  * así que se pueden interceptar sin levantar el backend. Las formas de las respuestas siguen el
  * contrato documentado (docs/BACKEND_ENDPOINTS.md); cada prueba define solo lo que usa.
  */
-export const API = "http://localhost:3001/api/v1";
+/** Misma API que usa el build de las pruebas (playwright.config.ts → MOCK_API_PORT). */
+export const API = "http://localhost:3199/api/v1";
 
 export type Handler = (request: Request) => { status: number; body?: unknown } | Promise<{ status: number; body?: unknown }>;
 
