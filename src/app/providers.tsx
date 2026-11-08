@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { RealtimeProvider } from "@/features/chat/realtime";
 import { SessionProvider } from "@/features/session/session-provider";
 import { ApiError } from "@/lib/api/client";
 
@@ -27,7 +28,9 @@ export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(createQueryClient);
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        <RealtimeProvider>{children}</RealtimeProvider>
+      </SessionProvider>
     </QueryClientProvider>
   );
 }

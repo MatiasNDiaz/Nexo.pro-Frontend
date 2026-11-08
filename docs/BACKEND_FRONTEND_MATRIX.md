@@ -195,9 +195,9 @@ Estados: **Implementado** · **Parcial** (funciona pero no se puede usar complet
 | Funcionalidad | Endpoint | Método | Roles | Datos accesibles | Estado backend | Interfaz futura |
 | --- | --- | --- | --- | --- | --- | --- |
 | Adjunto privado: enlace firmado de 5 minutos (Cloudinary) o el contenido (local). | [`/api/v1/chat/attachments/:fileId`](BACKEND_ENDPOINTS.md#e-086) | GET | CUSTOMER, PROFESSIONAL | 302 a un enlace firmado de 5 minutos (Cloudinary) o el binario con `Cache-Control: private, no-store` (local) | Implementado | Mensajes (lista de chats y conversación) |
-| Mis conversaciones, las más recientes primero (hasta 100). | [`/api/v1/chat/conversations`](BACKEND_ENDPOINTS.md#e-087) | GET | CUSTOMER, PROFESSIONAL | Array de [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) | Problemático | Mensajes (lista de chats y conversación) |
-| Solo el cliente abre un chat, y solo con un profesional visible en el catálogo. | [`/api/v1/chat/conversations`](BACKEND_ENDPOINTS.md#e-088) | POST | CUSTOMER | [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) | Parcial | Mensajes (lista de chats y conversación) |
-| Una conversación propia: contraparte, último mensaje, no leídos y si puedo escribir. | [`/api/v1/chat/conversations/:id`](BACKEND_ENDPOINTS.md#e-089) | GET | CUSTOMER, PROFESSIONAL | [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) | Problemático | Mensajes (lista de chats y conversación) |
+| Mis conversaciones, las más recientes primero (hasta 100). | [`/api/v1/chat/conversations`](BACKEND_ENDPOINTS.md#e-087) | GET | CUSTOMER, PROFESSIONAL | Array de [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) | Implementado | Mensajes (lista de chats y conversación) |
+| Solo el cliente abre un chat, y solo con un profesional visible en el catálogo. | [`/api/v1/chat/conversations`](BACKEND_ENDPOINTS.md#e-088) | POST | CUSTOMER | [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) | Implementado | Mensajes (lista de chats y conversación) |
+| Una conversación propia: contraparte, último mensaje, no leídos y si puedo escribir. | [`/api/v1/chat/conversations/:id`](BACKEND_ENDPOINTS.md#e-089) | GET | CUSTOMER, PROFESSIONAL | [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) | Implementado | Mensajes (lista de chats y conversación) |
 | Mensajes de una conversación propia, paginados hacia atrás con `before`. | [`/api/v1/chat/conversations/:id/messages`](BACKEND_ENDPOINTS.md#e-090) | GET | CUSTOMER, PROFESSIONAL | Array de [`MessageDto`](BACKEND_ENDPOINTS.md#dto-messagedto-auth-dto-auth-responses-dto-ts) | Implementado | Mensajes (lista de chats y conversación) |
 | Envía un mensaje (texto y/o hasta 5 adjuntos CHAT_ATTACHMENT). Avisa en tiempo real y notifica. | [`/api/v1/chat/conversations/:id/messages`](BACKEND_ENDPOINTS.md#e-091) | POST | CUSTOMER, PROFESSIONAL | [`MessageDto`](BACKEND_ENDPOINTS.md#dto-messagedto-auth-dto-auth-responses-dto-ts) | Implementado | Mensajes (lista de chats y conversación) |
 | Confirmación de lectura: avisa al otro hasta dónde leyó. | [`/api/v1/chat/conversations/:id/read`](BACKEND_ENDPOINTS.md#e-092) | POST | CUSTOMER, PROFESSIONAL | Sin cuerpo | Implementado | Mensajes (lista de chats y conversación) |
@@ -235,7 +235,7 @@ Estados: **Implementado** · **Parcial** (funciona pero no se puede usar complet
 | Mis favoritos; los que ya no aparecen en el catálogo vienen sin datos personales (`listed: false`). | [`/api/v1/favorites`](BACKEND_ENDPOINTS.md#e-104) | GET | CUSTOMER | Array de [`FavoriteDto`](BACKEND_ENDPOINTS.md#dto-favoritedto) | Implementado | Favoritos (cliente) |
 | Quita un favorito. | [`/api/v1/favorites/:professionalId`](BACKEND_ENDPOINTS.md#e-105) | DELETE | CUSTOMER | Sin cuerpo | Implementado | Favoritos (cliente) |
 | Activa o desactiva el aviso de disponibilidad de un favorito. | [`/api/v1/favorites/:professionalId`](BACKEND_ENDPOINTS.md#e-106) | PATCH | CUSTOMER | Sin cuerpo | Implementado | Favoritos (cliente) |
-| Guarda (o actualiza) un favorito. Solo profesionales que aparecen en el catálogo. | [`/api/v1/favorites/:professionalId`](BACKEND_ENDPOINTS.md#e-107) | PUT | CUSTOMER | Sin cuerpo | Parcial | Favoritos (cliente) |
+| Guarda (o actualiza) un favorito. Solo profesionales que aparecen en el catálogo. | [`/api/v1/favorites/:professionalId`](BACKEND_ENDPOINTS.md#e-107) | PUT | CUSTOMER | Sin cuerpo | Implementado | Favoritos (cliente) |
 
 ## `forum`
 
@@ -341,7 +341,7 @@ Estados: **Implementado** · **Parcial** (funciona pero no se puede usar complet
 
 | Funcionalidad | Endpoint | Método | Roles | Datos accesibles | Estado backend | Interfaz futura |
 | --- | --- | --- | --- | --- | --- | --- |
-| Reporta un perfil, mensaje, publicación, respuesta del foro o reseña, con motivo, descripción y hasta 3 fotos. | [`/api/v1/reports`](BACKEND_ENDPOINTS.md#e-163) | POST | CUSTOMER, PROFESSIONAL | [`MyReportDto`](BACKEND_ENDPOINTS.md#dto-myreportdto) | Parcial | Reportar contenido / mis reportes |
+| Reporta un perfil, mensaje, publicación, respuesta del foro o reseña, con motivo, descripción y hasta 3 fotos. | [`/api/v1/reports`](BACKEND_ENDPOINTS.md#e-163) | POST | CUSTOMER, PROFESSIONAL | [`MyReportDto`](BACKEND_ENDPOINTS.md#dto-myreportdto) | Implementado | Reportar contenido / mis reportes |
 | Mis reportes y su estado. | [`/api/v1/reports/mine`](BACKEND_ENDPOINTS.md#e-164) | GET | CUSTOMER, PROFESSIONAL | Array de [`MyReportDto`](BACKEND_ENDPOINTS.md#dto-myreportdto) | Implementado | Reportar contenido / mis reportes |
 
 ## `requests`
@@ -349,7 +349,7 @@ Estados: **Implementado** · **Parcial** (funciona pero no se puede usar complet
 | Funcionalidad | Endpoint | Método | Roles | Datos accesibles | Estado backend | Interfaz futura |
 | --- | --- | --- | --- | --- | --- | --- |
 | Mis solicitudes (cliente), las más recientes primero (hasta 100). | [`/api/v1/requests`](BACKEND_ENDPOINTS.md#e-165) | GET | CUSTOMER | Array de [`RequestDto`](BACKEND_ENDPOINTS.md#dto-requestdto) | Implementado | Solicitudes y presupuestos |
-| El cliente envía un pedido a uno o varios profesionales (cada uno en su chat). | [`/api/v1/requests`](BACKEND_ENDPOINTS.md#e-166) | POST | CUSTOMER | [`RequestDto`](BACKEND_ENDPOINTS.md#dto-requestdto) | Parcial | Solicitudes y presupuestos |
+| El cliente envía un pedido a uno o varios profesionales (cada uno en su chat). | [`/api/v1/requests`](BACKEND_ENDPOINTS.md#e-166) | POST | CUSTOMER | [`RequestDto`](BACKEND_ENDPOINTS.md#dto-requestdto) | Implementado | Solicitudes y presupuestos |
 | El cliente ve todo su pedido; cada profesional, solo su negociación. | [`/api/v1/requests/:id`](BACKEND_ENDPOINTS.md#e-167) | GET | CUSTOMER, PROFESSIONAL | [`RequestDto`](BACKEND_ENDPOINTS.md#dto-requestdto) | Implementado | Solicitudes y presupuestos |
 | El cliente cancela el pedido (antes de elegir). | [`/api/v1/requests/:id/cancel`](BACKEND_ENDPOINTS.md#e-168) | POST | CUSTOMER | [`RequestDto`](BACKEND_ENDPOINTS.md#dto-requestdto) | Implementado | Solicitudes y presupuestos |
 | El profesional retira su presupuesto vigente. | [`/api/v1/requests/quotes/:quoteId/withdraw`](BACKEND_ENDPOINTS.md#e-169) | POST | PROFESSIONAL | [`RequestDto`](BACKEND_ENDPOINTS.md#dto-requestdto) | Implementado | Solicitudes y presupuestos |

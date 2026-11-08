@@ -63,7 +63,7 @@ test.describe("panel: navegación", () => {
     await mockApi(page, signedIn(activeCustomer, { "GET /users/me": () => json(200, personal()) }));
     await page.goto("/panel/cuenta");
     const nav = page.getByRole("navigation", { name: "Panel" });
-    await expect(nav.getByRole("link")).toHaveText(["Inicio", "Mi cuenta", "Verificación", "Seguridad"]);
+    await expect(nav.getByRole("link")).toHaveText(["Inicio", "Mensajes", "Pedidos", "Trabajos", "Mi cuenta", "Verificación", "Seguridad"]);
     await expect(nav.getByRole("link", { name: "Mi cuenta" })).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("heading", { level: 1, name: "Mi cuenta" })).toBeVisible();
   });

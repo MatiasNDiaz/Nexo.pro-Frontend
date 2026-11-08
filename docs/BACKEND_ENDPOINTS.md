@@ -105,9 +105,9 @@
 | [E-084](#e-084) | GET | `/api/v1/catalog/professionals/:slug` | Público | — | Implementado |
 | [E-085](#e-085) | GET | `/api/v1/catalog/professionals/:slug/reviews` | Público | — | Implementado |
 | [E-086](#e-086) | GET | `/api/v1/chat/attachments/:fileId` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
-| [E-087](#e-087) | GET | `/api/v1/chat/conversations` | CUSTOMER, PROFESSIONAL | ACTIVE | Problemático |
-| [E-088](#e-088) | POST | `/api/v1/chat/conversations` | CUSTOMER | ACTIVE | Parcial |
-| [E-089](#e-089) | GET | `/api/v1/chat/conversations/:id` | CUSTOMER, PROFESSIONAL | ACTIVE | Problemático |
+| [E-087](#e-087) | GET | `/api/v1/chat/conversations` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
+| [E-088](#e-088) | POST | `/api/v1/chat/conversations` | CUSTOMER | ACTIVE | Implementado |
+| [E-089](#e-089) | GET | `/api/v1/chat/conversations/:id` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
 | [E-090](#e-090) | GET | `/api/v1/chat/conversations/:id/messages` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
 | [E-091](#e-091) | POST | `/api/v1/chat/conversations/:id/messages` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
 | [E-092](#e-092) | POST | `/api/v1/chat/conversations/:id/read` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
@@ -125,7 +125,7 @@
 | [E-104](#e-104) | GET | `/api/v1/favorites` | CUSTOMER | ACTIVE | Implementado |
 | [E-105](#e-105) | DELETE | `/api/v1/favorites/:professionalId` | CUSTOMER | ACTIVE | Implementado |
 | [E-106](#e-106) | PATCH | `/api/v1/favorites/:professionalId` | CUSTOMER | ACTIVE | Implementado |
-| [E-107](#e-107) | PUT | `/api/v1/favorites/:professionalId` | CUSTOMER | ACTIVE | Parcial |
+| [E-107](#e-107) | PUT | `/api/v1/favorites/:professionalId` | CUSTOMER | ACTIVE | Implementado |
 | [E-108](#e-108) | GET | `/api/v1/forum/posts` | Público | — | Implementado |
 | [E-109](#e-109) | POST | `/api/v1/forum/posts` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
 | [E-110](#e-110) | DELETE | `/api/v1/forum/posts/:id` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
@@ -181,10 +181,10 @@
 | [E-160](#e-160) | PUT | `/api/v1/professionals/me/social-links` | PROFESSIONAL | PENDING_VERIFICATION, ACTIVE | Implementado |
 | [E-161](#e-161) | PUT | `/api/v1/professionals/me/theme` | PROFESSIONAL | PENDING_VERIFICATION, ACTIVE | Implementado |
 | [E-162](#e-162) | GET | `/api/v1/professions` | Público | — | Implementado |
-| [E-163](#e-163) | POST | `/api/v1/reports` | CUSTOMER, PROFESSIONAL | ACTIVE | Parcial |
+| [E-163](#e-163) | POST | `/api/v1/reports` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
 | [E-164](#e-164) | GET | `/api/v1/reports/mine` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
 | [E-165](#e-165) | GET | `/api/v1/requests` | CUSTOMER | ACTIVE | Implementado |
-| [E-166](#e-166) | POST | `/api/v1/requests` | CUSTOMER | ACTIVE | Parcial |
+| [E-166](#e-166) | POST | `/api/v1/requests` | CUSTOMER | ACTIVE | Implementado |
 | [E-167](#e-167) | GET | `/api/v1/requests/:id` | CUSTOMER, PROFESSIONAL | ACTIVE | Implementado |
 | [E-168](#e-168) | POST | `/api/v1/requests/:id/cancel` | CUSTOMER | ACTIVE | Implementado |
 | [E-169](#e-169) | POST | `/api/v1/requests/quotes/:quoteId/withdraw` | PROFESSIONAL | ACTIVE | Implementado |
@@ -2077,8 +2077,8 @@ Mis conversaciones, las más recientes primero (hasta 100).
 | Protecciones | CSRF: no aplica (GET) · Origin: no aplica · Límite: global |
 | Respuesta | `200` · Array de [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) |
 | Errores | `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 SUBSCRIPTION_REQUIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `409 PROFESSIONAL_UNAVAILABLE`, `429 TOO_MANY_REQUESTS` |
-| Estado | Problemático |
-| Observaciones | **Riesgo probable:** si la contraparte se dio de baja y se anonimizó, `chat.service.ts:441` la busca sin `withDeleted` y la respuesta sería 500. |
+| Estado | Implementado |
+| Observaciones | Con la otra parte dada de baja responde igual: `counterpart.deactivated: true` y `canWrite: false` (H-02 resuelto, backend `4e4f810`). |
 | Interfaz | Mensajes (lista de chats y conversación) |
 
 <a id="e-088"></a>
@@ -2099,8 +2099,8 @@ Solo el cliente abre un chat, y solo con un profesional visible en el catálogo.
 | Headers | `Origin`, `X-Requested-With: XMLHttpRequest`, `X-CSRF-Token` |
 | Respuesta | `201` · [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) |
 | Errores | `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `403 ORIGIN_NOT_ALLOWED / MISSING_REQUESTED_WITH`, `403 CSRF_INVALID`, `404 PROFESSIONAL_NOT_AVAILABLE`, `409 PROFESSIONAL_UNAVAILABLE`, `429 TOO_MANY_REQUESTS` |
-| Estado | Parcial |
-| Observaciones | El catálogo y el perfil público **no devuelven el id del profesional** que pide este endpoint: desde el catálogo no se puede iniciar. Solo funciona con ids que el frontend ya tenga por otra vía (chat, favoritos, foro). **Riesgo probable:** si la contraparte se dio de baja y se anonimizó, `chat.service.ts:441` la busca sin `withDeleted` y la respuesta sería 500. |
+| Estado | Implementado |
+| Observaciones | `professionalId` es el id de usuario: el catálogo y el perfil público lo devuelven como `professionalUserId` (H-01 resuelto). Volver a abrirlo devuelve la misma conversación, aunque el profesional se haya dado de baja (H-02 resuelto). |
 | Interfaz | Mensajes (lista de chats y conversación) |
 
 <a id="e-089"></a>
@@ -2121,8 +2121,8 @@ Una conversación propia: contraparte, último mensaje, no leídos y si puedo es
 | Parámetros de ruta | `id` (uuid) |
 | Respuesta | `200` · [`ConversationDto`](BACKEND_ENDPOINTS.md#dto-conversationdto) |
 | Errores | `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 SUBSCRIPTION_REQUIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `404 CONVERSATION_NOT_FOUND`, `409 PROFESSIONAL_UNAVAILABLE`, `429 TOO_MANY_REQUESTS` |
-| Estado | Problemático |
-| Observaciones | **Riesgo probable:** si la contraparte se dio de baja y se anonimizó, `chat.service.ts:441` la busca sin `withDeleted` y la respuesta sería 500. |
+| Estado | Implementado |
+| Observaciones | Con la otra parte dada de baja responde igual: `counterpart.deactivated: true` y `canWrite: false` (H-02 resuelto, backend `4e4f810`). |
 | Interfaz | Mensajes (lista de chats y conversación) |
 
 <a id="e-090"></a>
@@ -2511,8 +2511,8 @@ Guarda (o actualiza) un favorito. Solo profesionales que aparecen en el catálog
 | Headers | `Origin`, `X-Requested-With: XMLHttpRequest`, `X-CSRF-Token` |
 | Respuesta | `204` · Sin cuerpo |
 | Errores | `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `403 ORIGIN_NOT_ALLOWED / MISSING_REQUESTED_WITH`, `403 CSRF_INVALID`, `404 PROFESSIONAL_NOT_AVAILABLE`, `429 TOO_MANY_REQUESTS` |
-| Estado | Parcial |
-| Observaciones | El catálogo y el perfil público **no devuelven el id del profesional** que pide este endpoint: desde el catálogo no se puede iniciar. Solo funciona con ids que el frontend ya tenga por otra vía (chat, favoritos, foro). |
+| Estado | Implementado |
+| Observaciones | `professionalId` es el id de usuario: el catálogo y el perfil público lo devuelven como `professionalUserId` (H-01 resuelto). |
 | Interfaz | Favoritos (cliente) |
 
 ## Módulo `forum`
@@ -3688,8 +3688,8 @@ Reporta un perfil, mensaje, publicación, respuesta del foro o reseña, con moti
 | Headers | `Origin`, `X-Requested-With: XMLHttpRequest`, `X-CSRF-Token` |
 | Respuesta | `201` · [`MyReportDto`](BACKEND_ENDPOINTS.md#dto-myreportdto) |
 | Errores | `400 WRONG_FILE_PURPOSE`, `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `403 ORIGIN_NOT_ALLOWED / MISSING_REQUESTED_WITH`, `403 CSRF_INVALID`, `404 FILE_NOT_FOUND`, `404 REPORT_TARGET_NOT_FOUND`, `409 FILE_NOT_READY`, `409 REPORT_ALREADY_OPEN`, `429 TOO_MANY_REQUESTS` |
-| Estado | Parcial |
-| Observaciones | Para reportar un PERFIL hace falta el id del usuario, que el catálogo y el perfil público no devuelven. Mensajes, publicaciones, respuestas y reseñas sí tienen id visible. |
+| Estado | Implementado |
+| Observaciones | Para reportar un PERFIL hace falta el id de usuario: el catálogo y el perfil público lo devuelven como `professionalUserId` (H-01 resuelto). |
 | Interfaz | Reportar contenido / mis reportes |
 
 <a id="e-164"></a>
@@ -3750,8 +3750,8 @@ El cliente envía un pedido a uno o varios profesionales (cada uno en su chat).
 | Headers | `Origin`, `X-Requested-With: XMLHttpRequest`, `X-CSRF-Token` |
 | Respuesta | `201` · [`RequestDto`](BACKEND_ENDPOINTS.md#dto-requestdto) |
 | Errores | `400 INVALID_PROFESSION`, `400 PROFESSION_NOT_OFFERED`, `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `403 ORIGIN_NOT_ALLOWED / MISSING_REQUESTED_WITH`, `403 CSRF_INVALID`, `404 PROFESSIONAL_NOT_AVAILABLE`, `404 REQUEST_NOT_FOUND`, `429 TOO_MANY_REQUESTS` |
-| Estado | Parcial |
-| Observaciones | El catálogo y el perfil público **no devuelven el id del profesional** que pide este endpoint: desde el catálogo no se puede iniciar. Solo funciona con ids que el frontend ya tenga por otra vía (chat, favoritos, foro). |
+| Estado | Implementado |
+| Observaciones | `professionalIds` son ids de usuario: el catálogo y el perfil público los devuelven como `professionalUserId` (H-01 resuelto). |
 | Interfaz | Solicitudes y presupuestos |
 
 <a id="e-167"></a>

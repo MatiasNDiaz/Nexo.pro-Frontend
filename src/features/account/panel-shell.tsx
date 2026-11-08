@@ -1,12 +1,23 @@
 "use client";
 
-import { Fingerprint, LayoutDashboard, ShieldCheck, UserRound, type LucideIcon } from "lucide-react";
+import {
+  Briefcase,
+  FileText,
+  Fingerprint,
+  LayoutDashboard,
+  MessagesSquare,
+  ShieldCheck,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
+import { totalUnread } from "@/features/chat/cache";
+import { useConversations } from "@/features/chat/inbox";
 import type { Me } from "@/features/session/api";
-import { RequireSession } from "@/features/session/require-session";
+import { RequireSession, SessionSkeleton } from "@/features/session/require-session";
 import { cn } from "@/lib/cn";
 
 interface PanelLink {
@@ -24,8 +35,18 @@ export function panelLinksFor(user: Me): PanelLink[] {
   const home: PanelLink = { href: "/panel", label: "Inicio", icon: LayoutDashboard };
   const security: PanelLink = { href: "/panel/seguridad", label: "Seguridad", icon: ShieldCheck };
   if (user.status === "SUSPENDED" || user.status === "BANNED" || user.role === "ADMIN") return [home, security];
+  // Chat, pedidos y trabajos exigen la cuenta activa. Los del profesional llegan en la etapa 6.
+  const customerWork: PanelLink[] =
+    user.role === "CUSTOMER" && user.status === "ACTIVE"
+      ? [
+          { href: "/panel/mensajes", label: "Mensajes", icon: MessagesSquare },
+          { href: "/panel/pedidos", label: "Pedidos", icon: FileText },
+          { href: "/panel/trabajos", label: "Trabajos", icon: Briefcase },
+        ]
+      : [];
   return [
     home,
+    ...customerWork,
     { href: "/panel/cuenta", label: "Mi cuenta", icon: UserRound },
     { href: "/panel/verificacion", label: "Verificación", icon: Fingerprint },
     security,
@@ -33,7 +54,12 @@ export function panelLinksFor(user: Me): PanelLink[] {
 }
 
 export function PanelShell({ children }: { children: ReactNode }) {
-  return <RequireSession>{(user) => <PanelFrame user={user}>{children}</PanelFrame>}</RequireSession>;
+  // Suspense: RequireSession lee la URL, que en las rutas con parámetros ([id]) recién existe al pedirla.
+  return (
+    <Suspense fallback={<SessionSkeleton />}>
+      <RequireSession>{(user) => <PanelFrame user={user}>{children}</PanelFrame>}</RequireSession>
+    </Suspense>
+  );
 }
 
 function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
@@ -58,6 +84,7 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
                 >
                   <link.icon className="size-4" aria-hidden="true" />
                   {link.label}
+                  {link.href === "/panel/mensajes" && <UnreadCount />}
                 </Link>
               </li>
             );
@@ -66,5 +93,18 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
       </nav>
       <div className="min-w-0">{children}</div>
     </div>
+  );
+}
+
+/** Mensajes sin leer, sumados de la lista de chats (la mantiene al día el tiempo real). */
+function UnreadCount() {
+  const conversations = useConversations();
+  const unread = totalUnread(conversations.data);
+  if (unread === 0) return null;
+  return (
+    <span className="grid min-w-5 place-items-center rounded-full bg-amber-400 px-1.5 text-xs font-bold text-brand-900">
+      {unread > 99 ? "99+" : unread}
+      <span className="sr-only"> sin leer</span>
+    </span>
   );
 }

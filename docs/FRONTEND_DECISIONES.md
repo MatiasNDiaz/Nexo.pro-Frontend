@@ -50,6 +50,22 @@
 | Las pruebas de "sin scroll horizontal" comparan con el ancho configurado de la pantalla | En modo celular, si algo desborda, el navegador agranda el área y `scrollWidth - clientWidth` da 0: la prueba anterior nunca podía fallar en celular |
 | El aviso "Transition was aborted… Document hidden" en desarrollo no se corrige | Lo produce el navegador cuando la pestaña queda oculta en medio de una transición entre páginas: se pierde la animación, no la navegación. El código solo usa `<ViewTransition>` de React |
 
+## Panel del cliente: mensajes, pedidos y trabajos (5.1)
+
+| Decisión | Motivo |
+| --- | --- |
+| Tiempo real con un solo socket (`features/chat/realtime.tsx`), conectado solo con cuenta activa de cliente o profesional | Contrato §10. La librería se carga con `import()`: no pesa en las páginas públicas |
+| Los avisos se aplican a la caché; la lista de chats se actualiza en el navegador en vez de volver a pedirla | Armar la lista es caro en el backend (varias consultas por conversación). Solo se vuelve a pedir si llega un mensaje de un chat desconocido |
+| Al reconectar se vuelve a pedir todo lo del chat; ante `UNAUTHORIZED` se renueva la sesión y se reintenta, como mucho 2 veces seguidas | Contrato §10: los avisos perdidos no se reenvían. El tope evita un bucle si la sesión ya no sirve |
+| Los mensajes de sistema invalidan pedidos y trabajos | Cada cambio de un pedido o una contratación genera uno (flujos §7) |
+| La lectura se confirma solo con la pestaña visible y cuando llega algo nuevo de la otra parte | No se avisa "visto" por tener el chat abierto en otra pestaña, ni se hace un pedido inútil al abrir un chat ya leído |
+| Nombres en pedidos y trabajos tomados de la lista de chats (por `conversationId`) | H-05: `RequestDto` y `ContractDto` traen ids, no nombres |
+| Adjuntos del chat como enlace que se abre en otra pestaña | Ver H-14: la API los sirve con `Cross-Origin-Resource-Policy: same-origin` y el navegador bloquea un `<img>` desde otro origen. Abrir una pestaña no está sujeto a esa regla |
+| Al elegir un profesional se va directo al trabajo | `POST /requests/targets/:id/select` devuelve la contratación (no el pedido) |
+| Pedido desde el perfil a un solo profesional | El backend acepta hasta 10; elegir varios desde el catálogo queda para el rediseño |
+| Los diálogos se cierran al desmontar su efecto (`components/ui/dialog.tsx`) | Con Cache Components, Next conserva oculta la página anterior y React desmonta sus efectos: un modal abierto (p. ej. "Pedir presupuesto" al enviar) dejaba la página nueva inerte, sin clics ni scroll (encontrado en la prueba real) |
+| `PanelShell` envuelve `RequireSession` en `Suspense` | Lee la URL, que en las rutas con `[id]` recién existe al pedirlas (el build lo exige) |
+
 ## 404
 
 Las rutas inexistentes caen en `(sitio)/[...resto]` y muestran `(sitio)/not-found.tsx` dentro del layout del sitio. El `not-found.tsx` raíz es mínimo porque Next lo incluye en lo que manda a **todas** las páginas: con header y footer, cada página pesaba alrededor de un 25 % más.
@@ -71,6 +87,7 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | --- | --- | --- |
 | Límite del detalle de perfil desde el servidor de Next | Todos los pedidos del servidor salen de una IP: con muchos perfiles distintos sin caché podría llegar a 30 por minuto. Solución posible en el backend: reconocer al servidor del frontend con un encabezado secreto | Antes de producción |
 | Personalización del perfil (`theme`: color, fuente, animación) | El backend la devuelve según el plan; todavía no se aplica en la página | Etapa de diseño |
-| Abrir chat, favoritos, pedir presupuesto y reportar desde el perfil | Ya es posible con `professionalUserId` (H-01 resuelto); las pantallas llegan con el panel | Etapa 5 |
+| Favoritos y reportar desde el perfil | Chat y pedido de presupuesto ya están (5.1) | 5.2 y 5.3 |
+| H-14: adjuntos privados con `Cross-Origin-Resource-Policy: same-origin` | Para verlos dentro del chat (sin abrir otra pestaña), el backend tendría que mandar `same-site` en `GET /chat/attachments/:fileId` (y en las evidencias de reportes). Requiere aprobación del fundador | Antes del rediseño del chat |
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |

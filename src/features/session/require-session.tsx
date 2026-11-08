@@ -23,13 +23,16 @@ export function RequireSession({ children }: { children: (user: Me) => ReactNode
     router.replace(signedOut ? "/" : (`/ingresar?siguiente=${encodeURIComponent(pathname)}` as Route));
   }, [viewer.status, signedOut, router, pathname]);
 
-  if (viewer.status !== "authenticated") {
-    return (
-      <div className="container-page flex flex-col gap-4 py-12" aria-busy="true">
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    );
-  }
+  if (viewer.status !== "authenticated") return <SessionSkeleton />;
   return <>{children(viewer.user)}</>;
+}
+
+/** Lugar reservado mientras se lee la sesión (también sirve de fallback de Suspense). */
+export function SessionSkeleton() {
+  return (
+    <div className="container-page flex flex-col gap-4 py-12" aria-busy="true">
+      <Skeleton className="h-9 w-64" />
+      <Skeleton className="h-40 w-full" />
+    </div>
+  );
 }

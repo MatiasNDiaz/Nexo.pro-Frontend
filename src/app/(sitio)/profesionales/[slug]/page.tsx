@@ -11,7 +11,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { AttentionBadge } from "@/components/catalog/attention-badge";
@@ -24,6 +23,7 @@ import { revealDelay } from "@/components/motion/reveal";
 import { Badge, Skeleton } from "@/components/ui/feedback";
 import { env } from "@/config/env";
 import { getProfileReviews, getPublicProfile } from "@/features/catalog/data";
+import { ProfileActions } from "@/features/requests/profile-actions";
 import { REVIEWS_PAGE_SIZE } from "@/features/catalog/filters";
 import {
   areasSummary,
@@ -228,14 +228,13 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
           <aside className="flex flex-col gap-5 lg:sticky lg:top-24 lg:mt-8 lg:self-start">
             <div className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-card">
               <h2 className="text-lg font-semibold text-brand-900">Contactá a {profile.firstName}</h2>
+              <ProfileActions
+                slug={profile.slug}
+                professionalUserId={profile.professionalUserId}
+                firstName={profile.firstName}
+                professions={profile.professions}
+              />
               <ProfileContact slug={profile.slug} name={profile.firstName} />
-              <p className="text-xs text-muted">
-                Para pedir presupuestos por chat y dejar una reseña después del trabajo,{" "}
-                <Link href={`/ingresar?siguiente=/profesionales/${profile.slug}`} className="font-semibold text-brand-700 underline-offset-4 hover:underline">
-                  ingresá a tu cuenta
-                </Link>
-                .
-              </p>
             </div>
 
             <SideCard icon={MapPin} title="Zonas de trabajo">

@@ -26,6 +26,11 @@ function useNativeDialog(open: boolean, onClose: () => void) {
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
+    // Al salir de la página Next la conserva oculta (para volver atrás al instante) y React desmonta
+    // sus efectos: un modal que quedara abierto dejaría inerte la página nueva. Se cierra acá.
+    return () => {
+      if (dialog.open) dialog.close();
+    };
   }, [open]);
 
   useEffect(() => {
