@@ -38,6 +38,9 @@ yarn-error.log*
 # scripts y capturas de verificación manual (no se versionan)
 /.local/
 
+# skills de diseño de terceros (instalación local; ver docs/design/skills.md)
+/.claude/skills/
+
 # playwright
 /test-results/
 /playwright-report/
