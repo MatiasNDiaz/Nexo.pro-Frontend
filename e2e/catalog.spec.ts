@@ -25,15 +25,16 @@ test.describe("catálogo", () => {
     expect(new URL(request.url()).searchParams.get("limit")).toBe("12");
   });
 
-  test("filtra por oficio y por disponibles con URLs legibles", async ({ page, isMobile }) => {
+  test("filtra por oficio y por disponibles con URLs legibles", async ({ page }) => {
     await page.goto("/profesionales");
-    // En escritorio los filtros están en la columna izquierda; en celular, en el panel que abre "Filtros".
-    const panel = isMobile ? page.getByRole("dialog", { name: "Filtros" }) : main(page).getByRole("complementary", { name: "Filtros" });
+    // Salvo en pantallas muy anchas (columna fija), los filtros están en el panel que abre "Filtros":
+    // la pestaña del borde izquierdo en escritorio o la barra de arriba en celular.
+    const panel = page.getByRole("dialog", { name: "Filtros" });
     const openPanel = async () => {
-      if (isMobile) await page.getByRole("button", { name: /^Filtros/ }).click();
+      await main(page).getByRole("button", { name: /^Filtros/ }).filter({ visible: true }).click();
     };
     const apply = async () => {
-      if (isMobile) await panel.getByRole("button", { name: "Ver resultados" }).click();
+      await panel.getByRole("button", { name: "Ver resultados" }).click();
     };
 
     await openPanel();

@@ -52,12 +52,12 @@ export default function CatalogPage({ searchParams }: PageProps<"/profesionales"
         description="Todos tienen la identidad verificada por nuestro equipo. Filtrá por oficio y zona, o mirá quién está disponible ahora."
       />
       {/*
-        Filtros a la izquierda y resultados a la derecha; en celular, la barra de filtros arriba.
-        Los filtros van contra el borde izquierdo de la pantalla y los resultados quedan centrados: desde
-        1408 px una tercera columna vacía, del mismo ancho que los filtros, equilibra la de la izquierda
-        (más angosto no entra sin achicar demasiado las tarjetas).
+        La grilla de profesionales tiene el mismo ancho que el encabezado (container-page). Los filtros
+        van a la izquierda según el lugar que queda (ver CatalogFiltersBar): columna en el margen en
+        pantallas muy anchas, pestaña en el borde en escritorio, barra arriba en celular. `relative`:
+        la columna del margen se ubica respecto de este contenedor.
       */}
-      <div className="grid w-full grid-cols-[minmax(0,1fr)] gap-6 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[16rem_minmax(0,1fr)] lg:pr-6 lg:pl-4 min-[88rem]:grid-cols-[16rem_minmax(0,1fr)_16rem] min-[88rem]:pr-4">
+      <div className="container-page relative flex flex-col gap-6 py-8 sm:py-10">
         <Suspense fallback={<FiltersSkeleton />}>
           <Filters searchParams={searchParams} />
         </Suspense>
@@ -144,8 +144,7 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
   }
 
   return (
-    // Ancho máximo: las tarjetas no pasan de ~245 px aunque la pantalla sea grande (sigue centrada).
-    <section aria-labelledby="resultados" className="mx-auto flex w-full max-w-[48rem] flex-col gap-6">
+    <section aria-labelledby="resultados" className="flex flex-col gap-6">
       {beacon}
       {/* Junto a la lista: al volver de un perfil, repone el scroll con las tarjetas ya en su lugar. */}
       <CatalogScrollMemory />
@@ -155,7 +154,7 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
       </h2>
       {/* minmax(0, …): la columna no se estira con el contenido de la tarjeta (desborde en 375 px). */}
       {/* 1 columna en celular, 2 en tablet y 3 en escritorio. */}
-      <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))]">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))]">
         {page.data.map((item, index) => (
           <li key={item.slug}>
             <ProfessionalCard item={item} preload={index === 0} />
@@ -172,15 +171,15 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
 }
 
 function FiltersSkeleton() {
-  return <Skeleton className="h-12 w-full lg:h-[32rem]" />;
+  return <Skeleton className="h-12 w-full xl:hidden" />;
 }
 
 function ResultsSkeleton() {
   return (
-    <div className="mx-auto grid w-full max-w-[48rem] gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Cargando profesionales">
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Cargando profesionales">
       {Array.from({ length: 6 }, (_, i) => (
         <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface">
-          <Skeleton className="aspect-[6/5] w-full rounded-none" />
+          <Skeleton className="aspect-[4/3] w-full rounded-none" />
           <div className="flex flex-col gap-3 p-5">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="h-4 w-1/2" />

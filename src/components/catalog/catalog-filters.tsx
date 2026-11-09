@@ -45,11 +45,14 @@ const countActive = (values: Values) =>
   [values.professionSlug, values.localityId, values.neighborhoodId, values.availableNow].filter(Boolean).length;
 
 /**
- * Filtros del catálogo, siempre a la izquierda:
- * - Escritorio: una columna fija junto a los resultados; cada toque aplica el filtro al instante.
- * - Celular y tablet: una barra "Filtros" pegada arriba abre el mismo panel desde la izquierda; ahí se
- *   eligen y se aplican con "Ver resultados".
- * El oficio se elige con un toque (botones), la localidad con una lista y el barrio escribiendo.
+ * Filtros del catálogo, siempre a la izquierda. La grilla de profesionales ocupa el ancho de la
+ * página (container-page), así que los filtros se acomodan según el lugar que queda al costado:
+ * - Pantallas muy anchas (≥ 1776 px): una columna fija en el margen izquierdo; cada toque aplica el
+ *   filtro al instante.
+ * - Escritorio (1280–1775 px): una pestaña "Filtros" pegada al borde izquierdo abre el panel.
+ * - Celular y tablet: una barra "Filtros" pegada arriba abre el mismo panel.
+ * En el panel se eligen y se aplican con "Ver resultados". El oficio se elige con un toque (botones),
+ * la localidad con una lista y el barrio escribiendo.
  */
 export function CatalogFiltersBar({
   filters,
@@ -70,14 +73,21 @@ export function CatalogFiltersBar({
 
   const navigate = (values: Values) => startTransition(() => router.push(toHref(values), { scroll: false }));
   const active = countActive(current);
+  const openPanel = () => {
+    setDraft(current);
+    setSheetOpen(true);
+  };
 
   return (
-    // En celular el envoltorio "desaparece" (contents) para que la barra quede pegada mientras se
-    // recorren los resultados; en escritorio es la columna izquierda entera.
-    <div className="contents lg:block">
-      {/* Escritorio: columna izquierda */}
-      <aside aria-label="Filtros" className="sticky top-20 hidden self-start lg:block">
-        <div className="flex flex-col rounded-2xl border border-line bg-surface shadow-card">
+    // El envoltorio "desaparece" (contents): la barra de celular queda pegada mientras se recorren los
+    // resultados, y la columna de pantallas anchas se ubica respecto de la página (container-page).
+    <div className="contents">
+      {/* Pantallas muy anchas: columna en el margen izquierdo, fuera del ancho de la grilla. */}
+      <aside
+        aria-label="Filtros"
+        className="absolute inset-y-0 right-[calc(100%-0.5rem)] hidden w-64 py-8 sm:py-10 min-[111rem]:block"
+      >
+        <div className="sticky top-20 flex flex-col rounded-2xl border border-line bg-surface shadow-card">
           <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
             <h2 className="flex items-center gap-2 text-base font-bold text-ink">
               <SlidersHorizontal className="size-4 text-brand-600" aria-hidden="true" />
@@ -99,15 +109,30 @@ export function CatalogFiltersBar({
         </div>
       </aside>
 
+      {/* Escritorio: pestaña pegada al borde izquierdo de la pantalla que abre el panel. */}
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        onClick={openPanel}
+        className="group fixed top-1/2 left-0 z-30 hidden -translate-y-1/2 flex-col items-center gap-2 rounded-r-2xl bg-brand-700 px-2.5 py-4 text-white shadow-raised transition-[background-color,padding] duration-200 ease-out-soft hover:bg-brand-800 hover:pl-3.5 xl:flex min-[111rem]:hidden"
+      >
+        <SlidersHorizontal className="size-5" aria-hidden="true" />
+        <span className="font-semibold tracking-wide [writing-mode:vertical-rl] rotate-180">Filtros</span>
+        {active > 0 && (
+          <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-xs font-bold text-brand-900">
+            {active}
+            <span className="sr-only"> {active === 1 ? "activo" : "activos"}</span>
+          </span>
+        )}
+        {pending && <Spinner className="size-4" />}
+      </button>
+
       {/* Celular y tablet: barra pegada arriba que abre el panel */}
-      <div className="sticky top-16 z-20 -mx-4 border-b border-line bg-canvas/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:hidden">
+      <div className="sticky top-16 z-20 -mx-4 border-b border-line bg-canvas/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 xl:hidden">
         <button
           type="button"
           aria-haspopup="dialog"
-          onClick={() => {
-            setDraft(current);
-            setSheetOpen(true);
-          }}
+          onClick={openPanel}
           className="flex h-12 w-full items-center gap-3 rounded-xl border border-line-strong bg-surface px-4 text-left shadow-xs transition-colors hover:border-brand-400"
         >
           <SlidersHorizontal className="size-5 text-brand-600" aria-hidden="true" />
