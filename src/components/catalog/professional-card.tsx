@@ -29,7 +29,7 @@ export function ProfessionalCard({ item, preload = false }: { item: CatalogItem;
             alt=""
             fill
             preload={preload}
-            sizes="(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 92vw"
+            sizes="(min-width: 1408px) 20vw, (min-width: 1024px) 26vw, (min-width: 640px) 46vw, 92vw"
             className="object-cover object-[center_30%] transition-transform duration-700 ease-out-soft group-hover:scale-[1.07]"
           />
         ) : (

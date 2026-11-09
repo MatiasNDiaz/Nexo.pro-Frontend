@@ -49,9 +49,12 @@ export default function CatalogPage({ searchParams }: PageProps<"/profesionales"
         title="Encontrá al profesional indicado"
         description="Todos tienen la identidad verificada por nuestro equipo. Filtrá por oficio y zona, o mirá quién está disponible ahora."
       />
-      {/* Filtros a la izquierda y resultados a la derecha; en celular, la barra de filtros arriba. */}
-      <div className="container-page grid grid-cols-[minmax(0,1fr)] gap-6 py-8 sm:py-10 lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:gap-8">
-
+      {/*
+        Filtros a la izquierda y resultados a la derecha; en celular, la barra de filtros arriba.
+        Más ancho que el resto de las páginas (no usa container-page): los filtros van casi contra el
+        borde izquierdo y los resultados aprovechan la pantalla (4 columnas desde 1408 px).
+      */}
+      <div className="mx-auto grid w-full max-w-[120rem] grid-cols-[minmax(0,1fr)] gap-6 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-6 lg:pr-6 lg:pl-4 2xl:pr-8">
         <Suspense fallback={<FiltersSkeleton />}>
           <Filters searchParams={searchParams} />
         </Suspense>
@@ -141,7 +144,7 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
         {plural(page.total, "profesional encontrado", "profesionales encontrados")}
       </h2>
       {/* minmax(0, …): la columna no se estira con el contenido de la tarjeta (desborde en 375 px). */}
-      <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(3,minmax(0,1fr))]">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))] min-[88rem]:grid-cols-[repeat(4,minmax(0,1fr))]">
         {page.data.map((item, index) => (
           <li key={item.slug}>
             <ProfessionalCard item={item} preload={index === 0} />
@@ -163,7 +166,7 @@ function FiltersSkeleton() {
 
 function ResultsSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true" aria-label="Cargando profesionales">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 min-[88rem]:grid-cols-4" aria-busy="true" aria-label="Cargando profesionales">
       {Array.from({ length: 6 }, (_, i) => (
         <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface">
           <Skeleton className="aspect-[6/5] w-full rounded-none" />
