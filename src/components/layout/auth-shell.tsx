@@ -1,17 +1,14 @@
-import { BadgeCheck, MessagesSquare, Star } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
+import Image from "next/image";
 import type { ReactNode } from "react";
-import { revealDelay } from "@/components/motion/reveal";
+import { photos } from "@/content/photos";
 import { cn } from "@/lib/cn";
 
-const highlights = [
-  { icon: BadgeCheck, text: "Profesionales con identidad verificada" },
-  { icon: MessagesSquare, text: "Presupuestos y coordinación por chat" },
-  { icon: Star, text: "Reseñas de trabajos terminados" },
-];
+const highlights = ["Profesionales con identidad verificada", "Presupuestos y coordinación por chat", "Reseñas de trabajos terminados"];
 
 /**
- * Marco de las pantallas de cuenta (ingresar, registrarse, enlaces de email). En celular, solo la
- * tarjeta del formulario; desde escritorio, un panel de marca al costado.
+ * Marco de las pantallas de cuenta (ingresar, registrarse, enlaces de email): el formulario y una
+ * foto de oficio. En celular, la foto es una franja baja arriba; desde escritorio, un panel al costado.
  */
 export function AuthShell({
   title,
@@ -24,50 +21,48 @@ export function AuthShell({
   children: ReactNode;
   wide?: boolean;
 }) {
+  const photo = photos.electricista;
   return (
-    <div className="relative isolate flex flex-1 bg-linear-to-b from-brand-50 to-canvas">
+    <div className="relative isolate flex flex-1 flex-col bg-canvas lg:flex-row">
+      <div aria-hidden="true" className="relative h-32 overflow-hidden bg-brand-950 sm:h-40 lg:hidden">
+        <Image src={photo.src} alt="" fill sizes="100vw" className="object-cover opacity-80" />
+        <div className="absolute inset-0 bg-linear-to-t from-canvas to-transparent" />
+      </div>
       <div
         className={cn(
-          "container-page grid flex-1 items-start gap-10 py-8 sm:py-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:py-16",
+          "container-page grid flex-1 items-start gap-10 pb-10 sm:pb-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16 lg:py-16",
           !wide && "lg:items-center",
         )}
       >
         <aside
           aria-hidden="true"
           className={cn(
-            "relative hidden overflow-hidden rounded-3xl bg-brand-900 p-10 text-white shadow-raised lg:flex lg:min-h-[32rem] lg:flex-col lg:justify-between",
+            "relative hidden overflow-hidden rounded-3xl bg-brand-950 text-white lg:flex lg:min-h-[34rem] lg:flex-col lg:justify-end",
             // Con formularios largos, el panel acompaña el scroll en vez de quedar flotando al medio.
-            wide && "lg:sticky lg:top-24 lg:mt-24",
+            wide && "lg:sticky lg:top-24",
           )}
         >
-          <div className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-electric-500/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 -left-16 size-72 rounded-full bg-brand-500/30 blur-3xl" />
-          <p className="relative font-display text-3xl leading-tight font-bold">
-            Todo lo que necesitás para resolver tus arreglos, <span className="text-electric-400">en un solo lugar.</span>
-          </p>
-          <ul className="relative flex flex-col gap-3">
-            {highlights.map((item, index) => (
-              <li
-                key={item.text}
-                data-reveal="left"
-                style={revealDelay(index, 120)}
-                className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10"
-              >
-                <span className="grid size-10 place-items-center rounded-xl bg-brand-700">
-                  <item.icon className="size-5" />
-                </span>
-                <span className="font-medium text-brand-100">{item.text}</span>
-              </li>
-            ))}
-          </ul>
+          <Image src={photo.src} alt="" fill sizes="40vw" className="object-cover" />
+          <div className="absolute inset-0 bg-linear-to-t from-brand-950/95 via-brand-950/55 to-brand-950/10" />
+          <div className="relative flex flex-col gap-6 p-10">
+            <p className="max-w-[18ch] font-display text-4xl leading-[1.02] font-bold">Tus arreglos, con gente que da la cara.</p>
+            <ul className="flex flex-col gap-2.5">
+              {highlights.map((text) => (
+                <li key={text} className="flex items-center gap-2.5 text-brand-100">
+                  <BadgeCheck className="size-5 shrink-0 text-electric-400" />
+                  {text}
+                </li>
+              ))}
+            </ul>
+          </div>
         </aside>
 
-        <div className={`mx-auto flex w-full flex-col gap-6 animate-fade-up ${wide ? "max-w-2xl" : "max-w-md"}`}>
+        <div className={`mx-auto -mt-6 flex w-full flex-col gap-6 animate-fade-up lg:mt-0 ${wide ? "max-w-2xl" : "max-w-md"}`}>
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold text-brand-900">{title}</h1>
+            <h1 className="text-4xl leading-[1.02] font-bold text-brand-900">{title}</h1>
             {description && <p className="text-muted-strong">{description}</p>}
           </div>
-          <div className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-8">{children}</div>
+          <div className="rounded-3xl border border-line bg-surface p-5 sm:p-8">{children}</div>
         </div>
       </div>
     </div>

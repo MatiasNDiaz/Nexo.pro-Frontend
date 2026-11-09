@@ -6,6 +6,7 @@ import { Logo } from "@/components/brand/logo";
 import { revealDelay } from "@/components/motion/reveal";
 import { InstagramIcon, LinkedinIcon, WhatsappIcon } from "@/components/brand/social-icons";
 import { site, whatsappUrl } from "@/config/site";
+import { photos } from "@/content/photos";
 
 const explore: { href: Route; label: string }[] = [
   { href: "/", label: "Inicio" },
@@ -108,7 +109,25 @@ export function SiteFooter() {
 
       <div className="relative border-t border-white/10">
         <div className="container-page flex flex-col gap-3 py-6 text-sm sm:flex-row sm:items-center sm:justify-between">
-          <p>© Repara Ya. Todos los derechos reservados.</p>
+          <p>
+            © Repara Ya. Todos los derechos reservados.{" "}
+            <span className="text-brand-300">
+              Fotos ilustrativas de{" "}
+              <a
+                href="https://unsplash.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`Fotos: ${Object.values(photos)
+                  .map((photo) => photo.author)
+                  .join(", ")}`}
+                className="underline-offset-4 hover:underline"
+              >
+                Unsplash
+                <span className="sr-only"> (se abre en otra pestaña)</span>
+              </a>
+              .
+            </span>
+          </p>
           <nav aria-label="Legales">
             <ul className="flex flex-wrap gap-x-5">
               {legal.map((item) => (

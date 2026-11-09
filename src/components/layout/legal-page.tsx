@@ -10,7 +10,7 @@ const dateFormat = new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "lo
 export function LegalPage({ document }: { document: LegalDocument }) {
   return (
     <>
-      <PageHeader eyebrow="Legales" title={document.title} description={document.description} />
+      <PageHeader title={document.title} description={document.description} />
       <div className="container-page grid gap-10 py-10 lg:grid-cols-[14rem_1fr] lg:py-14">
         <nav aria-label="Secciones" className="hidden lg:block">
           <ul className="sticky top-24 flex flex-col gap-1 border-l border-line">

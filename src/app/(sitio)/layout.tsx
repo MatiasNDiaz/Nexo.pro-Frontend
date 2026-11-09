@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { BackToTop } from "@/components/layout/back-to-top";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
@@ -18,6 +20,10 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
       </main>
       <SiteFooter />
       <ScrollReveal />
+      {/* Suspense: lee la URL (para ocultarse en Mensajes), que en rutas con [id] llega al pedirla. */}
+      <Suspense fallback={null}>
+        <BackToTop />
+      </Suspense>
     </>
   );
 }

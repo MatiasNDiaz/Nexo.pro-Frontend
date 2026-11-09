@@ -38,7 +38,7 @@ export default function DesignSystemPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Interno" title="Sistema de diseño" description="Tokens y componentes base de Repara Ya." />
+      <PageHeader title="Sistema de diseño" description="Tokens y componentes base de Repara Ya." />
       <div className="container-page flex flex-col gap-14 py-12">
         <Section title="Colores">
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

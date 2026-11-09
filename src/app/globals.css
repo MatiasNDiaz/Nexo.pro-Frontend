@@ -112,6 +112,19 @@
   }
 }
 
+/*
+ * Barra de progreso de las fotos del héroe (components/home/hero-slides.tsx): su fin marca el cambio
+ * de foto. Fuera de @theme: ahí Tailwind descarta los keyframes que ninguna variable --animate usa.
+ */
+@keyframes slide-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* Contenedor de página: el mismo ancho y márgenes laterales en toda la app (16 px en celular). */
 @utility container-page {
   width: 100%;
