@@ -60,7 +60,7 @@
 | Los mensajes de sistema invalidan pedidos y trabajos | Cada cambio de un pedido o una contratación genera uno (flujos §7) |
 | La lectura se confirma solo con la pestaña visible y cuando llega algo nuevo de la otra parte | No se avisa "visto" por tener el chat abierto en otra pestaña, ni se hace un pedido inútil al abrir un chat ya leído |
 | Nombres en pedidos y trabajos tomados de la lista de chats (por `conversationId`) | H-05: `RequestDto` y `ContractDto` traen ids, no nombres |
-| Adjuntos del chat como enlace que se abre en otra pestaña | Ver H-14: la API los sirve con `Cross-Origin-Resource-Policy: same-origin` y el navegador bloquea un `<img>` desde otro origen. Abrir una pestaña no está sujeto a esa regla |
+| Adjuntos del chat dentro de la conversación con `<img>`/`<video>` nativos (al tocar la foto se abre entera) | Desde H-14 (backend `77c5582`) la API los sirve con `Cross-Origin-Resource-Policy: same-site`. No pasan por `next/image`: su optimizador los pediría desde el servidor, sin la sesión de la persona |
 | Al elegir un profesional se va directo al trabajo | `POST /requests/targets/:id/select` devuelve la contratación (no el pedido) |
 | Pedido desde el perfil a un solo profesional | El backend acepta hasta 10; elegir varios desde el catálogo queda para el rediseño |
 | Los diálogos se cierran al desmontar su efecto (`components/ui/dialog.tsx`) | Con Cache Components, Next conserva oculta la página anterior y React desmonta sus efectos: un modal abierto (p. ej. "Pedir presupuesto" al enviar) dejaba la página nueva inerte, sin clics ni scroll (encontrado en la prueba real) |
@@ -88,6 +88,5 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | Límite del detalle de perfil desde el servidor de Next | Todos los pedidos del servidor salen de una IP: con muchos perfiles distintos sin caché podría llegar a 30 por minuto. Solución posible en el backend: reconocer al servidor del frontend con un encabezado secreto | Antes de producción |
 | Personalización del perfil (`theme`: color, fuente, animación) | El backend la devuelve según el plan; todavía no se aplica en la página | Etapa de diseño |
 | Favoritos y reportar desde el perfil | Chat y pedido de presupuesto ya están (5.1) | 5.2 y 5.3 |
-| H-14: adjuntos privados con `Cross-Origin-Resource-Policy: same-origin` | Para verlos dentro del chat (sin abrir otra pestaña), el backend tendría que mandar `same-site` en `GET /chat/attachments/:fileId` (y en las evidencias de reportes). Requiere aprobación del fundador | Antes del rediseño del chat |
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |

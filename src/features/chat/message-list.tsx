@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CheckCheck, FileImage, FileVideo, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Check, CheckCheck, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
@@ -71,6 +71,12 @@ export function MessageList({
       ref={scroller}
       onScroll={(event) => {
         previous.current.nearBottom = isNearBottom(event.currentTarget);
+      }}
+      // Una foto que termina de cargar agranda la lista: si se estaba leyendo lo último, se baja.
+      onLoadCapture={(event) => {
+        const el = event.currentTarget;
+        if (previous.current.nearBottom) el.scrollTop = el.scrollHeight;
+        previous.current.height = el.scrollHeight;
       }}
       className="flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5"
     >
@@ -172,25 +178,29 @@ function Bubble({ message, mine, author, editable, seen, onEdit, onDelete }: Bub
             <>
               {message.body && <p className="whitespace-pre-line [overflow-wrap:anywhere]">{message.body}</p>}
               {message.attachments.length > 0 && (
-                <ul className={cn("flex flex-col gap-1", message.body && "mt-2")}>
+                <ul className={cn("grid gap-1.5", message.attachments.length > 1 && "grid-cols-2", message.body && "mt-2")}>
                   {message.attachments.map((attachment, index) => {
-                    const Icon = attachment.kind === "VIDEO" ? FileVideo : FileImage;
+                    const url = attachmentUrl(attachment.fileId);
+                    const label = `${attachment.kind === "VIDEO" ? "Video" : "Foto"} adjunta${message.attachments.length > 1 ? ` ${index + 1}` : ""}`;
                     return (
-                      <li key={attachment.fileId}>
-                        {/* Se abre en otra pestaña: el archivo es privado y lo sirve la API con la sesión. */}
-                        <a
-                          href={attachmentUrl(attachment.fileId)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold underline-offset-4 hover:underline",
-                            mine ? "bg-white/15 text-white" : "bg-brand-50 text-brand-800",
-                          )}
-                        >
-                          <Icon className="size-4" aria-hidden="true" />
-                          {attachment.kind === "VIDEO" ? "Video" : "Foto"} {message.attachments.length > 1 ? index + 1 : ""}
-                          <span className="sr-only"> (se abre en otra pestaña)</span>
-                        </a>
+                      <li key={attachment.fileId} className="overflow-hidden rounded-xl bg-black/5">
+                        {/*
+                          Archivo privado servido por la API con la sesión (cookie del mismo sitio, H-14):
+                          <img>/<video> nativos, porque el optimizador de Next lo pediría sin la sesión.
+                        */}
+                        {attachment.kind === "VIDEO" ? (
+                          <video src={url} controls preload="metadata" playsInline aria-label={label} className="max-h-72 w-full bg-black">
+                            <a href={url} target="_blank" rel="noopener noreferrer">
+                              Ver el video
+                            </a>
+                          </video>
+                        ) : (
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={url} alt={label} loading="lazy" decoding="async" className="max-h-72 w-full object-cover" />
+                            <span className="sr-only"> (se abre en otra pestaña)</span>
+                          </a>
+                        )}
                       </li>
                     );
                   })}

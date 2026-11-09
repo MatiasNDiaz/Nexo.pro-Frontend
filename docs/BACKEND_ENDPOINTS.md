@@ -2055,7 +2055,7 @@ Adjunto privado: enlace firmado de 5 minutos (Cloudinary) o el contenido (local)
 | Restricción por plan | el profesional necesita prueba o plan vigente (`SUBSCRIPTION_REQUIRED`) |
 | Protecciones | CSRF: no aplica (GET) · Origin: no aplica · Límite: global |
 | Parámetros de ruta | `fileId` (uuid) |
-| Respuesta | `200` · 302 a un enlace firmado de 5 minutos (Cloudinary) o el binario con `Cache-Control: private, no-store` (local) |
+| Respuesta | `200` · 302 a un enlace firmado de 5 minutos (Cloudinary) o el binario (local). Siempre con `Cache-Control: private, no-store` y `Cross-Origin-Resource-Policy: same-site` (H-14): se puede mostrar en `<img>`/`<video>` desde el frontend del mismo sitio |
 | Errores | `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 SUBSCRIPTION_REQUIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `404 CONVERSATION_NOT_FOUND`, `429 TOO_MANY_REQUESTS` |
 | Estado | Implementado |
 | Interfaz | Mensajes (lista de chats y conversación) |
@@ -2423,7 +2423,7 @@ Entrega un archivo privado ya autorizado por el llamador (adjuntos del chat): un
 | Estados de cuenta | ACTIVE |
 | Protecciones | CSRF: no aplica (GET) · Origin: no aplica · Límite: global |
 | Parámetros de ruta | `fileId` (uuid) |
-| Respuesta | `200` · 302 a un enlace firmado (Cloudinary) o el binario (local) |
+| Respuesta | `200` · 302 a un enlace firmado (Cloudinary) o el binario (local), con `Cache-Control: private, no-store` y `Cross-Origin-Resource-Policy: same-site` (H-14) |
 | Errores | `400 VALIDATION_FAILED / BAD_REQUEST`, `401 UNAUTHORIZED / ACCESS_TOKEN_EXPIRED`, `403 FORBIDDEN (rol)`, `403 ACCOUNT_STATE_NOT_ALLOWED`, `429 TOO_MANY_REQUESTS` |
 | Estado | Implementado |
 | Interfaz | Reportar contenido / mis reportes |
