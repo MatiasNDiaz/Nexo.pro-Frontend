@@ -49,7 +49,9 @@ export default function CatalogPage({ searchParams }: PageProps<"/profesionales"
         title="Encontrá al profesional indicado"
         description="Todos tienen la identidad verificada por nuestro equipo. Filtrá por oficio y zona, o mirá quién está disponible ahora."
       />
-      <div className="container-page flex flex-col gap-6 py-8 sm:py-10">
+      {/* Filtros a la izquierda y resultados a la derecha; en celular, la barra de filtros arriba. */}
+      <div className="container-page grid grid-cols-[minmax(0,1fr)] gap-6 py-8 sm:py-10 lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:gap-8">
+
         <Suspense fallback={<FiltersSkeleton />}>
           <Filters searchParams={searchParams} />
         </Suspense>
@@ -139,7 +141,7 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
         {plural(page.total, "profesional encontrado", "profesionales encontrados")}
       </h2>
       {/* minmax(0, …): la columna no se estira con el contenido de la tarjeta (desborde en 375 px). */}
-      <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 xl:grid-cols-[repeat(2,minmax(0,1fr))]">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(3,minmax(0,1fr))]">
         {page.data.map((item, index) => (
           <li key={item.slug}>
             <ProfessionalCard item={item} preload={index === 0} />
@@ -156,16 +158,16 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
 }
 
 function FiltersSkeleton() {
-  return <Skeleton className="h-11 w-full lg:h-24" />;
+  return <Skeleton className="h-12 w-full lg:h-[32rem]" />;
 }
 
 function ResultsSkeleton() {
   return (
-    <div className="grid gap-3 xl:grid-cols-2" aria-busy="true" aria-label="Cargando profesionales">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true" aria-label="Cargando profesionales">
       {Array.from({ length: 6 }, (_, i) => (
-        <div key={i} className="flex gap-5 rounded-2xl border border-line bg-surface p-5">
-          <Skeleton className="size-20 shrink-0 rounded-xl sm:size-28" />
-          <div className="flex flex-1 flex-col gap-3">
+        <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface">
+          <Skeleton className="aspect-[6/5] w-full rounded-none" />
+          <div className="flex flex-col gap-3 p-5">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-4 w-full" />

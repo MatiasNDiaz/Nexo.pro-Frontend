@@ -27,21 +27,29 @@ test.describe("catálogo", () => {
 
   test("filtra por oficio y por disponibles con URLs legibles", async ({ page, isMobile }) => {
     await page.goto("/profesionales");
-    if (isMobile) {
-      await page.getByRole("button", { name: "Filtros" }).click();
-      await page.getByRole("dialog", { name: "Filtros" }).getByRole("combobox", { name: "Oficio" }).selectOption("plomero");
-      await page.getByRole("button", { name: "Ver resultados" }).click();
-    } else {
-      await main(page).getByRole("combobox", { name: "Oficio" }).selectOption("plomero");
-    }
+    // En escritorio los filtros están en la columna izquierda; en celular, en el panel que abre "Filtros".
+    const panel = isMobile ? page.getByRole("dialog", { name: "Filtros" }) : main(page).getByRole("complementary", { name: "Filtros" });
+    const openPanel = async () => {
+      if (isMobile) await page.getByRole("button", { name: /^Filtros/ }).click();
+    };
+    const apply = async () => {
+      if (isMobile) await panel.getByRole("button", { name: "Ver resultados" }).click();
+    };
+
+    await openPanel();
+    await panel.getByRole("button", { name: "Plomero" }).click();
+    await apply();
     await expect(page).toHaveURL(/\/profesionales\?oficio=plomero$/);
     await expect(main(page).getByText("1 profesional encontrado")).toBeVisible();
     await expect(main(page).getByRole("link", { name: "Juan Gómez" })).toBeVisible();
 
     // Como una persona: toca la etiqueta visible (la casilla real está oculta visualmente).
-    await main(page).locator("label").filter({ hasText: "Disponible ahora" }).filter({ visible: true }).click();
+    await openPanel();
+    await expect(panel.getByRole("button", { name: "Plomero" })).toHaveAttribute("aria-pressed", "true");
+    await panel.locator("label").filter({ hasText: "Disponible ahora" }).click();
+    await expect(panel.getByRole("switch", { name: "Disponible ahora" })).toBeChecked();
+    await apply();
     await expect(page).toHaveURL(/oficio=plomero&disponible=1/);
-    await expect(main(page).getByRole("switch", { name: "Disponible ahora" }).filter({ visible: true })).toBeChecked();
     await expect(main(page).getByText("No encontramos profesionales con estos filtros")).toBeVisible();
   });
 

@@ -11,8 +11,8 @@ import { formatMoney } from "@/lib/format";
  * Planes de los profesionales, con estilo que sube junto con el precio:
  * - Basic: sobrio, translúcido sobre el fondo oscuro.
  * - Medium: degradado azul con borde eléctrico y resplandor al pasar el mouse.
- * - Premium: borde dorado que gira, fondo cálido, nombre en serif cursiva y un destello al pasar
- *   el mouse. Con movimiento reducido, el borde queda quieto.
+ * - Premium: borde dorado que gira, fondo cálido, brillo que la cruza, resplandor y destellos, y un
+ *   botón dorado que brilla. Con movimiento reducido, todo queda quieto.
  */
 export function PlansTable() {
   return (
@@ -73,12 +73,25 @@ export function PlansTable() {
             </ul>
             <div className="mt-8">
               {index === 2 ? (
+                // Botón dorado con brillo que lo cruza y halo que respira; al pasar el mouse sube y se aclara.
                 <Link
                   href="/registro?rol=profesional"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-100 via-amber-400 to-amber-500 font-semibold text-brand-900 shadow-[0_8px_24px_-10px_rgb(244_163_64/0.8)] transition-[transform,filter] duration-200 hover:brightness-105 active:scale-[0.97]"
+                  className="group/cta relative inline-flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-linear-to-r from-amber-100 via-amber-400 to-amber-500 font-semibold text-brand-900 transition-[translate,filter] duration-200 ease-out-soft [animation:glow-pulse_2.6s_ease-in-out_infinite] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.97]"
                 >
-                  <Crown className="size-4" aria-hidden="true" />
-                  Probar 30 días
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-linear-to-r from-transparent via-white/70 to-transparent [animation:shine-sweep_2.8s_var(--ease-in-out-strong)_infinite]"
+                  />
+                  {/*
+                    Brillo instantáneo al entrar a la tarjeta y otra vez al llegar al botón (otra
+                    duración: un valor de animación distinto la hace arrancar de nuevo).
+                  */}
+                  <span
+                    aria-hidden="true"
+                    className="shine-hover bg-linear-to-r from-transparent via-white/90 to-transparent group-hover/premium:[animation:shine-once_600ms_var(--ease-out-soft)] group-hover/cta:[animation:shine-once_550ms_var(--ease-out-soft)] group-focus-visible/cta:[animation:shine-once_600ms_var(--ease-out-soft)]"
+                  />
+                  <Crown className="relative size-4 transition-transform duration-300 ease-out-soft group-hover/cta:-rotate-12" aria-hidden="true" />
+                  <span className="relative">Probar 30 días</span>
                 </Link>
               ) : (
                 <ButtonLink href="/registro?rol=profesional" variant={index === 1 ? "accent" : "inverse"} fullWidth size="lg">
@@ -114,23 +127,54 @@ function PlanShell({ tier, children }: { tier: number; children: ReactNode }) {
     );
   }
 
-  // Premium: borde dorado giratorio (padding de 1,5 px sobre un degradado cónico) y destello al pasar el mouse.
+  /*
+   * Premium, la que más se mueve:
+   * - borde dorado que gira (padding de 2 px sobre un degradado cónico con ángulo animable);
+   * - un brillo que la cruza entera cada pocos segundos;
+   * - un resplandor cálido que flota y destellos que titilan;
+   * - al pasar el mouse sube más, se agranda apenas y el resplandor se enciende.
+   * Con movimiento reducido todo queda quieto (globals.css).
+   */
   return (
     <div
       className={cn(
-        "group/premium relative flex w-full rounded-3xl p-[1.5px] [animation:plan-spin_6s_linear_infinite] hover:[animation-duration:2.5s]",
+        "group/premium relative flex w-full rounded-3xl p-[2px] [animation:plan-spin_5s_linear_infinite]",
         "[background:conic-gradient(from_var(--plan-angle),#f4a340,#ffe1a8,#3b82f6,#f4a340)]",
-        "hover:shadow-[0_28px_70px_-24px_rgb(244_163_64/0.6)]",
-        lift,
+        "shadow-[0_20px_60px_-28px_rgb(244_163_64/0.55)] transition-[translate,scale,box-shadow] duration-300 ease-out-soft",
+        "hover:-translate-y-2.5 hover:scale-[1.015] hover:shadow-[0_34px_80px_-24px_rgb(244_163_64/0.75)]",
       )}
     >
-      <div className="relative flex w-full flex-col overflow-hidden rounded-[calc(1.5rem-1.5px)] bg-[radial-gradient(120%_80%_at_100%_0%,#3a2a12_0%,#14100c_45%,#07152a_100%)] p-7 sm:p-8">
+      <div className="relative flex w-full flex-col overflow-hidden rounded-[calc(var(--radius-3xl)-2px)] bg-[radial-gradient(120%_80%_at_100%_0%,#3a2a12_0%,#14100c_45%,#07152a_100%)] p-7 sm:p-8">
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-amber-100/15 to-transparent opacity-0 group-hover/premium:[animation:plan-sheen_1.1s_var(--ease-out-soft)] group-hover/premium:opacity-100"
+          className="pointer-events-none absolute -top-1/4 -right-1/4 size-[70%] rounded-full bg-[radial-gradient(closest-side,rgb(244_163_64/0.35),transparent)] opacity-70 transition-opacity duration-500 [animation:glow-drift_9s_ease-in-out_infinite] group-hover/premium:opacity-100"
         />
-        {children}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-linear-to-r from-transparent via-amber-100/20 to-transparent [animation:shine-sweep_4.5s_var(--ease-in-out-strong)_infinite]"
+        />
+        {/* Al pasar el mouse, un brillo fuerte cruza al instante (sin esperar el ciclo de arriba). */}
+        <span
+          aria-hidden="true"
+          className="shine-hover z-1 bg-linear-to-r from-transparent via-amber-50/45 to-transparent group-hover/premium:[animation:shine-once_750ms_var(--ease-out-soft)]"
+        />
+        {[
+          "top-6 right-[38%] size-3 [animation-delay:0s]",
+          "top-[42%] right-6 size-2.5 [animation-delay:1.1s]",
+          "bottom-28 left-5 size-2 [animation-delay:2.3s]",
+        ].map((place) => (
+          <Sparkle key={place} className={cn("absolute text-amber-100 opacity-0 [animation:twinkle_3.4s_ease-in-out_infinite]", place)} />
+        ))}
+        <div className="relative flex flex-1 flex-col">{children}</div>
       </div>
     </div>
+  );
+}
+
+function Sparkle({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 12 12" aria-hidden="true" className={cn("pointer-events-none", className)}>
+      <path d="M6 0c.5 3.2 2.8 5.5 6 6-3.2.5-5.5 2.8-6 6-.5-3.2-2.8-5.5-6-6 3.2-.5 5.5-2.8 6-6Z" fill="currentColor" />
+    </svg>
   );
 }

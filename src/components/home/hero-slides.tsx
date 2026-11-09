@@ -140,8 +140,9 @@ export function HeroSlides({ children }: { children: ReactNode }) {
   const running = !paused && !offscreen;
 
   return (
-    <div ref={root} role="region" aria-roledescription="carrusel" aria-label="Fotos de oficios" className="relative isolate overflow-hidden bg-brand-950">
-      <div className="absolute inset-0 -z-10">
+    <div ref={root} role="region" aria-roledescription="carrusel" aria-label="Fotos de oficios" className="relative isolate bg-brand-950">
+      {/* El recorte va en la capa de fotos (no en el carrusel): así las listas del buscador pueden salir por abajo. */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
         {heroSlides.map((item, index) => {
           if (index !== current && index !== upcoming) return null;
           const isCurrent = index === current;

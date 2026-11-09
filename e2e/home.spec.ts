@@ -24,7 +24,17 @@ test.describe("inicio", () => {
   test("el buscador del héroe lleva al catálogo con oficio y localidad", async ({ page }) => {
     await page.goto("/");
     const hero = page.getByRole("region", { name: "Fotos de oficios" });
-    await hero.getByLabel("Oficio").selectOption("electricista");
+    // Lista propia (no <select>): se abre con el teclado y se elige con Enter.
+    const trade = hero.getByRole("combobox", { name: /^Oficio/ });
+    await trade.focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(trade).toHaveAttribute("aria-expanded", "true");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(trade).toHaveAccessibleName(/Electricista/);
+    // Y con el mouse.
+    await hero.getByRole("combobox", { name: /^Localidad/ }).click();
+    await hero.getByRole("option", { name: "Toda Córdoba" }).click();
     await hero.getByRole("button", { name: "Buscar" }).click();
     await expect(page).toHaveURL(/\/profesionales\?oficio=electricista&localidad=$/);
     await expect(page.getByRole("heading", { level: 1, name: "Encontrá al profesional indicado" })).toBeVisible();

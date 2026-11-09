@@ -105,8 +105,16 @@ export function Dialog({ open, onClose, title, description, children, className 
   );
 }
 
-/** Panel lateral desde la derecha (menú móvil, filtros). */
-export function Sheet({ open, onClose, title, description, children, className }: DialogBaseProps) {
+/** Panel lateral (menú móvil desde la derecha; filtros desde la izquierda, donde están en escritorio). */
+export function Sheet({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  className,
+  side = "right",
+}: DialogBaseProps & { side?: "left" | "right" }) {
   const { ref, onBackdropClick } = useNativeDialog(open, onClose);
   const titleId = useId();
 
@@ -116,8 +124,10 @@ export function Sheet({ open, onClose, title, description, children, className }
       aria-labelledby={titleId}
       onClick={onBackdropClick}
       className={cn(
-        "fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-none w-[min(22rem,88vw)] max-w-none bg-surface p-0 shadow-raised",
-        "translate-x-full open:translate-x-0 starting:open:translate-x-full",
+        "fixed inset-y-0 m-0 h-dvh max-h-none w-[min(22rem,88vw)] max-w-none bg-surface p-0 shadow-raised",
+        side === "right"
+          ? "right-0 left-auto translate-x-full open:translate-x-0 starting:open:translate-x-full"
+          : "right-auto left-0 -translate-x-full open:translate-x-0 starting:open:-translate-x-full",
         discrete,
         backdrop,
         className,

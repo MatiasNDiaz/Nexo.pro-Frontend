@@ -138,13 +138,68 @@
     --plan-angle: 360deg;
   }
 }
-/* Destello que cruza una tarjeta al pasar el mouse. */
-@keyframes plan-sheen {
+/*
+ * Brillo que cruza de punta a punta (tarjeta Premium y botones destacados). El elemento mide el 40 %
+ * de su contenedor: de -160 % a 360 % de su ancho lo recorre entero. Pasa y descansa (55 % → 100 %).
+ */
+@keyframes shine-sweep {
   from {
-    transform: translateX(-120%) skewX(-18deg);
+    transform: translateX(-160%) skewX(-20deg);
+  }
+  55%,
+  to {
+    transform: translateX(360%) skewX(-20deg);
+  }
+}
+/*
+ * El mismo brillo, de una sola pasada y sin pausa: se aplica solo con el mouse encima (la animación
+ * arranca en el instante en que empieza el hover, sin esperar el ciclo). Clase .shine-hover abajo.
+ */
+@keyframes shine-once {
+  from {
+    transform: translateX(-160%) skewX(-20deg);
   }
   to {
-    transform: translateX(220%) skewX(-18deg);
+    transform: translateX(360%) skewX(-20deg);
+  }
+}
+/* Resplandor que flota lento dentro de la tarjeta Premium. */
+@keyframes glow-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-22%, 18%) scale(1.2);
+  }
+}
+/* Destellos chicos que titilan. */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(90deg);
+  }
+}
+/* Halo dorado que respira alrededor del botón Premium. */
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 24px -10px rgb(244 163 64 / 0.7);
+  }
+  50% {
+    box-shadow: 0 10px 36px -6px rgb(244 163 64 / 1);
+  }
+}
+/* Listas desplegables: aparecen desde el borde que las abre. */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
   }
 }
 
@@ -183,6 +238,19 @@
   details[open]::details-content {
     block-size: auto;
   }
+}
+
+/*
+ * Brillo instantáneo al pasar el mouse (o al enfocar con teclado) sobre el ancestro .group/shine-*:
+ * el elemento espera escondido a la izquierda y cruza una vez apenas empieza el hover.
+ */
+@utility shine-hover {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 45%;
+  pointer-events: none;
+  transform: translateX(-160%) skewX(-20deg);
 }
 
 /* Contenedor de página: el mismo ancho y márgenes laterales en toda la app (16 px en celular). */

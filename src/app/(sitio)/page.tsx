@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, BadgeCheck, Plus, Search } from "lucide-react";
+import { ArrowRight, ArrowUpRight, MapPin, Plus, Search, Wrench } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,7 +6,9 @@ import { Suspense } from "react";
 import { AccountStory } from "@/components/home/account-story";
 import { HeroSlides } from "@/components/home/hero-slides";
 import { PlansTable } from "@/components/home/plans-table";
+import { ShineLink } from "@/components/home/shine-link";
 import { ButtonLink } from "@/components/ui/button";
+import { Listbox } from "@/components/ui/listbox";
 import { about, faqs } from "@/content/home";
 import { scenes, tradePhotos } from "@/content/photos";
 import { getLocalities, getProfessions } from "@/features/catalog/data";
@@ -67,32 +69,32 @@ function Hero() {
     <section aria-labelledby="inicio-titulo">
       <HeroSlides>
         {/* Contenido centrado y alto en la pantalla (pedido del fundador), con el buscador a lo ancho. */}
-        <div className="container-page relative z-2 flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center pt-24 pb-28 text-center sm:pt-20 lg:min-h-[min(calc(100svh-4rem),58rem)] lg:pb-32">
-          <p className="mb-5 flex items-center gap-2 text-sm font-semibold text-white">
-            <BadgeCheck className="size-4 text-electric-400" aria-hidden="true" />
-            Identidad verificada en cada perfil
-          </p>
+        {/*
+          Por encima de los controles del carrusel (z-5) para que las listas del buscador los tapen; el
+          contenedor deja pasar los clics (pointer-events) y solo sus hijos los reciben.
+        */}
+        <div className="container-page pointer-events-none relative z-5 flex min-h-[calc(100svh-4rem)] *:pointer-events-auto flex-col items-center justify-center pt-24 pb-28 text-center sm:pt-20 lg:min-h-[min(calc(100svh-4rem),58rem)] lg:pb-32">
           <h1
             id="inicio-titulo"
             className="max-w-[22ch] text-[2.5rem] leading-[0.95] font-bold tracking-[-0.025em] text-balance text-white sm:text-6xl lg:text-[5.25rem]"
           >
             <WordsUp text="Oficios de confianza en Córdoba, a un mensaje." />
           </h1>
-          <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-white animate-fade-up [animation-delay:500ms]">
-            Electricistas, plomeros, gasistas y más, revisados por nuestro equipo. Pedí presupuesto por chat y elegí sin compromiso.
+          {/* Tan ancho como el buscador; blanco puro con una sombra suave para que se lea sobre cualquier foto. */}
+          <p className="mt-6 max-w-5xl text-lg leading-relaxed font-medium text-white [text-shadow:0_1px_12px_rgb(7_21_42/0.55)] animate-fade-up [animation-delay:500ms] sm:text-xl">
+            Electricistas, plomeros, gasistas, carpinteros, pintores y más oficios, con la identidad revisada por nuestro equipo.
+            Contale tu problema por chat, recibí presupuestos sin compromiso y seguí el trabajo desde que lo aceptás hasta que
+            termina.
           </p>
-          <div className="mt-9 w-full max-w-5xl text-left animate-fade-up [animation-delay:650ms]">
+          {/* z-10: la animación de entrada crea una capa propia; sin esto, las listas quedarían bajo el botón de abajo. */}
+          <div className="relative z-10 mt-9 w-full max-w-5xl text-left animate-fade-up [animation-delay:650ms]">
             <Suspense fallback={<SearchSkeleton />}>
               <HeroSearch />
             </Suspense>
           </div>
-          <Link
-            href="/registro?rol=profesional"
-            className="group mt-5 inline-flex h-11 items-center gap-1.5 font-semibold text-white animate-fade-up [animation-delay:750ms]"
-          >
-            ¿Sos profesional? Sumate
-            <ArrowRight className="size-4 transition-transform duration-200 ease-out-soft group-hover:translate-x-0.5" aria-hidden="true" />
-          </Link>
+          <div className="mt-7 animate-fade-up [animation-delay:750ms]">
+            <ShineLink href="/registro?rol=profesional">¿Sos profesional? Sumate</ShineLink>
+          </div>
         </div>
       </HeroSlides>
     </section>
@@ -108,29 +110,23 @@ async function HeroSearch() {
   const [professions, localities] = await Promise.all([getProfessions(), getLocalities()]);
   return (
     <form action="/profesionales" method="get" className="flex flex-col gap-1 rounded-2xl bg-white p-1.5 shadow-raised sm:flex-row sm:items-stretch">
-      <label className="flex flex-1 flex-col justify-center rounded-xl px-4 py-2 transition-colors focus-within:bg-canvas hover:bg-canvas">
-        <span className="text-xs font-semibold text-muted-strong">Oficio</span>
-        <select name="oficio" defaultValue="" className="-ml-1 h-7 cursor-pointer bg-transparent text-base font-medium text-ink outline-none">
-          <option value="">Todos los oficios</option>
-          {professions.map((profession) => (
-            <option key={profession.id} value={profession.slug}>
-              {profession.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <Listbox
+        variant="hero"
+        name="oficio"
+        label="Oficio"
+        icon={<Wrench className="size-5" aria-hidden="true" />}
+        className="flex-1"
+        options={[{ value: "", label: "Todos los oficios" }, ...professions.map((p) => ({ value: p.slug, label: p.name }))]}
+      />
       <span aria-hidden="true" className="mx-4 h-px bg-line sm:mx-0 sm:my-3 sm:h-auto sm:w-px" />
-      <label className="flex flex-1 flex-col justify-center rounded-xl px-4 py-2 transition-colors focus-within:bg-canvas hover:bg-canvas">
-        <span className="text-xs font-semibold text-muted-strong">Localidad</span>
-        <select name="localidad" defaultValue="" className="-ml-1 h-7 cursor-pointer bg-transparent text-base font-medium text-ink outline-none">
-          <option value="">Toda Córdoba</option>
-          {localities.map((locality) => (
-            <option key={locality.id} value={locality.id}>
-              {locality.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <Listbox
+        variant="hero"
+        name="localidad"
+        label="Localidad"
+        icon={<MapPin className="size-5" aria-hidden="true" />}
+        className="flex-1"
+        options={[{ value: "", label: "Toda Córdoba" }, ...localities.map((l) => ({ value: l.id, label: l.name }))]}
+      />
       <button
         type="submit"
         className="inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-amber-400 px-7 font-semibold text-brand-900 transition-[background-color,transform] duration-150 hover:bg-amber-500 active:scale-[0.97]"
@@ -152,8 +148,8 @@ async function Trades() {
     <section aria-labelledby="oficios" className="bg-surface">
       <div className="container-page py-20 sm:py-28">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 id="oficios" className="max-w-[14ch] text-4xl leading-[1.02] font-bold text-brand-900 sm:text-6xl">
-            ¿Qué necesitás arreglar?
+          <h2 id="oficios" className="max-w-[20ch] text-4xl leading-[1.02] font-bold text-brand-900 sm:text-6xl">
+            ¿Tenés un problema?… ¿a quién llamás?
           </h2>
           <Link href="/profesionales" className="group inline-flex h-11 items-center gap-1.5 font-semibold text-brand-700">
             Ver todos los profesionales
@@ -207,9 +203,7 @@ function Professionals() {
               Mostrá tus trabajos, elegí tus oficios y tus zonas, y respondé pedidos por chat. Empezás con 30 días de prueba con las
               funciones de Basic; después elegís tu plan y lo pagás mes a mes.
             </p>
-            <ButtonLink href="/registro?rol=profesional" variant="accent" size="lg">
-              Crear mi perfil profesional
-            </ButtonLink>
+            <ShineLink href="/registro?rol=profesional">Crear mi perfil profesional</ShineLink>
           </div>
           <div className="relative aspect-[4/5] max-h-[34rem] w-full overflow-hidden rounded-3xl sm:aspect-[4/3] lg:aspect-[4/5]">
             <Image src={scenes.escalera.src} alt={scenes.escalera.alt} fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />

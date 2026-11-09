@@ -8,38 +8,56 @@ import { RatingSummary } from "./rating";
 import { RemoteImage } from "./remote-image";
 
 /**
- * Un profesional en el catálogo, como fila escaneable: foto, quién es y qué hace, cómo trabaja y su
- * tarifa de referencia. Toda la tarjeta es un único enlace (el nombre es su texto accesible); no hay
- * botones adentro para no anidar elementos interactivos. `preload` solo para la primera (LCP).
+ * Un profesional en el catálogo: la cara grande arriba (es lo que da confianza), y abajo quién es,
+ * qué hace, cómo trabaja y su tarifa de referencia. Toda la tarjeta es un único enlace (el nombre es
+ * su texto accesible); no hay botones adentro para no anidar elementos interactivos. `preload` solo
+ * para la primera (LCP).
  */
 export function ProfessionalCard({ item, preload = false }: { item: CatalogItem; preload?: boolean }) {
   const name = displayName(item);
   const profession = primaryProfession(item);
   const rate = formatMoney(item.referenceRate);
-  // La foto de la persona primero (es lo que da confianza); la portada, si no tiene foto.
+  // La foto de la persona primero; la portada, si no tiene foto.
   const picture = item.avatarUrl ?? item.coverImageUrl;
 
   return (
-    <article className="group relative flex h-full gap-4 rounded-2xl border border-line bg-surface p-4 transition-[border-color,box-shadow] duration-200 ease-out-soft hover:border-brand-300 hover:shadow-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-electric-500 sm:gap-5 sm:p-5">
-      <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-brand-100 sm:size-28">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-[border-color,box-shadow,translate] duration-300 ease-out-soft hover:-translate-y-1.5 hover:border-electric-400 hover:shadow-[0_24px_50px_-22px_rgb(18_59_122/0.45)] has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-electric-500">
+      <div className="relative aspect-[6/5] overflow-hidden bg-brand-100">
         {picture ? (
           <RemoteImage
             src={picture}
             alt=""
             fill
             preload={preload}
-            sizes="112px"
-            className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
+            sizes="(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 92vw"
+            className="object-cover object-[center_30%] transition-transform duration-700 ease-out-soft group-hover:scale-[1.07]"
           />
         ) : (
-          <span aria-hidden="true" className="grid size-full place-items-center font-display text-2xl font-bold text-brand-500">
+          <span aria-hidden="true" className="grid size-full place-items-center font-display text-5xl font-bold text-brand-500">
             {item.firstName[0]}
             {item.lastName[0]}
           </span>
         )}
+        {/* Hover: un brillo cruza la foto, sube un degradado y aparece "Ver perfil" (decorativo: el enlace es el nombre). */}
+        <span
+          aria-hidden="true"
+          className="shine-hover bg-linear-to-r from-transparent via-white/30 to-transparent group-hover:[animation:shine-once_700ms_var(--ease-out-soft)]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 flex items-end justify-center bg-linear-to-t from-brand-950/75 via-brand-950/15 to-transparent pb-4 opacity-0 transition-opacity duration-300 ease-out-soft group-hover:opacity-100"
+        >
+          <span className="inline-flex translate-y-3 items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-800 shadow-raised transition-[translate] duration-300 ease-out-soft group-hover:translate-y-0">
+            Ver perfil
+            <ArrowRight className="size-4" />
+          </span>
+        </span>
+        <span className="absolute top-3 left-3">
+          <AttentionBadge status={item.attentionStatus} />
+        </span>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2.5 p-5">
         <div className="flex flex-col gap-0.5">
           <h3 className="flex items-center gap-1.5 text-lg leading-tight font-bold text-ink">
             <Link href={`/profesionales/${item.slug}`} className="truncate outline-none after:absolute after:inset-0 after:content-['']">
@@ -65,29 +83,24 @@ export function ProfessionalCard({ item, preload = false }: { item: CatalogItem;
               <span className="truncate">{areasSummary(item.serviceAreas)}</span>
             </span>
           )}
-          {item.yearsExperience !== null && <span className="hidden sm:inline">{plural(item.yearsExperience, "año", "años")} de oficio</span>}
+          {item.yearsExperience !== null && <span>{plural(item.yearsExperience, "año", "años")} de oficio</span>}
+          {item.freeQuote && <span className="font-semibold text-success-800">Presupuesto sin cargo</span>}
         </div>
 
-        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <AttentionBadge status={item.attentionStatus} />
-            {item.freeQuote && <span className="text-xs font-semibold text-success-800">Presupuesto sin cargo</span>}
-          </div>
-          <div className="flex items-center gap-4">
-            {rate && item.rateMode ? (
-              <span className="text-right text-sm leading-tight text-muted" title="Tarifa de referencia que indica el profesional">
-                <span className="block font-display text-lg font-bold text-ink">{rate}</span>
-                {rateModeLabel[item.rateMode]}
-                <span className="sr-only"> (tarifa de referencia)</span>
-              </span>
-            ) : (
-              <span className="text-sm text-muted">Precio a convenir</span>
-            )}
-            <span aria-hidden="true" className="hidden items-center gap-1 text-sm font-semibold text-brand-700 sm:inline-flex">
-              Ver perfil
-              <ArrowRight className="size-4 transition-transform duration-200 ease-out-soft group-hover:translate-x-0.5" />
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-3.5">
+          {rate && item.rateMode ? (
+            <span className="text-sm leading-tight text-muted" title="Tarifa de referencia que indica el profesional">
+              <span className="block font-display text-lg font-bold text-ink">{rate}</span>
+              {rateModeLabel[item.rateMode]}
+              <span className="sr-only"> (tarifa de referencia)</span>
             </span>
-          </div>
+          ) : (
+            <span className="text-sm text-muted">Precio a convenir</span>
+          )}
+          <span aria-hidden="true" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
+            Ver perfil
+            <ArrowRight className="size-4 transition-transform duration-200 ease-out-soft group-hover:translate-x-0.5" />
+          </span>
         </div>
       </div>
     </article>
