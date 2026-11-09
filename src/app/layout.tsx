@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Archivo, Inter } from "next/font/google";
 import { env } from "@/config/env";
 import "./globals.css";
 import { Providers } from "./providers";
 
 // Fuentes variables autoalojadas por next/font (sin pedidos a Google desde el navegador y sin saltos
-// de layout). Inter para textos largos e interfaz; Plus Jakarta Sans para títulos.
+// de layout). Inter para textos largos e interfaz; Archivo (con su eje de ancho) para títulos.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap" });
+const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es-AR" className={`${inter.variable} ${jakarta.variable} h-full antialiased`}>
+    <html lang="es-AR" className={`${inter.variable} ${archivo.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
       </body>

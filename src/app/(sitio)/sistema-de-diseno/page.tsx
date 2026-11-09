@@ -56,7 +56,7 @@ export default function DesignSystemPage() {
 
         <Section title="Tipografía">
           <div className="flex flex-col gap-3">
-            <p className="font-display text-5xl font-bold text-brand-900">Títulos en Plus Jakarta Sans</p>
+            <p className="font-display text-5xl font-bold text-brand-900">Títulos en Archivo semicondensada</p>
             <p className="text-2xl font-semibold text-brand-900">Subtítulo de sección</p>
             <p className="max-w-2xl text-lg leading-relaxed text-ink">
               Texto de lectura en Inter. Pensado para leerse cómodo en el celular: 16 a 18 px, interlineado amplio y

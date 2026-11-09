@@ -62,19 +62,35 @@
   --color-danger-600: #b42318;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Títulos: Archivo semicondensada (eje wdth). Firme, de rotulación de oficio; Inter para leer. */
+  --font-display: var(--font-archivo), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  /* Sombras teñidas de azul noche: más profundas y menos grises que las de Tailwind. */
-  --shadow-xs: 0 1px 2px 0 rgb(11 31 58 / 0.06);
-  --shadow-card: 0 1px 2px 0 rgb(11 31 58 / 0.05), 0 4px 16px -4px rgb(11 31 58 / 0.08);
-  --shadow-raised: 0 2px 4px 0 rgb(11 31 58 / 0.06), 0 16px 40px -12px rgb(11 31 58 / 0.18);
-  --shadow-cta: 0 8px 24px -8px rgb(244 163 64 / 0.55);
+  /*
+   * Radios contenidos (rediseño, auditoría: "exceso de redondeado"). Se redefine la escala de
+   * Tailwind para que todo el sistema baje de golpe: controles 8 px, tarjetas 10 px, bloques 14 px.
+   * Lo redondo de verdad (avatares, contadores, interruptores) sigue con rounded-full.
+   */
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.625rem;
+  --radius-3xl: 0.875rem;
 
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  /*
+   * Superficies: se separan con líneas (#DCE5F2), no con sombra. La sombra queda para lo que flota
+   * (menús, diálogos, la tarjeta del héroe).
+   */
+  --shadow-xs: 0 1px 1px 0 rgb(11 31 58 / 0.04);
+  --shadow-card: 0 1px 1px 0 rgb(11 31 58 / 0.03);
+  --shadow-raised: 0 1px 2px 0 rgb(11 31 58 / 0.06), 0 18px 40px -16px rgb(11 31 58 / 0.22);
+  --shadow-cta: 0 6px 18px -8px rgb(244 163 64 / 0.6);
+
+  /* Curvas fuertes (emil-design-eng): salida para entradas y respuestas; nunca ease-in en UI. */
+  --ease-out-soft: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-in-soft: cubic-bezier(0.55, 0, 1, 0.45);
 
-  --animate-fade-up: fade-up 600ms var(--ease-out-soft) both;
-  --animate-fade-in: fade-in 400ms var(--ease-out-soft) both;
+  --animate-fade-up: fade-up 500ms var(--ease-out-soft) both;
+  --animate-fade-in: fade-in 300ms var(--ease-out-soft) both;
 
   @keyframes fade-up {
     from {
@@ -126,7 +142,8 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    font-stretch: 88%;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
   p {
@@ -160,21 +177,21 @@
 @media (prefers-reduced-motion: no-preference) {
   .reveal-on [data-reveal] {
     opacity: 0;
-    transform: translate3d(0, 32px, 0);
+    transform: translate3d(0, 16px, 0);
     transition:
-      opacity 700ms var(--ease-out-soft),
-      transform 900ms var(--ease-out-soft);
+      opacity 500ms var(--ease-out-soft),
+      transform 600ms var(--ease-out-soft);
     transition-delay: var(--reveal-delay, 0ms);
     will-change: opacity, transform;
   }
   .reveal-on [data-reveal="left"] {
-    transform: translate3d(-40px, 0, 0);
+    transform: translate3d(-20px, 0, 0);
   }
   .reveal-on [data-reveal="right"] {
-    transform: translate3d(40px, 0, 0);
+    transform: translate3d(20px, 0, 0);
   }
   .reveal-on [data-reveal="scale"] {
-    transform: scale(0.94);
+    transform: scale(0.97);
   }
   .reveal-on [data-reveal][data-revealed] {
     opacity: 1;
