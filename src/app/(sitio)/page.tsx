@@ -292,23 +292,35 @@ function Faq() {
   );
 }
 
+/** Cierre en blanco (hace de pausa clara antes del pie oscuro), con un collage de dos fotos. */
 function FinalCta() {
   return (
-    <section aria-labelledby="empeza" className="relative isolate overflow-hidden bg-brand-950">
-      <Image src={scenes.pasillo.src} alt="" fill sizes="100vw" className="-z-20 object-cover" />
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-r from-brand-950/95 via-brand-950/75 to-brand-950/30" />
-      <div data-reveal className="container-page flex min-h-[28rem] flex-col items-start justify-center gap-6 py-20">
-        <h2 id="empeza" className="max-w-[14ch] text-4xl leading-[1.02] font-bold text-white sm:text-6xl">
-          ¿Tenés algo para arreglar?
-        </h2>
-        <p className="max-w-[40ch] text-lg text-brand-100">Encontrá a alguien de confianza cerca tuyo. Crear tu cuenta es gratis.</p>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
-          <ButtonLink href="/profesionales" variant="accent" size="lg">
-            Buscar un profesional
-          </ButtonLink>
-          <Link href="/registro?rol=profesional" className="inline-flex h-11 items-center justify-center font-semibold text-white underline-offset-4 hover:underline">
-            Soy profesional
-          </Link>
+    <section aria-labelledby="empeza" className="border-t border-line bg-surface">
+      <div className="container-page grid gap-12 py-20 sm:py-28 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-20">
+        <div data-reveal className="flex flex-col items-start gap-6">
+          <h2 id="empeza" className="max-w-[14ch] text-4xl leading-[1.02] font-bold text-brand-900 sm:text-6xl">
+            ¿Tenés algo para arreglar?
+          </h2>
+          <p className="max-w-[44ch] text-lg leading-relaxed text-muted-strong">
+            Encontrá a alguien de confianza cerca tuyo, pedile presupuesto por chat y seguí el trabajo hasta el final. Crear tu
+            cuenta es gratis.
+          </p>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
+            <ButtonLink href="/profesionales" variant="accent" size="lg">
+              Buscar un profesional
+            </ButtonLink>
+            <ButtonLink href="/registro" variant="secondary" size="lg">
+              Crear mi cuenta
+            </ButtonLink>
+          </div>
+        </div>
+        <div aria-hidden="true" className="relative mx-auto h-[22rem] w-full max-w-lg sm:h-[26rem]">
+          <div className="absolute top-0 left-0 h-[78%] w-[62%] overflow-hidden rounded-3xl shadow-raised">
+            <Image src={scenes.pasillo.src} alt="" fill sizes="(min-width: 1024px) 28vw, 60vw" className="object-cover" />
+          </div>
+          <div className="absolute right-0 bottom-0 h-[62%] w-[52%] overflow-hidden rounded-3xl shadow-raised ring-8 ring-surface">
+            <Image src={tradePhotos.pintor!.src} alt="" fill sizes="(min-width: 1024px) 24vw, 50vw" className="object-cover" />
+          </div>
         </div>
       </div>
     </section>

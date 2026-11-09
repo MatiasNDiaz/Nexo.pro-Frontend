@@ -16,7 +16,8 @@ export function ProfessionalCard({ item, preload = false }: { item: CatalogItem;
   const name = displayName(item);
   const profession = primaryProfession(item);
   const rate = formatMoney(item.referenceRate);
-  const picture = item.coverImageUrl ?? item.avatarUrl;
+  // La foto de la persona primero (es lo que da confianza); la portada, si no tiene foto.
+  const picture = item.avatarUrl ?? item.coverImageUrl;
 
   return (
     <article className="group relative flex h-full gap-4 rounded-2xl border border-line bg-surface p-4 transition-[border-color,box-shadow] duration-200 ease-out-soft hover:border-brand-300 hover:shadow-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-electric-500 sm:gap-5 sm:p-5">

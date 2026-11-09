@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Inter } from "next/font/google";
+import { Archivo, Instrument_Serif, Inter } from "next/font/google";
 import { env } from "@/config/env";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -8,6 +8,8 @@ import { Providers } from "./providers";
 // de layout). Inter para textos largos e interfaz; Archivo (con su eje de ancho) para títulos.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
+// Serif de exhibición, solo para acentos (nombres de los planes).
+const instrument = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
@@ -27,7 +29,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es-AR" className={`${inter.variable} ${archivo.variable} h-full antialiased`}>
+    <html lang="es-AR" className={`${inter.variable} ${archivo.variable} ${instrument.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
       </body>

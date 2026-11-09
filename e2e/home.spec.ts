@@ -8,23 +8,17 @@ const PRICES = [
 ] as const;
 
 test.describe("inicio", () => {
-  test("planes: tabla en escritorio, pestañas en celular", async ({ page, isMobile }) => {
+  test("planes: una tarjeta por plan con su precio y lo que incluye", async ({ page }) => {
     await page.goto("/");
     const section = page.locator("#planes");
-    if (isMobile) {
-      const tabs = section.getByRole("tablist", { name: "Planes" });
-      for (const [name, price] of PRICES) {
-        await tabs.getByRole("tab", { name }).click();
-        await expect(tabs.getByRole("tab", { name })).toHaveAttribute("aria-selected", "true");
-        await expect(section.getByRole("tabpanel")).toContainText(price);
-      }
-    } else {
-      const table = section.getByRole("table", { name: "Comparación de planes para profesionales" });
-      for (const [name, price] of PRICES) {
-        await expect(table.getByRole("columnheader", { name: new RegExp(name) })).toContainText(price);
-      }
-      await expect(table.getByRole("row", { name: /Estadísticas de visitas/ })).toBeVisible();
+    for (const [name, price] of PRICES) {
+      const card = section.getByRole("listitem").filter({ has: page.getByRole("heading", { name, level: 3 }) });
+      await expect(card).toContainText(price);
+      await expect(card.getByRole("link", { name: /Probar 30 días/ })).toHaveAttribute("href", "/registro?rol=profesional");
     }
+    // Lo que no incluye un plan se anuncia para lectores de pantalla.
+    const basic = section.getByRole("listitem").filter({ has: page.getByRole("heading", { name: "Basic", level: 3 }) });
+    await expect(basic.getByText("Estadísticas de visitas")).toContainText("(no incluido)");
   });
 
   test("el buscador del héroe lleva al catálogo con oficio y localidad", async ({ page }) => {

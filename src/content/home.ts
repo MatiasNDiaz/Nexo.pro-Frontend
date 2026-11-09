@@ -38,10 +38,26 @@ export const planFeatures: { label: string; values: readonly [string | boolean, 
  * historia que se arma al hacer scroll (components/home/account-story.tsx).
  */
 export const customerBenefits = [
-  { title: "Chat directo con el profesional", text: "Le contás qué pasa y te responde ahí mismo. Tu número no se comparte con nadie." },
-  { title: "Presupuestos claros para comparar", text: "Te llega el presupuesto con el detalle del trabajo. Lo aceptás solo si te cierra." },
-  { title: "El trabajo, paso a paso", text: "Ves cuándo lo agenda, cuándo empieza y cuándo termina, sin tener que preguntar." },
-  { title: "Tu reseña cuenta", text: "Cuando termina, contás cómo te fue. Así otros eligen mejor." },
+  {
+    title: "Chat directo con el profesional",
+    text: "Le contás qué pasa con tus palabras y le mandás fotos o videos del problema. Te responde ahí mismo, y toda la conversación queda guardada.",
+    points: ["Tu número no se comparte con nadie", "Fotos y videos del problema", "Sabés cuándo leyó tu mensaje"],
+  },
+  {
+    title: "Presupuestos claros para comparar",
+    text: "El presupuesto llega al chat con el monto y el detalle de lo que incluye. Podés pedirle a otros y comparar antes de decidir.",
+    points: ["Monto y detalle por escrito", "Sin compromiso hasta que aceptás", "Lo aceptás con un toque"],
+  },
+  {
+    title: "El trabajo, paso a paso",
+    text: "Cuando elegís, el trabajo queda registrado. Ves cuándo lo agenda, cuándo empieza y cuándo termina, sin tener que andar preguntando.",
+    points: ["Fecha y hora acordadas", "Aviso en cada cambio", "Podés cancelar si algo no va"],
+  },
+  {
+    title: "Tu reseña cuenta",
+    text: "Cuando el trabajo termina, contás cómo te fue. Solo opinan clientes con un trabajo terminado, así que las reseñas valen de verdad.",
+    points: ["De 1 a 5 estrellas y tu comentario", "Ayudás a otros a elegir mejor", "Tenés 30 días para dejarla"],
+  },
 ] as const;
 
 export const about = {

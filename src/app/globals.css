@@ -64,6 +64,8 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   /* Títulos: Archivo semicondensada (eje wdth). Firme, de rotulación de oficio; Inter para leer. */
   --font-display: var(--font-archivo), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Serif de exhibición para acentos puntuales (nombres de los planes). */
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
 
   /*
    * Radios contenidos (rediseño, auditoría: "exceso de redondeado"). Se redefine la escala de
@@ -122,6 +124,27 @@
   }
   to {
     transform: scaleX(1);
+  }
+}
+
+/* Plan Premium: el borde dorado gira (degradado cónico con un ángulo animable). */
+@property --plan-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes plan-spin {
+  to {
+    --plan-angle: 360deg;
+  }
+}
+/* Destello que cruza una tarjeta al pasar el mouse. */
+@keyframes plan-sheen {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(220%) skewX(-18deg);
   }
 }
 
