@@ -9,7 +9,8 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/feedback";
-import { Field, Select, Textarea } from "@/components/ui/form-controls";
+import { Field, Textarea } from "@/components/ui/form-controls";
+import { FormListbox } from "@/components/ui/form-listbox";
 import { chatKeys } from "@/features/chat/api";
 import { errorMessage, isApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
@@ -96,13 +97,12 @@ export function RequestQuoteDialog({ open, onClose, professional }: RequestQuote
         {professional.professions.length > 1 && (
           <Field id="pedido-oficio" label="Oficio" error={errors.professionId?.message}>
             {(a11y) => (
-              <Select {...a11y} {...register("professionId")}>
-                {professional.professions.map((profession) => (
-                  <option key={profession.id} value={profession.id}>
-                    {profession.name}
-                  </option>
-                ))}
-              </Select>
+              <FormListbox
+                {...a11y}
+                control={control}
+                name="professionId"
+                options={professional.professions.map((profession) => ({ value: profession.id, label: profession.name }))}
+              />
             )}
           </Field>
         )}

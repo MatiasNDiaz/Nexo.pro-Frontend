@@ -6,7 +6,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Avatar, Card } from "@/components/ui/card";
 import { Alert, Badge, EmptyState, Skeleton } from "@/components/ui/feedback";
-import { Checkbox, Field, Input, Select, Textarea } from "@/components/ui/form-controls";
+import { Checkbox, Field, Input, Textarea } from "@/components/ui/form-controls";
+import { Listbox } from "@/components/ui/listbox";
 import { DialogDemo } from "./dialog-demo";
 
 export const metadata: Metadata = { title: "Sistema de diseño", robots: { index: false, follow: false } };
@@ -96,13 +97,14 @@ export default function DesignSystemPage() {
             </Field>
             <Field id="demo-oficio" label="Oficio">
               {(a11y) => (
-                <Select {...a11y} defaultValue="">
-                  <option value="" disabled>
-                    Elegí un oficio
-                  </option>
-                  <option>Electricidad</option>
-                  <option>Plomería</option>
-                </Select>
+                <Listbox
+                  {...a11y}
+                  placeholder="Elegí un oficio"
+                  options={[
+                    { value: "electricidad", label: "Electricidad" },
+                    { value: "plomeria", label: "Plomería" },
+                  ]}
+                />
               )}
             </Field>
             <Field id="demo-deshabilitado" label="Deshabilitado">

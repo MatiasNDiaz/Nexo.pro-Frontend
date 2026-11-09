@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/feedback";
 import { env } from "@/config/env";
 import { cn } from "@/lib/cn";
 import { getProfileReviews, getPublicProfile } from "@/features/catalog/data";
+import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { ProfileActions } from "@/features/requests/profile-actions";
 import { REVIEWS_PAGE_SIZE } from "@/features/catalog/filters";
 import {
@@ -248,6 +249,7 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
                 professions={profile.professions}
               />
               <ProfileContact slug={profile.slug} name={profile.firstName} />
+              <FavoriteButton professionalUserId={profile.professionalUserId} name={profile.firstName} />
             </div>
 
             <SideCard icon={MapPin} title="Zonas de trabajo">

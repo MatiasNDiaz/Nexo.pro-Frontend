@@ -8,7 +8,8 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Alert, Skeleton } from "@/components/ui/feedback";
-import { Field, Input, Select } from "@/components/ui/form-controls";
+import { Field, Input } from "@/components/ui/form-controls";
+import { FormListbox } from "@/components/ui/form-listbox";
 import { useLocalities, useNeighborhoodSuggestions, useProvinces } from "@/features/catalogs/queries";
 import { neighborhoodName, personName, phoneSchema } from "@/features/session/schemas";
 import { useSessionActions } from "@/features/session/session-provider";
@@ -207,16 +208,13 @@ function NeighborhoodChange({ form }: { form: ReturnType<typeof useForm<Values>>
     <div className="grid gap-4 sm:grid-cols-2">
       <Field id="datos-localidad" label="Localidad" error={errors.localityId?.message}>
         {(a11y) => (
-          <Select {...a11y} {...form.register("localityId")} defaultValue="">
-            <option value="" disabled>
-              {localities.isPending ? "Cargando…" : "Elegí la localidad"}
-            </option>
-            {localities.data?.map((locality) => (
-              <option key={locality.id} value={locality.id}>
-                {locality.name}
-              </option>
-            ))}
-          </Select>
+          <FormListbox
+            {...a11y}
+            control={form.control}
+            name="localityId"
+            placeholder={localities.isPending ? "Cargando…" : "Elegí la localidad"}
+            options={localities.data?.map((locality) => ({ value: locality.id, label: locality.name })) ?? []}
+          />
         )}
       </Field>
       <Field

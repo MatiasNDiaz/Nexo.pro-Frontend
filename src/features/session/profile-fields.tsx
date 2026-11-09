@@ -4,7 +4,9 @@ import { MapPin, Plus, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ComponentProps } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Field, Input, Select } from "@/components/ui/form-controls";
+import { Field, Input } from "@/components/ui/form-controls";
+import { FormListbox } from "@/components/ui/form-listbox";
+import { Listbox } from "@/components/ui/listbox";
 import { useLocalities, useNeighborhoodSuggestions, useProfessions, useProvinces } from "@/features/catalogs/queries";
 import { cn } from "@/lib/cn";
 import { MAX_SERVICE_AREAS, type ProfileValues } from "./schemas";
@@ -65,35 +67,26 @@ function ProvinceSelect({ id, value, onChange }: { id: string; value: string | n
   return (
     <Field id={id} label="Provincia" required>
       {(a11y) => (
-        <Select {...a11y} value={value ?? ""} onChange={(event) => onChange(event.target.value)} disabled={provinces.isPending}>
-          <option value="" disabled>
-            {provinces.isPending ? "Cargando…" : "Elegí la provincia"}
-          </option>
-          {provinces.data?.map((province) => (
-            <option key={province.id} value={province.id}>
-              {province.name}
-            </option>
-          ))}
-        </Select>
+        <Listbox
+          {...a11y}
+          value={value ?? ""}
+          onChange={onChange}
+          disabled={provinces.isPending}
+          placeholder={provinces.isPending ? "Cargando…" : "Elegí la provincia"}
+          options={provinces.data?.map((province) => ({ value: province.id, label: province.name })) ?? []}
+        />
       )}
     </Field>
   );
 }
 
-function LocalityOptions({ provinceId }: { provinceId: string | null }) {
+/** Localidades de la provincia para el desplegable, con el texto que corresponde mientras tanto. */
+function useLocalityOptions(provinceId: string | null) {
   const localities = useLocalities(provinceId);
-  return (
-    <>
-      <option value="" disabled>
-        {!provinceId ? "Elegí primero la provincia" : localities.isPending ? "Cargando…" : "Elegí la localidad"}
-      </option>
-      {localities.data?.map((locality) => (
-        <option key={locality.id} value={locality.id}>
-          {locality.name}
-        </option>
-      ))}
-    </>
-  );
+  return {
+    placeholder: !provinceId ? "Elegí primero la provincia" : localities.isPending ? "Cargando…" : "Elegí la localidad",
+    options: localities.data?.map((locality) => ({ value: locality.id, label: locality.name })) ?? [],
+  };
 }
 
 /** Campo de barrio con sugerencias de los barrios aprobados; se puede escribir uno nuevo. */
@@ -126,6 +119,7 @@ function CustomerLocation() {
     formState: { errors },
   } = useFormContext<ProfileValues>();
   const { provinceId, setProvinceId } = useProvinceChoice();
+  const localityOptions = useLocalityOptions(provinceId);
   const localityId = useWatch<ProfileValues, "customerLocalityId">({ name: "customerLocalityId" });
   const neighborhood = useWatch<ProfileValues, "customerNeighborhood">({ name: "customerNeighborhood" });
 
@@ -135,9 +129,7 @@ function CustomerLocation() {
       <div className="grid gap-5 sm:grid-cols-2">
         <Field id="reg-localidad" label="Localidad" required error={errors.customerLocalityId?.message}>
           {(a11y) => (
-            <Select {...a11y} {...register("customerLocalityId")} defaultValue="">
-              <LocalityOptions provinceId={provinceId} />
-            </Select>
+            <FormListbox<ProfileValues> {...a11y} name="customerLocalityId" {...localityOptions} />
           )}
         </Field>
         <Field
@@ -168,6 +160,7 @@ function ProfessionalLocation() {
   } = useFormContext<ProfileValues>();
   const professions = useProfessions();
   const { provinceId, setProvinceId } = useProvinceChoice();
+  const localityOptions = useLocalityOptions(provinceId);
   const { fields, append, remove } = useFieldArray({ control, name: "serviceAreas" });
   const areas = useWatch<ProfileValues, "serviceAreas">({ name: "serviceAreas" });
 
@@ -192,16 +185,13 @@ function ProfessionalLocation() {
         error={errors.professionId?.message}
       >
         {(a11y) => (
-          <Select {...a11y} {...register("professionId")} defaultValue="" disabled={professions.isPending}>
-            <option value="" disabled>
-              {professions.isPending ? "Cargando…" : "Elegí tu oficio"}
-            </option>
-            {professions.data?.map((profession) => (
-              <option key={profession.id} value={profession.id}>
-                {profession.name}
-              </option>
-            ))}
-          </Select>
+          <FormListbox<ProfileValues>
+            {...a11y}
+            name="professionId"
+            disabled={professions.isPending}
+            placeholder={professions.isPending ? "Cargando…" : "Elegí tu oficio"}
+            options={professions.data?.map((profession) => ({ value: profession.id, label: profession.name })) ?? []}
+          />
         )}
       </Field>
 
@@ -219,9 +209,7 @@ function ProfessionalLocation() {
               <li key={field.id} className="grid gap-3 rounded-xl bg-canvas p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
                 <Field id={`zona-${field.id}-localidad`} label={`Zona ${index + 1}: localidad`} error={areaErrors?.localityId?.message}>
                   {(a11y) => (
-                    <Select {...a11y} {...register(`serviceAreas.${index}.localityId`)} defaultValue="">
-                      <LocalityOptions provinceId={provinceId} />
-                    </Select>
+                    <FormListbox<ProfileValues> {...a11y} name={`serviceAreas.${index}.localityId`} {...localityOptions} />
                   )}
                 </Field>
                 <Field id={`zona-${field.id}-barrio`} label="Barrio (opcional)" error={areaErrors?.neighborhoodName?.message}>

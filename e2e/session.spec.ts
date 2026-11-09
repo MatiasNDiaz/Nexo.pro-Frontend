@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { apiError, json, LOCALITY, me, mockApi, PROFESSION } from "./support/mock-api";
+import { chooseOption } from "./support/listbox";
 
 const session = { user: me(), csrfToken: "csrf-1" };
 
@@ -157,7 +158,7 @@ test.describe("registro", () => {
     await page.getByRole("textbox", { name: "Nombre", exact: true }).fill("Lucía");
     await page.getByRole("textbox", { name: "Apellido" }).fill("Gómez");
     await page.getByRole("textbox", { name: "Teléfono" }).fill("(351) 506-7276");
-    await page.getByRole("combobox", { name: "Localidad" }).selectOption(LOCALITY.id);
+    await chooseOption(page, "Localidad", LOCALITY.name);
     await page.getByRole("combobox", { name: "Barrio" }).fill("Nueva Córdoba");
     await page.getByRole("textbox", { name: "Email" }).fill("lucia@example.com");
     await page.getByLabel(/^Contraseña/).fill("una-clave-larga");
@@ -182,8 +183,8 @@ test.describe("registro", () => {
     await page.getByRole("textbox", { name: "Nombre", exact: true }).fill("Juan");
     await page.getByRole("textbox", { name: "Apellido" }).fill("López");
     await page.getByRole("textbox", { name: "Teléfono" }).fill("3515067276");
-    await page.getByRole("combobox", { name: "Oficio principal" }).selectOption(PROFESSION.id);
-    await page.getByRole("combobox", { name: "Zona 1: localidad" }).selectOption(LOCALITY.id);
+    await chooseOption(page, "Oficio principal", PROFESSION.name);
+    await chooseOption(page, "Zona 1: localidad", LOCALITY.name);
     await page.getByRole("textbox", { name: "Email" }).fill("juan@example.com");
     await page.getByLabel(/^Contraseña/).fill("una-clave-larga");
     await page.getByRole("button", { name: "Crear mi cuenta" }).click();

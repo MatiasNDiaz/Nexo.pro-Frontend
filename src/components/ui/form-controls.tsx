@@ -21,23 +21,8 @@ export function Textarea({ className, rows = 4, ...props }: ComponentProps<"text
   return <textarea rows={rows} className={cn(control, "min-h-24 py-2.5 leading-relaxed", className)} {...props} />;
 }
 
-export function Select({ className, children, ...props }: ComponentProps<"select">) {
-  return (
-    <div className="relative">
-      <select className={cn(control, "h-11 appearance-none pr-10", className)} {...props}>
-        {children}
-      </select>
-      <svg
-        className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-muted"
-        viewBox="0 0 16 16"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-  );
-}
+// Los desplegables son propios (ui/listbox.tsx y ui/form-listbox.tsx), no <select>: el nativo no
+// toma la estética de la página.
 
 export function Checkbox({ className, label, ...props }: Omit<ComponentProps<"input">, "type"> & { label: ReactNode }) {
   return (

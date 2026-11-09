@@ -11,6 +11,7 @@ import { Alert, Badge, EmptyState, Skeleton } from "@/components/ui/feedback";
 import { PanelTitle, SettingsSection } from "@/features/account/settings-section";
 import { chatKeys, counterpartName } from "@/features/chat/api";
 import { CounterpartAvatar } from "@/features/chat/counterpart-avatar";
+import { ReviewPanel } from "@/features/reviews/review-panel";
 import { errorMessage, isApiError } from "@/lib/api/errors";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { cancelContract, contractKeys, getContract, listContracts, OPEN_CONTRACT_STATUSES, requestKeys, type Contract } from "./api";
@@ -181,6 +182,8 @@ function ContractDetail({ contract }: { contract: Contract }) {
           </ButtonLink>
         </div>
       </SettingsSection>
+
+      {contract.status === "COMPLETED" && <ReviewPanel contractId={contract.id} completedAt={contract.completedAt} name={name} />}
 
       {open && (
         <>

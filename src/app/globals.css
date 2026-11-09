@@ -195,6 +195,40 @@
     box-shadow: 0 10px 36px -6px rgb(244 163 64 / 1);
   }
 }
+/* Campana del encabezado: se sacude una vez cuando hay notificaciones sin leer. */
+@keyframes bell-ring {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  15% {
+    rotate: 14deg;
+  }
+  30% {
+    rotate: -12deg;
+  }
+  45% {
+    rotate: 8deg;
+  }
+  60% {
+    rotate: -5deg;
+  }
+  75% {
+    rotate: 2deg;
+  }
+}
+/* Corazón de favoritos: late al guardar. */
+@keyframes heart-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  45% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 /* Listas desplegables: aparecen desde el borde que las abre. */
 @keyframes pop-in {
   from {
@@ -210,6 +244,16 @@
   }
   to {
     transform: none;
+  }
+}
+
+/* Foto de las pantallas de cuenta: acercamiento lento de ida y vuelta (Ken Burns). */
+@keyframes ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12) translate(-1.5%, -1%);
   }
 }
 

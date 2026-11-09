@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { PHOTO_NAV } from "@/components/catalog/profile-photo-transition";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { NotificationBell } from "@/features/notifications/notification-bell";
 import { useSessionActions } from "@/features/session/session-provider";
 import { AccountMenu } from "./account-menu";
 import { Sheet } from "@/components/ui/dialog";
@@ -38,6 +39,10 @@ export function HeaderNav() {
       </nav>
 
       <div className="flex items-center gap-2">
+        {/* Notificaciones: con sesión (cuenta activa o por verificar, como permite el backend). */}
+        {viewer.status === "authenticated" && (viewer.user.status === "ACTIVE" || viewer.user.status === "PENDING_VERIFICATION") && (
+          <NotificationBell />
+        )}
         <div className="hidden items-center gap-2 md:flex">
           <AccountActions viewer={viewer} />
         </div>

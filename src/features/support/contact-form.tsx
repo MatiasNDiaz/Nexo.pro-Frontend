@@ -8,7 +8,8 @@ import { z } from "zod";
 import { Turnstile } from "@/components/forms/turnstile";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
-import { Field, Input, Select, Textarea } from "@/components/ui/form-controls";
+import { Field, Input, Textarea } from "@/components/ui/form-controls";
+import { FormListbox } from "@/components/ui/form-listbox";
 import { env } from "@/config/env";
 import { api } from "@/lib/api/client";
 import { errorMessage, isApiError } from "@/lib/api/errors";
@@ -101,16 +102,7 @@ export function ContactForm() {
       </div>
       <Field id="contacto-motivo" label="Motivo" required error={errors.category?.message}>
         {(a11y) => (
-          <Select {...a11y} {...register("category")}>
-            <option value="" disabled>
-              Elegí el motivo
-            </option>
-            {contactCategories.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </Select>
+          <FormListbox {...a11y} control={control} name="category" placeholder="Elegí el motivo" options={contactCategories} />
         )}
       </Field>
       <Field

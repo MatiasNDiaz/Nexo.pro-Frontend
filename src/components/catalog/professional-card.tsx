@@ -3,6 +3,7 @@ import Link from "next/link";
 import { areasSummary, displayName, primaryProfession, rateModeLabel } from "@/features/catalog/labels";
 import type { CatalogItem } from "@/features/catalog/types";
 import { formatMoney, plural } from "@/lib/format";
+import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { AttentionBadge } from "./attention-badge";
 import { PHOTO_NAV, ProfilePhotoTransition } from "./profile-photo-transition";
 import { RatingSummary } from "./rating";
@@ -62,6 +63,10 @@ export function ProfessionalCard({ item, preload = false }: { item: CatalogItem;
         </span>
         <span className="absolute top-3 left-3">
           <AttentionBadge status={item.attentionStatus} />
+        </span>
+        {/* Guardar en favoritos: por encima del enlace de la tarjeta (z-10), no adentro. */}
+        <span className="absolute top-2.5 right-2.5 z-10">
+          <FavoriteButton professionalUserId={item.professionalUserId} name={name} variant="card" />
         </span>
         {/* El oficio, protagonista: ámbar con texto azul noche (7,99:1) sobre la foto. */}
         {profession && (

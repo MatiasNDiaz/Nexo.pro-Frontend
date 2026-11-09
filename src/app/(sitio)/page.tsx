@@ -7,6 +7,7 @@ import { AccountStory } from "@/components/home/account-story";
 import { HeroSlides } from "@/components/home/hero-slides";
 import { PlansTable } from "@/components/home/plans-table";
 import { ShineLink } from "@/components/home/shine-link";
+import { WordsUp } from "@/components/motion/words-up";
 import { ButtonLink } from "@/components/ui/button";
 import { Listbox } from "@/components/ui/listbox";
 import { about, faqs } from "@/content/home";
@@ -50,18 +51,6 @@ export default function HomePage() {
       <FinalCta />
     </>
   );
-}
-
-/** Título que entra palabra por palabra desde abajo (CSS, visible sin JavaScript). */
-function WordsUp({ text, delay = 0 }: { text: string; delay?: number }) {
-  return text.split(" ").map((word, index) => (
-    <span key={`${word}-${index}`} className="inline-block overflow-hidden pb-[0.08em] align-bottom">
-      <span className="inline-block animate-[word-up_700ms_var(--ease-out-soft)_both]" style={{ animationDelay: `${delay + index * 55}ms` }}>
-        {word}
-        {" "}
-      </span>
-    </span>
-  ));
 }
 
 function Hero() {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AuthShell } from "@/components/layout/auth-shell";
 import { Skeleton } from "@/components/ui/feedback";
+import { scenes } from "@/content/photos";
 import { RegisterForm } from "@/features/session/register-form";
 
 export const metadata: Metadata = {
@@ -12,7 +13,16 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <AuthShell title="Creá tu cuenta" description="Es gratis para clientes. Si sos profesional, probalo 30 días." wide>
+    <AuthShell
+      title="Creá tu cuenta"
+      description="Es gratis para clientes. Si sos profesional, probalo 30 días."
+      wide
+      side={{
+        photo: scenes.aberturas,
+        heading: "Empezá hoy: tu cuenta es gratis.",
+        points: ["Pedí presupuestos sin compromiso", "Chateá y coordiná en un solo lugar", "Profesionales: 30 días de prueba"],
+      }}
+    >
       {/* El formulario lee ?rol= de la URL: se resuelve en el navegador. */}
       <Suspense
         fallback={

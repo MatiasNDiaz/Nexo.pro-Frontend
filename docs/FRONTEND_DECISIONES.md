@@ -66,6 +66,27 @@
 | Los diálogos se cierran al desmontar su efecto (`components/ui/dialog.tsx`) | Con Cache Components, Next conserva oculta la página anterior y React desmonta sus efectos: un modal abierto (p. ej. "Pedir presupuesto" al enviar) dejaba la página nueva inerte, sin clics ni scroll (encontrado en la prueba real) |
 | `PanelShell` envuelve `RequireSession` en `Suspense` | Lee la URL, que en las rutas con `[id]` recién existe al pedirlas (el build lo exige) |
 
+## Panel del cliente: favoritos, reseñas y notificaciones (5.2)
+
+| Decisión | Motivo |
+| --- | --- |
+| Favoritos solo para el cliente activo; el corazón cambia al instante y se deshace si el backend lo rechaza | El backend los permite solo a `CUSTOMER`. Las tres acciones responden 204 sin cuerpo: la lista se vuelve a pedir |
+| El corazón de la tarjeta del catálogo va por encima del enlace de la tarjeta (`z-10`), no adentro | Un botón dentro de un enlace es un elemento interactivo anidado (inválido y confuso para lectores de pantalla) |
+| La reseña se deja desde el detalle del trabajo terminado; "Mis reseñas" lista y avisa cuáles faltan | Una por contratación y dentro de los 30 días desde que terminó (ADR 0028). El nombre del profesional sale del chat del trabajo (H-05) |
+| Notificaciones: la forma de la lista se tipa a mano (`features/notifications/api.ts`) | El OpenAPI no la declara; se tomó de `notifications.service.ts` (`toDto`) |
+| La campana y el contador se vuelven a pedir con cada `notification:new` del tiempo real y, por las dudas, cada minuto | Con la cuenta por verificar no hay tiempo real, y una conexión cortada pierde avisos |
+| Avisos push con un service worker propio y mínimo (`public/sw.js`): solo muestra avisos | No guarda páginas ni intercepta pedidos: no puede servir contenido viejo ni interferir con la sesión. Sin clave VAPID en el backend (`enabled: false`), la página lo explica en vez de ofrecer el botón |
+
+## Interfaz: desplegables, transiciones y scroll
+
+| Decisión | Motivo |
+| --- | --- |
+| Desplegables propios (`ui/listbox.tsx`, patrón "combobox de solo selección" de WAI-ARIA) en lugar de `<select>` | El nativo no toma la estética de la página (pedido del fundador). Teclado completo, búsqueda con más de 10 opciones y `FormListbox` para react-hook-form |
+| La foto del profesional vuela entre su tarjeta y su perfil (`<ViewTransition>` con el mismo nombre) | Solo en navegaciones marcadas con el tipo `navegacion` (tarjeta, menú y "atrás"): así no se repite cuando el perfil termina de cargar |
+| El esqueleto del perfil muestra la foto recién tocada (`PhotoStash`) | Si el perfil no estaba precargado, Next mostraba el esqueleto sin foto y el vuelo no se formaba en el primer toque |
+| Script en el `<head>` (`lib/popstate-gate.ts`) que se registra antes que el router de Next | React resuelve sincrónicamente las navegaciones del botón "atrás" y no las anima: el perfil frena ese evento y pide la misma URL como navegación común. **Con la CSP, este script necesita su nonce** |
+| Filtros, pestañas y paginación cambian el contenido sin mover la pantalla (`scroll={false}`) y la zona de resultados guarda un alto mínimo | Pedido del fundador: el salto hacia arriba al filtrar era incómodo |
+
 ## 404
 
 Las rutas inexistentes caen en `(sitio)/[...resto]` y muestran `(sitio)/not-found.tsx` dentro del layout del sitio. El `not-found.tsx` raíz es mínimo porque Next lo incluye en lo que manda a **todas** las páginas: con header y footer, cada página pesaba alrededor de un 25 % más.
@@ -87,6 +108,7 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | --- | --- | --- |
 | Límite del detalle de perfil desde el servidor de Next | Todos los pedidos del servidor salen de una IP: con muchos perfiles distintos sin caché podría llegar a 30 por minuto. Solución posible en el backend: reconocer al servidor del frontend con un encabezado secreto | Antes de producción |
 | Personalización del perfil (`theme`: color, fuente, animación) | El backend la devuelve según el plan; todavía no se aplica en la página | Etapa de diseño |
-| Favoritos y reportar desde el perfil | Chat y pedido de presupuesto ya están (5.1) | 5.2 y 5.3 |
+| Reportar desde el perfil | Chat, pedido de presupuesto y favoritos ya están (5.1 y 5.2) | 5.3 |
+| Avisos push en producción | El backend necesita sus claves VAPID; sin ellas la página explica que todavía no están activados | Antes de producción |
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |

@@ -18,7 +18,7 @@ test.describe("catálogo", () => {
     await page.goto("/profesionales");
     await expect(main(page).getByRole("heading", { level: 1, name: "Encontrá al profesional indicado" })).toBeVisible();
     await expect(main(page).getByText("2 profesionales encontrados")).toBeVisible();
-    await expect(main(page).getByRole("link", { name: "Ana Pérez" })).toHaveAttribute("href", "/profesionales/ana-perez-ab12c");
+    await expect(main(page).getByRole("link", { name: "Ana Pérez", exact: true })).toHaveAttribute("href", "/profesionales/ana-perez-ab12c");
     await expect(main(page).getByRole("img", { name: /4,5 de 5 \(12 reseñas\)/ }).first()).toBeVisible();
     // El pedido del navegador es el que cuenta para las métricas Premium (no el del servidor).
     const request = await beacon;
@@ -42,7 +42,7 @@ test.describe("catálogo", () => {
     await apply();
     await expect(page).toHaveURL(/\/profesionales\?oficio=plomero$/);
     await expect(main(page).getByText("1 profesional encontrado")).toBeVisible();
-    await expect(main(page).getByRole("link", { name: "Juan Gómez" })).toBeVisible();
+    await expect(main(page).getByRole("link", { name: "Juan Gómez", exact: true })).toBeVisible();
 
     // Como una persona: toca la etiqueta visible (la casilla real está oculta visualmente).
     await openPanel();

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { API, apiError } from "./support/mock-api";
+import { chooseOption } from "./support/listbox";
 
 /** Contenido dentro de <main> (ver la nota de catalog.spec.ts sobre el streaming). */
 const main = (page: Page) => page.getByRole("main");
@@ -68,7 +69,7 @@ test.describe("contacto", () => {
 
     await main(page).getByRole("textbox", { name: "Nombre" }).fill("Ana Pérez");
     await main(page).getByRole("textbox", { name: "Email" }).fill("ana@example.com");
-    await main(page).getByRole("combobox", { name: "Motivo" }).selectOption("COMPLAINT");
+    await chooseOption(main(page), "Motivo", "Reclamo");
     await main(page).getByRole("textbox", { name: "Mensaje" }).fill("Quiero hacer un reclamo sobre un trabajo.");
     const request = page.waitForRequest((r) => r.url().endsWith("/support/contact") && r.method() === "POST");
     await main(page).getByRole("button", { name: "Enviar mensaje" }).click();
@@ -99,7 +100,7 @@ test.describe("contacto", () => {
     await page.goto("/contacto");
     await main(page).getByRole("textbox", { name: "Nombre" }).fill("Ana Pérez");
     await main(page).getByRole("textbox", { name: "Email" }).fill("ana@example.com");
-    await main(page).getByRole("combobox", { name: "Motivo" }).selectOption("OTHER");
+    await chooseOption(main(page), "Motivo", "Otro");
     await main(page).getByRole("textbox", { name: "Mensaje" }).fill("Mensaje de prueba suficientemente largo.");
     await main(page).getByRole("button", { name: "Enviar mensaje" }).click();
     await expect(main(page).getByText(/varios mensajes desde tu conexión/)).toBeVisible();

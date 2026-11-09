@@ -12,6 +12,8 @@ import { applyMessageToList, upsertMessage, type MessagePages } from "./cache";
 /** Pedidos y contrataciones: los mensajes de sistema avisan que cambiaron (ver features/requests). */
 const REQUESTS_KEY = ["requests"] as const;
 const CONTRACTS_KEY = ["contracts"] as const;
+/** Notificaciones (features/notifications). */
+const NOTIFICATIONS_KEY = ["notifications"] as const;
 
 /** Reintentos seguidos ante un rechazo por sesión: evita un bucle si la sesión ya no sirve. */
 const MAX_AUTH_RETRIES = 2;
@@ -97,12 +99,17 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       connection.on("connect", () => {
         authRetries = 0;
         // Al reconectar se pudieron perder avisos: se vuelve a pedir lo que esté a la vista.
-        if (connectedBefore) void queryClient.invalidateQueries({ queryKey: chatKeys.all });
+        if (connectedBefore) {
+          void queryClient.invalidateQueries({ queryKey: chatKeys.all });
+          void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+        }
         connectedBefore = true;
       });
       connection.on("message:new", onMessage);
       connection.on("message:updated", onMessage);
       connection.on("conversation:read", onRead);
+      // Notificación nueva: la campana y la lista se vuelven a pedir (son livianas).
+      connection.on("notification:new", () => void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY }));
       // Rechazo por sesión (acceso vencido): se renueva una vez y se reconecta.
       connection.on("error", (payload: unknown) => {
         if ((payload as { code?: unknown } | null)?.code !== "UNAUTHORIZED" || authRetries >= MAX_AUTH_RETRIES) return;

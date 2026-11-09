@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronDown, Search } from "lucide-react";
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import { cn } from "@/lib/cn";
 
 export interface ListboxOption {
@@ -10,7 +10,7 @@ export interface ListboxOption {
 }
 
 interface ListboxProps {
-  options: ListboxOption[];
+  options: readonly ListboxOption[];
   /** Controlado. Si no se pasa, el valor vive adentro (arranca en `defaultValue`). */
   value?: string;
   defaultValue?: string;
@@ -26,8 +26,14 @@ interface ListboxProps {
   variant?: "field" | "hero";
   /** Etiqueta visible dentro del botón (variante hero). */
   label?: ReactNode;
+  /** Texto cuando el valor no es ninguna opción (p. ej. "Elegí tu oficio"); no se puede elegir. */
+  placeholder?: string;
   icon?: ReactNode;
   className?: string;
+  /** Para formularios (react-hook-form `Controller`): se marca como tocado al salir. */
+  onBlur?: () => void;
+  /** Para formularios: el foco va al botón cuando hay un error. */
+  ref?: Ref<HTMLButtonElement>;
   "aria-describedby"?: string;
   "aria-invalid"?: true;
 }
@@ -51,8 +57,11 @@ export function Listbox({
   disabled,
   variant = "field",
   label,
+  placeholder,
   icon,
   className,
+  onBlur,
+  ref,
   ...aria
 }: ListboxProps) {
   const autoId = useId();
@@ -75,7 +84,8 @@ export function Listbox({
   const searchable = options.length > SEARCH_FROM;
   const normalize = (text: string) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
   const visible = searchable && query ? options.filter((o) => normalize(o.label).includes(normalize(query))) : options;
-  const selected = options.find((o) => o.value === current) ?? options[0];
+  const match = options.find((o) => o.value === current);
+  const selected = match ?? (placeholder === undefined ? options[0] : undefined);
 
   const openList = () => {
     if (disabled) return;
@@ -174,7 +184,15 @@ export function Listbox({
     <div ref={rootRef} className={cn("relative", className)}>
       {name && <input type="hidden" name={name} value={current} />}
       <button
-        ref={buttonRef}
+        ref={(node) => {
+          buttonRef.current = node;
+          if (typeof ref === "function") ref(node);
+          else if (ref) ref.current = node;
+        }}
+        onBlur={(event) => {
+          // Sale de verdad (no hacia el buscador ni la lista de este mismo desplegable).
+          if (!rootRef.current?.contains(event.relatedTarget as Node | null)) onBlur?.();
+        }}
         id={buttonId}
         type="button"
         role="combobox"
@@ -202,7 +220,9 @@ export function Listbox({
               {label}
             </span>
           )}
-          <span className={cn("truncate", variant === "hero" && "text-base font-semibold text-ink")}>{selected?.label}</span>
+          <span className={cn("truncate", variant === "hero" && "text-base font-semibold text-ink", !selected && "text-muted")}>
+            {selected?.label ?? placeholder}
+          </span>
         </span>
         <ChevronDown
           className="size-4 shrink-0 text-muted transition-transform duration-200 ease-out-soft group-aria-expanded/lb:rotate-180"
