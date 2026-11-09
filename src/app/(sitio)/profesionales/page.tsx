@@ -2,6 +2,7 @@ import { SearchX, Users } from "lucide-react";
 import type { Metadata, Route } from "next";
 import { Suspense } from "react";
 import { CatalogFiltersBar } from "@/components/catalog/catalog-filters";
+import { CatalogScrollMemory } from "@/components/catalog/catalog-return";
 import { Pagination } from "@/components/catalog/pagination";
 import { ProfessionalCard } from "@/components/catalog/professional-card";
 import { ViewBeacon } from "@/components/catalog/view-beacon";
@@ -59,9 +60,12 @@ export default function CatalogPage({ searchParams }: PageProps<"/profesionales"
         <Suspense fallback={<FiltersSkeleton />}>
           <Filters searchParams={searchParams} />
         </Suspense>
-        <Suspense fallback={<ResultsSkeleton />}>
-          <Results searchParams={searchParams} />
-        </Suspense>
+        {/* Alto mínimo: si un filtro trae menos profesionales, la página no se acorta y la pantalla no salta. */}
+        <div className="min-h-[70vh]">
+          <Suspense fallback={<ResultsSkeleton />}>
+            <Results searchParams={searchParams} />
+          </Suspense>
+        </div>
       </div>
     </>
   );
@@ -141,6 +145,8 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
   return (
     <section aria-labelledby="resultados" className="flex flex-col gap-6">
       {beacon}
+      {/* Junto a la lista: al volver de un perfil, repone el scroll con las tarjetas ya en su lugar. */}
+      <CatalogScrollMemory />
       <h2 id="resultados" className="text-sm font-medium text-muted-strong" aria-live="polite">
         {plural(page.total, "profesional encontrado", "profesionales encontrados")}
       </h2>

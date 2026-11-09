@@ -364,6 +364,36 @@
   animation: none;
 }
 
+/*
+ * Foto del profesional entre su tarjeta y su perfil (components/catalog/profile-photo-transition.tsx).
+ * El grupo viaja de la posición y tamaño viejos a los nuevos; encima, el par de imágenes se agranda
+ * en el medio del vuelo (con sombra, "levantada") y se achica hasta encajar. Igual a la vuelta.
+ * Las dos capturas llenan el grupo recortadas (object-fit: cover): la tarjeta es 6:5 y el perfil 1:1.
+ */
+::view-transition-group(.pro-photo) {
+  animation-duration: 620ms;
+  animation-timing-function: var(--ease-in-out-strong);
+  z-index: 50;
+}
+::view-transition-image-pair(.pro-photo) {
+  overflow: clip;
+  border-radius: var(--radius-2xl);
+  animation: photo-lift 620ms var(--ease-in-out-strong) both;
+}
+::view-transition-old(.pro-photo),
+::view-transition-new(.pro-photo) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation-duration: 620ms;
+}
+@keyframes photo-lift {
+  50% {
+    transform: scale(1.22);
+    box-shadow: 0 30px 70px -20px rgb(7 21 42 / 0.55);
+  }
+}
+
 @keyframes page-out {
   to {
     opacity: 0;

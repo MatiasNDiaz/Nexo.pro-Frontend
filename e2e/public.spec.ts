@@ -25,6 +25,18 @@ test.describe("foro", () => {
     await expect(main(page).getByRole("link", { name: "Preguntas", exact: true })).toHaveAttribute("aria-current", "page");
   });
 
+  test("cambiar de pestaña no mueve la pantalla", async ({ page }) => {
+    await page.goto("/foro");
+    const tab = main(page).getByRole("link", { name: "Busco profesional", exact: true });
+    // Con la página bajada lo justo para que las pestañas sigan a la vista.
+    await page.evaluate(() => window.scrollTo(0, 200));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(200);
+    await tab.click();
+    await expect(page).toHaveURL(/tipo=busco-profesional/);
+    await expect(tab).toHaveAttribute("aria-current", "page");
+    expect(await page.evaluate(() => window.scrollY)).toBe(200);
+  });
+
   test("detalle: texto seguro, respuestas anidadas y respuesta eliminada", async ({ page }) => {
     await page.goto("/foro/aaaaaaaa-0000-4000-8000-000000000001");
     // El texto aparece en el párrafo y en el título para lectores de pantalla: se mira el párrafo.

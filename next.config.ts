@@ -20,7 +20,12 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   typedRoutes: true,
   poweredByHeader: false,
+  // Solo `next dev`: deja que un celular de la red local cargue los recursos de desarrollo (Next los
+  // bloquea si el pedido viene de otra dirección que localhost). No afecta la build de producción.
+  allowedDevOrigins: ["192.168.0.253"],
   images: {
+    // Next 16 solo acepta las calidades listadas: 60 para las fotos del héroe (bajo un velo oscuro), 75 el resto.
+    qualities: [60, 75],
     // Archivos públicos subidos por los usuarios (Cloudinary). Se restringe a la carpeta de la cuenta
     // cuando esté definido el cloud name de producción.
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" }],

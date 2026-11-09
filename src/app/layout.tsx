@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Instrument_Serif, Inter } from "next/font/google";
 import { env } from "@/config/env";
+import { POPSTATE_GATE } from "@/lib/popstate-gate";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -30,6 +31,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es-AR" className={`${inter.variable} ${archivo.variable} ${instrument.variable} h-full antialiased`}>
+      <head>
+        {/* Antes que el router de Next: ver src/lib/popstate-gate.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: POPSTATE_GATE }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
       </body>

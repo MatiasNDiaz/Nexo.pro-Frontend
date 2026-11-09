@@ -162,7 +162,8 @@ export function HeroSlides({ children }: { children: ReactNode }) {
               className="absolute inset-0"
               style={isCurrent ? { zIndex: 1 } : { zIndex: 0, visibility: "hidden" }}
             >
-              <Image src={item.photo.src} alt={item.photo.alt} fill preload={index === 0} sizes="100vw" className="object-cover" />
+              {/* Calidad 60: van detrás de un velo oscuro al 50 %, la diferencia no se ve y pesan bastante menos (LCP en celular). */}
+              <Image src={item.photo.src} alt={item.photo.alt} fill preload={index === 0} quality={60} sizes="100vw" className="object-cover" />
             </div>
           );
         })}

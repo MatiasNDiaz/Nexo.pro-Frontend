@@ -18,14 +18,17 @@ export function pageWindow(current: number, total: number): (number | "gap")[] {
 const itemClass =
   "inline-grid h-11 min-w-11 place-items-center rounded-xl px-3 text-sm font-semibold transition-colors";
 
-/** Paginación con enlaces reales: funciona sin JavaScript y la recorren los buscadores. */
+/**
+ * Paginación con enlaces reales: funciona sin JavaScript y la recorren los buscadores. Cambiar de
+ * página reemplaza la lista sin mover la pantalla (scroll={false}), como el resto de los filtros.
+ */
 export function Pagination({ page, total, hrefFor }: { page: number; total: number; hrefFor: (page: number) => string }) {
   if (total <= 1) return null;
   const link = (target: number) => hrefFor(target) as Route;
   return (
     <nav aria-label="Páginas de resultados" className="flex items-center justify-center gap-1.5">
       {page > 1 ? (
-        <Link href={link(page - 1)} rel="prev" className={cn(itemClass, "text-brand-800 hover:bg-brand-50")}>
+        <Link href={link(page - 1)} rel="prev" scroll={false} className={cn(itemClass, "text-brand-800 hover:bg-brand-50")}>
           <ChevronLeft className="size-5" aria-hidden="true" />
           <span className="sr-only">Página anterior</span>
         </Link>
@@ -48,7 +51,7 @@ export function Pagination({ page, total, hrefFor }: { page: number; total: numb
                   {item}
                 </span>
               ) : (
-                <Link href={link(item)} className={cn(itemClass, "text-ink hover:bg-brand-50")}>
+                <Link href={link(item)} scroll={false} className={cn(itemClass, "text-ink hover:bg-brand-50")}>
                   <span className="sr-only">Página </span>
                   {item}
                 </Link>
@@ -58,7 +61,7 @@ export function Pagination({ page, total, hrefFor }: { page: number; total: numb
         )}
       </ul>
       {page < total ? (
-        <Link href={link(page + 1)} rel="next" className={cn(itemClass, "text-brand-800 hover:bg-brand-50")}>
+        <Link href={link(page + 1)} rel="next" scroll={false} className={cn(itemClass, "text-brand-800 hover:bg-brand-50")}>
           <ChevronRight className="size-5" aria-hidden="true" />
           <span className="sr-only">Página siguiente</span>
         </Link>

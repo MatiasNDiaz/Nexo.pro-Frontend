@@ -15,7 +15,9 @@ import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { AttentionBadge } from "@/components/catalog/attention-badge";
 import { MoreReviews } from "@/components/catalog/more-reviews";
+import { CatalogBackTransition } from "@/components/catalog/catalog-return";
 import { ProfileContact } from "@/components/catalog/profile-contact";
+import { ProfilePhotoTransition } from "@/components/catalog/profile-photo-transition";
 import { RatingSummary } from "@/components/catalog/rating";
 import { RemoteImage } from "@/components/catalog/remote-image";
 import { ReviewItem } from "@/components/catalog/review-item";
@@ -92,6 +94,8 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
   return (
     <article className="pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdFor(profile)) }} />
+      {/* "Atrás" hacia el catálogo con la foto volviendo a su tarjeta. */}
+      <CatalogBackTransition />
 
       {/* Identidad: banda azul noche (con el banner del profesional de fondo, si tiene). */}
       <header className="relative isolate overflow-hidden bg-brand-950 text-white">
@@ -101,18 +105,24 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
             <div aria-hidden="true" className="absolute inset-0 -z-10 bg-brand-950/75" />
           </>
         )}
-        <div className="container-page flex flex-col gap-6 py-10 sm:flex-row sm:items-end sm:gap-8 sm:py-14 animate-fade-up">
+        <div className="container-page flex flex-col gap-6 py-10 sm:flex-row sm:items-end sm:gap-8 sm:py-14">
+          {/*
+            Sin animación de entrada propia: la foto llega volando desde la tarjeta del catálogo (mismo
+            nombre de transición, ver ProfilePhotoTransition) y tiene que estar quieta en su lugar.
+          */}
           <span className="relative size-28 shrink-0 overflow-hidden rounded-2xl bg-brand-800 ring-1 ring-white/15 sm:size-36">
-            {profile.avatarUrl ? (
-              <RemoteImage src={profile.avatarUrl} alt={`Foto de ${name}`} fill preload sizes="144px" className="object-cover" />
-            ) : (
-              <span aria-hidden="true" className="grid size-full place-items-center font-display text-4xl font-bold text-brand-200">
-                {profile.firstName[0]}
-                {profile.lastName[0]}
-              </span>
-            )}
+            <ProfilePhotoTransition slug={profile.slug}>
+              {profile.avatarUrl ? (
+                <RemoteImage src={profile.avatarUrl} alt={`Foto de ${name}`} fill preload sizes="144px" className="object-cover" />
+              ) : (
+                <span aria-hidden="true" className="grid size-full place-items-center font-display text-4xl font-bold text-brand-200">
+                  {profile.firstName[0]}
+                  {profile.lastName[0]}
+                </span>
+              )}
+            </ProfilePhotoTransition>
           </span>
-          <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex min-w-0 flex-col gap-3 animate-fade-up">
             <div className="flex flex-col gap-1">
               {profession && <p className="font-semibold text-amber-400">{profession}</p>}
               <h1 className="flex flex-wrap items-center gap-2 text-4xl leading-[1.02] font-bold sm:text-6xl">

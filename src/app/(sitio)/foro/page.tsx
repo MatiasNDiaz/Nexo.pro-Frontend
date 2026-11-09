@@ -37,9 +37,12 @@ export default function ForumPage({ searchParams }: PageProps<"/foro">) {
         <Suspense fallback={<Skeleton className="h-28 w-full rounded-2xl" />}>
           <Controls searchParams={searchParams} />
         </Suspense>
-        <Suspense fallback={<ResultsSkeleton />}>
-          <Results searchParams={searchParams} />
-        </Suspense>
+        {/* Alto mínimo: si un filtro trae menos publicaciones, la página no se acorta y la pantalla no salta. */}
+        <div className="min-h-[70vh]">
+          <Suspense fallback={<ResultsSkeleton />}>
+            <Results searchParams={searchParams} />
+          </Suspense>
+        </div>
       </div>
     </>
   );
@@ -64,6 +67,8 @@ async function Controls({ searchParams }: { searchParams: Promise<SearchParams> 
               <li key={tab.label}>
                 <Link
                   href={forumHref({ ...filters, type: tab.type, page: 1 }) as Route}
+                  // Cambia la lista sin mover la pantalla (sin volver arriba de todo).
+                  scroll={false}
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "inline-flex h-10 items-center rounded-xl px-4 text-sm font-semibold whitespace-nowrap transition-colors",
