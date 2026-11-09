@@ -6,7 +6,6 @@ import { Pagination } from "@/components/catalog/pagination";
 import { ProfessionalCard } from "@/components/catalog/professional-card";
 import { ViewBeacon } from "@/components/catalog/view-beacon";
 import { PageHeader } from "@/components/layout/page-header";
-import { revealDelay } from "@/components/motion/reveal";
 import { ButtonLink } from "@/components/ui/button";
 import { Alert, EmptyState, Skeleton } from "@/components/ui/feedback";
 import { scenes } from "@/content/photos";
@@ -139,9 +138,10 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
       <h2 id="resultados" className="text-sm font-medium text-muted-strong" aria-live="polite">
         {plural(page.total, "profesional encontrado", "profesionales encontrados")}
       </h2>
-      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* minmax(0, …): la columna no se estira con el contenido de la tarjeta (desborde en 375 px). */}
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 xl:grid-cols-[repeat(2,minmax(0,1fr))]">
         {page.data.map((item, index) => (
-          <li key={item.slug} data-reveal style={revealDelay(index % 3, 80)}>
+          <li key={item.slug}>
             <ProfessionalCard item={item} preload={index === 0} />
           </li>
         ))}
@@ -161,11 +161,11 @@ function FiltersSkeleton() {
 
 function ResultsSkeleton() {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Cargando profesionales">
+    <div className="grid gap-3 xl:grid-cols-2" aria-busy="true" aria-label="Cargando profesionales">
       {Array.from({ length: 6 }, (_, i) => (
-        <div key={i} className="overflow-hidden rounded-2xl border border-line bg-surface">
-          <Skeleton className="aspect-4/3 w-full rounded-none" />
-          <div className="flex flex-col gap-3 p-5">
+        <div key={i} className="flex gap-5 rounded-2xl border border-line bg-surface p-5">
+          <Skeleton className="size-20 shrink-0 rounded-xl sm:size-28" />
+          <div className="flex flex-1 flex-col gap-3">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-4 w-full" />

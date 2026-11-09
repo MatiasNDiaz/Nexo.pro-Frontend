@@ -20,7 +20,7 @@ import { RatingSummary } from "@/components/catalog/rating";
 import { RemoteImage } from "@/components/catalog/remote-image";
 import { ReviewItem } from "@/components/catalog/review-item";
 import { revealDelay } from "@/components/motion/reveal";
-import { Badge, Skeleton } from "@/components/ui/feedback";
+import { Skeleton } from "@/components/ui/feedback";
 import { env } from "@/config/env";
 import { getProfileReviews, getPublicProfile } from "@/features/catalog/data";
 import { ProfileActions } from "@/features/requests/profile-actions";
@@ -93,48 +93,48 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
     <article className="pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdFor(profile)) }} />
 
-      {/* Portada */}
-      <div className="relative h-40 overflow-hidden bg-linear-to-br from-brand-700 via-brand-800 to-brand-950 sm:h-56">
+      {/* Identidad: banda azul noche (con el banner del profesional de fondo, si tiene). */}
+      <header className="relative isolate overflow-hidden bg-brand-950 text-white">
         {profile.banner?.kind === "IMAGE" && (
-          <RemoteImage src={profile.banner.url} alt="" fill preload sizes="100vw" className="object-cover opacity-90" />
+          <>
+            <RemoteImage src={profile.banner.url} alt="" fill preload sizes="100vw" className="-z-20 object-cover" />
+            <div aria-hidden="true" className="absolute inset-0 -z-10 bg-brand-950/75" />
+          </>
         )}
-      </div>
-
-      <div className="container-page">
-        <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:gap-10">
-          <div className="flex min-w-0 flex-col gap-8">
-            {/* Encabezado */}
-            <header className="-mt-14 flex flex-col gap-4 sm:-mt-16 animate-fade-up">
-              <span className="relative size-28 overflow-hidden rounded-3xl border-4 border-surface bg-brand-100 shadow-raised sm:size-32">
-                {profile.avatarUrl ? (
-                  <RemoteImage src={profile.avatarUrl} alt={`Foto de ${name}`} fill preload sizes="128px" className="object-cover" />
-                ) : (
-                  <span aria-hidden="true" className="grid size-full place-items-center font-display text-4xl font-bold text-brand-400">
-                    {profile.firstName[0]}
-                    {profile.lastName[0]}
-                  </span>
-                )}
+        <div className="container-page flex flex-col gap-6 py-10 sm:flex-row sm:items-end sm:gap-8 sm:py-14 animate-fade-up">
+          <span className="relative size-28 shrink-0 overflow-hidden rounded-2xl bg-brand-800 ring-1 ring-white/15 sm:size-36">
+            {profile.avatarUrl ? (
+              <RemoteImage src={profile.avatarUrl} alt={`Foto de ${name}`} fill preload sizes="144px" className="object-cover" />
+            ) : (
+              <span aria-hidden="true" className="grid size-full place-items-center font-display text-4xl font-bold text-brand-200">
+                {profile.firstName[0]}
+                {profile.lastName[0]}
               </span>
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-3xl font-bold text-brand-900 sm:text-4xl">{name}</h1>
-                  <span role="img" aria-label="Identidad verificada" title="Identidad verificada">
-                    <BadgeCheck className="size-7 text-electric-500" aria-hidden="true" />
-                  </span>
-                </div>
-                {profile.businessName && <p className="text-lg text-muted-strong">{profile.businessName}</p>}
-                {profession && <p className="text-lg font-semibold text-brand-700">{profession}</p>}
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <AttentionBadge status={profile.attentionStatus} />
-                <Badge tone="electric">
-                  <BadgeCheck className="size-3.5" aria-hidden="true" />
-                  Identidad verificada
-                </Badge>
-                {profile.freeQuote && <Badge tone="electric">Presupuesto sin cargo</Badge>}
-              </div>
-              <RatingSummary average={profile.ratingAverage} count={profile.ratingCount} size="md" />
-            </header>
+            )}
+          </span>
+          <div className="flex min-w-0 flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              {profession && <p className="font-semibold text-amber-400">{profession}</p>}
+              <h1 className="flex flex-wrap items-center gap-2 text-4xl leading-[1.02] font-bold sm:text-6xl">
+                {name}
+                <span role="img" aria-label="Identidad verificada" title="Identidad verificada">
+                  <BadgeCheck className="size-7 text-electric-400 sm:size-9" aria-hidden="true" />
+                </span>
+              </h1>
+              {profile.businessName && <p className="text-lg text-brand-200">{profile.businessName}</p>}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <AttentionBadge status={profile.attentionStatus} />
+              {profile.freeQuote && <span className="text-sm font-semibold text-white">Presupuesto sin cargo</span>}
+              <RatingSummary average={profile.ratingAverage} count={profile.ratingCount} size="md" onDark />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container-page pt-4">
+        <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:gap-12">
+          <div className="flex min-w-0 flex-col gap-8">
 
             {profile.bio && (
               <Section icon={Users} title={`Sobre ${profile.firstName}`}>
@@ -143,7 +143,7 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
             )}
 
             <Section icon={FileBadge} title="Servicio">
-              <dl className="grid gap-4 sm:grid-cols-2">
+              <dl className="grid border-t border-line sm:grid-cols-2 sm:gap-x-10">
                 <Fact label="Oficios" value={profile.professions.map((p) => p.name).join(", ")} />
                 {profile.yearsExperience !== null && <Fact label="Experiencia" value={plural(profile.yearsExperience, "año")} />}
                 {rate && profile.rateMode && <Fact label="Tarifa de referencia" value={`${rate} ${rateModeLabel[profile.rateMode]}`} />}
@@ -225,7 +225,8 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
           </div>
 
           {/* Columna lateral: contacto, zonas y horarios */}
-          <aside className="flex flex-col gap-5 lg:sticky lg:top-24 lg:mt-8 lg:self-start">
+          {/* En celular va primero: contactar es la acción principal del perfil. */}
+          <aside className="order-first flex flex-col gap-5 pt-6 lg:sticky lg:top-24 lg:order-none lg:mt-8 lg:self-start lg:pt-0">
             <div className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-card">
               <h2 className="text-lg font-semibold text-brand-900">Contactá a {profile.firstName}</h2>
               <ProfileActions
@@ -326,15 +327,11 @@ function jsonLdFor(profile: PublicProfile) {
   };
 }
 
-function Section({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: ReactNode }) {
+/** Sección del perfil: título con peso propio (sin ícono decorativo) separado por una línea. */
+function Section({ title, children }: { icon?: LucideIcon; title: string; children: ReactNode }) {
   return (
-    <section data-reveal className="flex flex-col gap-4">
-      <h2 className="flex items-center gap-2.5 text-xl font-semibold text-brand-900">
-        <span className="grid size-9 place-items-center rounded-xl bg-brand-50 text-brand-700">
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-        {title}
-      </h2>
+    <section className="flex flex-col gap-5 border-t border-line pt-8 first:border-t-0 first:pt-6">
+      <h2 className="text-2xl font-bold text-brand-900 sm:text-3xl">{title}</h2>
       {children}
     </section>
   );
@@ -354,12 +351,12 @@ function SideCard({ icon: Icon, title, children }: { icon: LucideIcon; title: st
 
 function Fact({ label, value, icon: Icon }: { label: string; value: string; icon?: LucideIcon }) {
   return (
-    <div className="rounded-2xl bg-surface p-4 ring-1 ring-line">
-      <dt className="flex items-center gap-1.5 text-sm text-muted">
+    <div className="flex items-baseline justify-between gap-4 border-b border-line py-3">
+      <dt className="flex items-center gap-1.5 text-sm text-muted-strong">
         {Icon && <Icon className="size-4" aria-hidden="true" />}
         {label}
       </dt>
-      <dd className="mt-1 font-semibold text-ink">{value}</dd>
+      <dd className="text-right font-semibold text-ink">{value}</dd>
     </div>
   );
 }

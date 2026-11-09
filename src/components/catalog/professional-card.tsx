@@ -1,87 +1,91 @@
-import { BadgeCheck, MapPin } from "lucide-react";
+import { ArrowRight, BadgeCheck, MapPin } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/feedback";
 import { areasSummary, displayName, primaryProfession, rateModeLabel } from "@/features/catalog/labels";
 import type { CatalogItem } from "@/features/catalog/types";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, plural } from "@/lib/format";
 import { AttentionBadge } from "./attention-badge";
 import { RatingSummary } from "./rating";
 import { RemoteImage } from "./remote-image";
 
 /**
- * Tarjeta de un profesional en el catálogo. Toda la tarjeta es un único enlace (el nombre es su
- * texto accesible); no hay botones adentro para no anidar elementos interactivos.
- * `preload` solo para la primera tarjeta visible: es la imagen que define la carga percibida (LCP).
+ * Un profesional en el catálogo, como fila escaneable: foto, quién es y qué hace, cómo trabaja y su
+ * tarifa de referencia. Toda la tarjeta es un único enlace (el nombre es su texto accesible); no hay
+ * botones adentro para no anidar elementos interactivos. `preload` solo para la primera (LCP).
  */
 export function ProfessionalCard({ item, preload = false }: { item: CatalogItem; preload?: boolean }) {
   const name = displayName(item);
   const profession = primaryProfession(item);
   const rate = formatMoney(item.referenceRate);
-  const cover = item.coverImageUrl ?? item.avatarUrl;
+  const picture = item.coverImageUrl ?? item.avatarUrl;
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-card transition-[transform,box-shadow,border-color] duration-300 ease-out-soft hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-electric-500">
-      <div className="relative aspect-4/3 overflow-hidden bg-linear-to-br from-brand-100 to-brand-50">
-        {cover ? (
+    <article className="group relative flex h-full gap-4 rounded-2xl border border-line bg-surface p-4 transition-[border-color,box-shadow] duration-200 ease-out-soft hover:border-brand-300 hover:shadow-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-electric-500 sm:gap-5 sm:p-5">
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-brand-100 sm:size-28">
+        {picture ? (
           <RemoteImage
-            src={cover}
+            src={picture}
             alt=""
             fill
             preload={preload}
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.03]"
+            sizes="112px"
+            className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
           />
         ) : (
-          <span aria-hidden="true" className="absolute inset-0 grid place-items-center font-display text-5xl font-bold text-brand-300">
+          <span aria-hidden="true" className="grid size-full place-items-center font-display text-2xl font-bold text-brand-500">
             {item.firstName[0]}
             {item.lastName[0]}
           </span>
         )}
-        <AttentionBadge status={item.attentionStatus} className="absolute top-3 left-3 shadow-xs" />
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex items-start gap-3">
-          {item.avatarUrl && item.coverImageUrl && (
-            <span className="relative -mt-11 size-14 shrink-0 overflow-hidden rounded-2xl border-4 border-surface bg-brand-50 shadow-card">
-              <RemoteImage src={item.avatarUrl} alt="" fill sizes="56px" className="object-cover" />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="flex items-center gap-1.5 text-lg leading-tight font-bold text-ink">
+            <Link href={`/profesionales/${item.slug}`} className="truncate outline-none after:absolute after:inset-0 after:content-['']">
+              {name}
+            </Link>
+            <span role="img" aria-label="Identidad verificada" title="Identidad verificada" className="shrink-0">
+              <BadgeCheck className="size-[1.1rem] text-electric-500" aria-hidden="true" />
             </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-lg font-semibold text-ink">
-              <Link
-                href={`/profesionales/${item.slug}`}
-                className="outline-none after:absolute after:inset-0 after:content-['']"
-              >
-                {name}
-              </Link>
-            </h3>
-            {item.businessName && <p className="truncate text-sm text-muted">{item.businessName}</p>}
-          </div>
-          <span role="img" aria-label="Identidad verificada" title="Identidad verificada" className="mt-1 shrink-0">
-            <BadgeCheck className="size-5 text-electric-500" aria-hidden="true" />
-          </span>
+          </h3>
+          <p className="truncate text-sm">
+            {profession && <span className="font-semibold text-brand-700">{profession}</span>}
+            {item.businessName && <span className="text-muted"> · {item.businessName}</span>}
+          </p>
         </div>
 
-        {profession && <p className="font-medium text-brand-700">{profession}</p>}
+        {item.bio && <p className="line-clamp-2 text-sm leading-relaxed text-muted-strong">{item.bio}</p>}
 
-        {item.serviceAreas.length > 0 && (
-          <p className="flex items-start gap-1.5 text-sm text-muted">
-            <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            <span className="line-clamp-2">{areasSummary(item.serviceAreas)}</span>
-          </p>
-        )}
-
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted">
           <RatingSummary average={item.ratingAverage} count={item.ratingCount} />
+          {item.serviceAreas.length > 0 && (
+            <span className="flex max-w-full min-w-0 items-center gap-1">
+              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+              <span className="truncate">{areasSummary(item.serviceAreas)}</span>
+            </span>
+          )}
+          {item.yearsExperience !== null && <span className="hidden sm:inline">{plural(item.yearsExperience, "año", "años")} de oficio</span>}
+        </div>
+
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-1">
           <div className="flex flex-wrap items-center gap-2">
-            {item.freeQuote && <Badge tone="electric">Presupuesto sin cargo</Badge>}
-            {rate && item.rateMode && (
-              <span className="text-sm text-muted" title="Tarifa de referencia que indica el profesional">
-                <span className="font-semibold text-ink">{rate}</span> {rateModeLabel[item.rateMode]}
+            <AttentionBadge status={item.attentionStatus} />
+            {item.freeQuote && <span className="text-xs font-semibold text-success-800">Presupuesto sin cargo</span>}
+          </div>
+          <div className="flex items-center gap-4">
+            {rate && item.rateMode ? (
+              <span className="text-right text-sm leading-tight text-muted" title="Tarifa de referencia que indica el profesional">
+                <span className="block font-display text-lg font-bold text-ink">{rate}</span>
+                {rateModeLabel[item.rateMode]}
                 <span className="sr-only"> (tarifa de referencia)</span>
               </span>
+            ) : (
+              <span className="text-sm text-muted">Precio a convenir</span>
             )}
+            <span aria-hidden="true" className="hidden items-center gap-1 text-sm font-semibold text-brand-700 sm:inline-flex">
+              Ver perfil
+              <ArrowRight className="size-4 transition-transform duration-200 ease-out-soft group-hover:translate-x-0.5" />
+            </span>
           </div>
         </div>
       </div>

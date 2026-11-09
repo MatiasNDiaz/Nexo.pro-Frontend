@@ -34,7 +34,7 @@ export function PageHeader({
           {actions && <div className="mt-2 flex flex-wrap gap-3">{actions}</div>}
         </div>
         {photo && (
-          <div className="relative aspect-[16/9] overflow-hidden rounded-3xl bg-brand-100 animate-[clip-up_900ms_var(--ease-out-soft)_both] sm:aspect-[2/1] lg:aspect-[4/3]">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-3xl bg-brand-100 animate-[clip-up_900ms_var(--ease-out-soft)_both] sm:aspect-[2/1] lg:aspect-[16/10]">
             <Image src={photo.src} alt="" fill preload sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
           </div>
         )}
