@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { WhatsappIcon } from "@/components/brand/social-icons";
 import { PageHeader } from "@/components/layout/page-header";
 import { site, whatsappUrl } from "@/config/site";
-import { photos } from "@/content/photos";
+import { scenes } from "@/content/photos";
 import { ContactForm } from "@/features/support/contact-form";
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export default function ContactPage() {
   return (
     <>
       <PageHeader
-        photo={photos.herramientas}
+        photo={scenes.ventana}
         title="Contacto"
         description="Contanos tu consulta, sugerencia o el problema que encontraste. Leemos todos los mensajes."
       />

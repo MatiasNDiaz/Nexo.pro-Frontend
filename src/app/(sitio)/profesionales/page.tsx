@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { revealDelay } from "@/components/motion/reveal";
 import { ButtonLink } from "@/components/ui/button";
 import { Alert, EmptyState, Skeleton } from "@/components/ui/feedback";
-import { photos } from "@/content/photos";
+import { scenes } from "@/content/photos";
 import { getLocalities, getProfessions, searchCatalog } from "@/features/catalog/data";
 import {
   catalogHref,
@@ -46,7 +46,7 @@ export default function CatalogPage({ searchParams }: PageProps<"/profesionales"
   return (
     <>
       <PageHeader
-        photo={photos.albanil}
+        photo={scenes.pasillo}
         title="Encontrá al profesional indicado"
         description="Todos tienen la identidad verificada por nuestro equipo. Filtrá por oficio y zona, o mirá quién está disponible ahora."
       />

@@ -1,19 +1,45 @@
 import { expect, test } from "@playwright/test";
 import { expectNoHorizontalScroll } from "./support/layout";
 
+const PRICES = [
+  ["Basic", "$ 10.000"],
+  ["Medium", "$ 15.000"],
+  ["Premium", "$ 20.000"],
+] as const;
+
 test.describe("inicio", () => {
-  test("muestra los tres planes con sus precios", async ({ page }) => {
+  test("planes: tabla en escritorio, pestañas en celular", async ({ page, isMobile }) => {
     await page.goto("/");
-    const plans = page.locator("#planes");
-    for (const [name, price] of [
-      ["Basic", "$ 10.000"],
-      ["Medium", "$ 15.000"],
-      ["Premium", "$ 20.000"],
-    ] as const) {
-      const card = plans.getByRole("listitem").filter({ has: page.getByRole("heading", { name, exact: true }) });
-      await expect(card).toContainText(price);
+    const section = page.locator("#planes");
+    if (isMobile) {
+      const tabs = section.getByRole("tablist", { name: "Planes" });
+      for (const [name, price] of PRICES) {
+        await tabs.getByRole("tab", { name }).click();
+        await expect(tabs.getByRole("tab", { name })).toHaveAttribute("aria-selected", "true");
+        await expect(section.getByRole("tabpanel")).toContainText(price);
+      }
+    } else {
+      const table = section.getByRole("table", { name: "Comparación de planes para profesionales" });
+      for (const [name, price] of PRICES) {
+        await expect(table.getByRole("columnheader", { name: new RegExp(name) })).toContainText(price);
+      }
+      await expect(table.getByRole("row", { name: /Estadísticas de visitas/ })).toBeVisible();
     }
-    await expect(plans.getByRole("link", { name: "Empezar con la prueba" })).toHaveCount(3);
+  });
+
+  test("el buscador del héroe lleva al catálogo con oficio y localidad", async ({ page }) => {
+    await page.goto("/");
+    const hero = page.getByRole("region", { name: "Fotos de oficios" });
+    await hero.getByLabel("Oficio").selectOption("electricista");
+    await hero.getByRole("button", { name: "Buscar" }).click();
+    await expect(page).toHaveURL(/\/profesionales\?oficio=electricista&localidad=$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Encontrá al profesional indicado" })).toBeVisible();
+  });
+
+  test("el mosaico de oficios lleva al catálogo filtrado", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Electricista", exact: true }).click();
+    await expect(page).toHaveURL(/\/profesionales\?oficio=electricista$/);
   });
 
   test("las preguntas frecuentes se abren y cierran", async ({ page }) => {
@@ -27,11 +53,20 @@ test.describe("inicio", () => {
     await expect(answer).toBeHidden();
   });
 
-  test("quiénes somos y nuestro objetivo", async ({ page }) => {
+  test("quiénes somos, el objetivo y la cuenta gratis", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 2, name: "Quiénes somos" })).toBeVisible();
     await expect(page.getByRole("heading", { level: 3, name: "Nuestro objetivo" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Lo que tenés con tu cuenta gratis." })).toBeVisible();
     await expect(page.getByRole("link", { name: "Crear mi cuenta gratis" })).toHaveAttribute("href", "/registro");
+  });
+
+  test("la historia de la cuenta avanza al tocar cada paso (celular)", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "en escritorio el paso lo marca el scroll");
+    await page.goto("/");
+    const step = page.getByRole("button", { name: /Tu reseña cuenta/ });
+    await step.click();
+    await expect(step).toHaveAttribute("aria-pressed", "true");
   });
 
   test("las fotos del héroe se pueden pausar", async ({ page }) => {
@@ -48,14 +83,8 @@ test.describe("inicio", () => {
     await page.goto("/");
     const region = page.getByRole("region", { name: "Fotos de oficios" });
     await expect(region.getByRole("img")).toHaveCount(1);
-    await expect(region.getByRole("button")).toHaveCount(0);
+    await expect(region.getByRole("button", { name: /fotos/ })).toHaveCount(0);
     await context.close();
-  });
-
-  test("los oficios llevan al catálogo filtrado", async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("navigation", { name: "Oficios" }).getByRole("link", { name: "Electricista" }).click();
-    await expect(page).toHaveURL(/\/profesionales\?oficio=electricista$/);
   });
 
   test("el botón para volver arriba aparece al bajar y sube", async ({ page }) => {

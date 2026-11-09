@@ -11,7 +11,7 @@ test.describe("foro", () => {
     const wanted = main(page).getByRole("article").filter({ hasText: "Busco electricista" });
     await expect(wanted.getByText("Busco profesional")).toBeVisible();
     await expect(wanted.getByText("Nueva Córdoba, Córdoba")).toBeVisible();
-    await expect(wanted.getByText(/Presupuesto estimado: \$\s?50\.000/)).toBeVisible();
+    await expect(wanted.getByText(/Ofrezco a partir de \$\s?50\.000/)).toBeVisible();
     await expect(main(page).getByRole("article").filter({ hasText: "instalación de gas" }).getByText("Resuelta")).toBeVisible();
     // Sin sesión invita a ingresar para participar.
     await expect(main(page).getByRole("link", { name: "Ingresar" })).toHaveAttribute("href", "/ingresar?siguiente=%2Fforo");

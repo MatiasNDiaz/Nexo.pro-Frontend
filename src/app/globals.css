@@ -125,6 +125,43 @@
   }
 }
 
+/* Título del héroe: cada palabra sube desde abajo de su propia máscara. */
+@keyframes word-up {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Fotos de los encabezados: se descubren de abajo hacia arriba. */
+@keyframes clip-up {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Preguntas frecuentes: el alto de <details> se anima donde el navegador lo permite (si no, abre directo). */
+:root {
+  interpolate-size: allow-keywords;
+}
+@media (prefers-reduced-motion: no-preference) {
+  details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 320ms var(--ease-out-soft),
+      content-visibility 320ms allow-discrete;
+  }
+  details[open]::details-content {
+    block-size: auto;
+  }
+}
+
 /* Contenedor de página: el mismo ancho y márgenes laterales en toda la app (16 px en celular). */
 @utility container-page {
   width: 100%;

@@ -6,7 +6,7 @@ import { Logo } from "@/components/brand/logo";
 import { revealDelay } from "@/components/motion/reveal";
 import { InstagramIcon, LinkedinIcon, WhatsappIcon } from "@/components/brand/social-icons";
 import { site, whatsappUrl } from "@/config/site";
-import { photos } from "@/content/photos";
+import { allPhotos } from "@/content/photos";
 
 const explore: { href: Route; label: string }[] = [
   { href: "/", label: "Inicio" },
@@ -114,15 +114,13 @@ export function SiteFooter() {
             <span className="text-brand-300">
               Fotos ilustrativas de{" "}
               <a
-                href="https://unsplash.com"
+                href="https://www.pexels.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                title={`Fotos: ${Object.values(photos)
-                  .map((photo) => photo.author)
-                  .join(", ")}`}
+                title={`Fotos de: ${[...new Set(allPhotos.map((photo) => photo.author))].join(", ")}`}
                 className="underline-offset-4 hover:underline"
               >
-                Unsplash
+                Pexels
                 <span className="sr-only"> (se abre en otra pestaña)</span>
               </a>
               .

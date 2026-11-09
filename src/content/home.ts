@@ -11,53 +11,42 @@
  * No se muestra el chatbot de Premium: todavía no está implementado.
  */
 export const plans = [
-  {
-    code: "BASIC",
-    name: "Basic",
-    price: 10000,
-    pitch: "Para empezar a recibir pedidos.",
-    features: ["1 oficio", "5 fotos de tus trabajos", "Pedidos y presupuestos por chat", "Reseñas de tus clientes"],
-  },
-  {
-    code: "MEDIUM",
-    name: "Medium",
-    price: 15000,
-    pitch: "Más presencia en el catálogo.",
-    features: [
-      "Hasta 2 oficios",
-      "5 fotos y 1 video",
-      "Mejor posición en el catálogo",
-      "Personalizá los colores de tu perfil",
-      "Avisos de disponibilidad a quienes te guardaron",
-    ],
-  },
-  {
-    code: "PREMIUM",
-    name: "Premium",
-    price: 20000,
-    pitch: "La máxima visibilidad y tus números.",
-    features: [
-      "Hasta 3 oficios",
-      "5 fotos y 2 videos, con archivos más pesados",
-      "La mejor posición en el catálogo",
-      "Personalización ampliada del perfil",
-      "Avisos de disponibilidad con tu mensaje",
-      "Estadísticas de visitas a tu perfil",
-    ],
-  },
+  { code: "BASIC", name: "Basic", price: 10000, pitch: "Para empezar a recibir pedidos." },
+  { code: "MEDIUM", name: "Medium", price: 15000, pitch: "Más presencia en el catálogo." },
+  { code: "PREMIUM", name: "Premium", price: 20000, pitch: "La máxima visibilidad y tus números." },
 ] as const;
 
-/** Lo que gana un cliente al crear su cuenta (todo existe hoy en el panel). */
+/**
+ * Qué incluye cada plan, en el orden de `plans` (Basic, Medium, Premium). `true` = incluido,
+ * `false` = no incluido, texto = el valor. Columnas de `subscription_plans`.
+ */
+export const planFeatures: { label: string; values: readonly [string | boolean, string | boolean, string | boolean] }[] = [
+  { label: "Oficios", values: ["1", "Hasta 2", "Hasta 3"] },
+  { label: "Fotos de tus trabajos", values: ["5", "5", "5"] },
+  { label: "Videos", values: [false, "1", "2"] },
+  { label: "Pedidos y presupuestos por chat", values: [true, true, true] },
+  { label: "Reseñas de tus clientes", values: [true, true, true] },
+  { label: "Posición en el catálogo", values: ["Base", "Mejor", "La mejor"] },
+  { label: "Colores, tipografía y banner con foto en tu perfil", values: [false, true, true] },
+  { label: "Animación y banner con video", values: [false, false, true] },
+  { label: "Avisos de disponibilidad a quienes te guardaron", values: [false, true, "Con tu mensaje"] },
+  { label: "Estadísticas de visitas", values: [false, false, true] },
+];
+
+/**
+ * Lo que gana un cliente al crear su cuenta (todo existe hoy en el panel). Cada uno es un paso de la
+ * historia que se arma al hacer scroll (components/home/account-story.tsx).
+ */
 export const customerBenefits = [
-  { title: "Chat directo", text: "Le escribís al profesional sin pasar tu número a nadie." },
-  { title: "Presupuestos para comparar", text: "Pedís presupuesto, lo ves con detalle y elegís cuando quieras." },
-  { title: "Seguimiento del trabajo", text: "Ves cuándo lo agenda, cuándo empieza y cuándo termina." },
-  { title: "Tu reseña cuenta", text: "Al terminar el trabajo, contás cómo te fue y ayudás a otros." },
+  { title: "Chat directo con el profesional", text: "Le contás qué pasa y te responde ahí mismo. Tu número no se comparte con nadie." },
+  { title: "Presupuestos claros para comparar", text: "Te llega el presupuesto con el detalle del trabajo. Lo aceptás solo si te cierra." },
+  { title: "El trabajo, paso a paso", text: "Ves cuándo lo agenda, cuándo empieza y cuándo termina, sin tener que preguntar." },
+  { title: "Tu reseña cuenta", text: "Cuando termina, contás cómo te fue. Así otros eligen mejor." },
 ] as const;
 
 export const about = {
   who: "Repara Ya es una plataforma de Córdoba que conecta a quienes necesitan un arreglo con profesionales de oficio que muestran quiénes son: con su identidad verificada, sus trabajos y las reseñas de sus clientes.",
-  goal: "Que contratar un oficio sea tan confiable como pedirle a un conocido: saber quién viene a tu casa, qué hizo antes y qué te va a cobrar, antes de decidir. Y que cada profesional pueda mostrar su trabajo y conseguir clientes en su zona.",
+  goal: "Que contratar un oficio sea tan confiable como pedirle a un conocido, y que cada profesional consiga clientes por la calidad de su trabajo.",
   values: [
     { title: "Confianza", text: "Cada perfil pasa por una revisión de identidad de nuestro equipo." },
     { title: "Transparencia", text: "Las reseñas son solo de trabajos terminados, y no se compran." },

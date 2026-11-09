@@ -45,7 +45,7 @@ export function ForumPostCard({ post }: { post: ForumPost }) {
           {budget && (
             <li className="flex items-center gap-1.5">
               <Wallet className="size-4" aria-hidden="true" />
-              Presupuesto estimado: {budget}
+              Ofrezco a partir de {budget}
             </li>
           )}
           {post.deadline && (

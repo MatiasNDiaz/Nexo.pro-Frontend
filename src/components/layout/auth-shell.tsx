@@ -1,7 +1,7 @@
 import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { photos } from "@/content/photos";
+import { tradePhotos } from "@/content/photos";
 import { cn } from "@/lib/cn";
 
 const highlights = ["Profesionales con identidad verificada", "Presupuestos y coordinación por chat", "Reseñas de trabajos terminados"];
@@ -21,7 +21,7 @@ export function AuthShell({
   children: ReactNode;
   wide?: boolean;
 }) {
-  const photo = photos.electricista;
+  const photo = tradePhotos.electricista!;
   return (
     <div className="relative isolate flex flex-1 flex-col bg-canvas lg:flex-row">
       <div aria-hidden="true" className="relative h-32 overflow-hidden bg-brand-950 sm:h-40 lg:hidden">

@@ -87,7 +87,7 @@ async function Post({ params }: { params: Promise<{ id: string }> }) {
             {budget && (
               <li className="flex items-center gap-1.5">
                 <Wallet className="size-4 text-brand-600" aria-hidden="true" />
-                Presupuesto estimado: {budget}
+                Ofrezco a partir de {budget}
               </li>
             )}
             {post.deadline && (
