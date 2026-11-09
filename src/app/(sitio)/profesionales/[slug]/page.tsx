@@ -16,6 +16,7 @@ import { Suspense, type ReactNode } from "react";
 import { AttentionBadge } from "@/components/catalog/attention-badge";
 import { MoreReviews } from "@/components/catalog/more-reviews";
 import { CatalogBackTransition } from "@/components/catalog/catalog-return";
+import { PendingProfilePhoto } from "@/components/catalog/photo-stash";
 import { ProfileContact } from "@/components/catalog/profile-contact";
 import { ProfilePhotoTransition } from "@/components/catalog/profile-photo-transition";
 import { RatingSummary } from "@/components/catalog/rating";
@@ -24,6 +25,7 @@ import { ReviewItem } from "@/components/catalog/review-item";
 import { revealDelay } from "@/components/motion/reveal";
 import { Skeleton } from "@/components/ui/feedback";
 import { env } from "@/config/env";
+import { cn } from "@/lib/cn";
 import { getProfileReviews, getPublicProfile } from "@/features/catalog/data";
 import { ProfileActions } from "@/features/requests/profile-actions";
 import { REVIEWS_PAGE_SIZE } from "@/features/catalog/filters";
@@ -371,18 +373,42 @@ function Fact({ label, value, icon: Icon }: { label: string; value: string; icon
   );
 }
 
+/**
+ * Mientras carga: la misma banda y la misma caja de foto que el encabezado real (mismas clases y
+ * alturas de línea), con la foto de la tarjeta recién tocada adentro (PendingProfilePhoto). Así la
+ * foto vuela hasta su lugar aunque el perfil no estuviera precargado, y la real la reemplaza sin moverse.
+ */
 function ProfileSkeleton() {
+  const bar = "inline-block rounded-md bg-white/10 align-middle";
   return (
     <div aria-busy="true" aria-label="Cargando perfil">
-      <Skeleton className="h-40 w-full rounded-none sm:h-56" />
-      <div className="container-page grid gap-8 lg:grid-cols-[1fr_22rem]">
-        <div className="-mt-14 flex flex-col gap-4">
-          <Skeleton className="size-28 rounded-3xl" />
-          <Skeleton className="h-9 w-64" />
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-32 w-full" />
+      <div className="bg-brand-950">
+        <div className="container-page flex flex-col gap-6 py-10 sm:flex-row sm:items-end sm:gap-8 sm:py-14">
+          <span className="relative size-28 shrink-0 overflow-hidden rounded-2xl bg-brand-800 ring-1 ring-white/15 sm:size-36">
+            <PendingProfilePhoto />
+          </span>
+          <div aria-hidden="true" className="flex min-w-0 flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold">
+                <span className={cn(bar, "h-[1em] w-24")} />
+              </p>
+              <p className="font-display text-4xl leading-[1.02] font-bold sm:text-6xl">
+                <span className={cn(bar, "h-[0.85em] w-[7ch]")} />
+              </p>
+              <p className="text-lg">
+                <span className={cn(bar, "h-[1em] w-40")} />
+              </p>
+            </div>
+            <span className={cn(bar, "h-6 w-48 rounded-full")} />
+          </div>
         </div>
-        <Skeleton className="mt-8 h-64 w-full rounded-3xl" />
+      </div>
+      <div className="container-page grid gap-8 pt-8 lg:grid-cols-[1fr_22rem] lg:gap-12">
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-9 w-56" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+        <Skeleton className="h-56 w-full rounded-3xl" />
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { areasSummary, displayName, primaryProfession, rateModeLabel } from "@/f
 import type { CatalogItem } from "@/features/catalog/types";
 import { formatMoney, plural } from "@/lib/format";
 import { AttentionBadge } from "./attention-badge";
-import { ProfilePhotoTransition } from "./profile-photo-transition";
+import { PHOTO_NAV, ProfilePhotoTransition } from "./profile-photo-transition";
 import { RatingSummary } from "./rating";
 import { RemoteImage } from "./remote-image";
 
@@ -30,6 +30,7 @@ export function ProfessionalCard({ item, preload = false }: { item: CatalogItem;
             <RemoteImage
               src={picture}
               alt=""
+              data-pro-photo={item.slug}
               fill
               preload={preload}
               sizes="(min-width: 1408px) 20vw, (min-width: 1024px) 26vw, (min-width: 640px) 46vw, 92vw"
@@ -68,7 +69,7 @@ export function ProfessionalCard({ item, preload = false }: { item: CatalogItem;
               prefetch: trae el perfil completo de antemano para que llegue en el mismo instante del
               clic; si se mostrara primero el esqueleto, la foto no podría viajar de la tarjeta al perfil.
             */}
-            <Link href={`/profesionales/${item.slug}`} prefetch className="truncate outline-none after:absolute after:inset-0 after:content-['']">
+            <Link href={`/profesionales/${item.slug}`} prefetch transitionTypes={[PHOTO_NAV]} className="truncate outline-none after:absolute after:inset-0 after:content-['']">
               {name}
             </Link>
             <span role="img" aria-label="Identidad verificada" title="Identidad verificada" className="shrink-0">

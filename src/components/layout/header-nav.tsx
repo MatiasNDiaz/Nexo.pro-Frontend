@@ -4,6 +4,7 @@ import { LayoutDashboard, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { PHOTO_NAV } from "@/components/catalog/profile-photo-transition";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useSessionActions } from "@/features/session/session-provider";
 import { AccountMenu } from "./account-menu";
@@ -61,6 +62,7 @@ export function HeaderNav() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    transitionTypes={[PHOTO_NAV]}
                     onClick={closeMenu}
                     aria-current={active ? "page" : undefined}
                     className={cn(
@@ -87,6 +89,8 @@ function DesktopLink({ item, active }: { item: NavItem; active: boolean }) {
   return (
     <Link
       href={item.href}
+      // Ir a "Profesionales" desde un perfil hace volver la foto a su tarjeta (ProfilePhotoTransition).
+      transitionTypes={[PHOTO_NAV]}
       aria-current={active ? "page" : undefined}
       className={cn(
         "relative inline-flex h-10 items-center rounded-lg px-3.5 text-[0.9375rem] font-medium transition-colors",

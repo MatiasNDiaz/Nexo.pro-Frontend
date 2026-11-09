@@ -3,6 +3,7 @@ import type { Metadata, Route } from "next";
 import { Suspense } from "react";
 import { CatalogFiltersBar } from "@/components/catalog/catalog-filters";
 import { CatalogScrollMemory } from "@/components/catalog/catalog-return";
+import { PhotoStash } from "@/components/catalog/photo-stash";
 import { Pagination } from "@/components/catalog/pagination";
 import { ProfessionalCard } from "@/components/catalog/professional-card";
 import { ViewBeacon } from "@/components/catalog/view-beacon";
@@ -143,10 +144,12 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
   }
 
   return (
-    <section aria-labelledby="resultados" className="flex flex-col gap-6">
+    // Ancho máximo: las tarjetas no pasan de ~245 px aunque la pantalla sea grande (sigue centrada).
+    <section aria-labelledby="resultados" className="mx-auto flex w-full max-w-[48rem] flex-col gap-6">
       {beacon}
       {/* Junto a la lista: al volver de un perfil, repone el scroll con las tarjetas ya en su lugar. */}
       <CatalogScrollMemory />
+      <PhotoStash />
       <h2 id="resultados" className="text-sm font-medium text-muted-strong" aria-live="polite">
         {plural(page.total, "profesional encontrado", "profesionales encontrados")}
       </h2>
@@ -174,7 +177,7 @@ function FiltersSkeleton() {
 
 function ResultsSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Cargando profesionales">
+    <div className="mx-auto grid w-full max-w-[48rem] gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Cargando profesionales">
       {Array.from({ length: 6 }, (_, i) => (
         <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface">
           <Skeleton className="aspect-[6/5] w-full rounded-none" />

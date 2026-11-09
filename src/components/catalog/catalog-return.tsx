@@ -3,6 +3,7 @@
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect } from "react";
+import { PHOTO_NAV } from "./profile-photo-transition";
 
 /*
  * Volver del perfil al catálogo con el botón "atrás" del navegador, con la foto volando de vuelta a
@@ -56,7 +57,7 @@ export function CatalogBackTransition() {
           document.documentElement.style.minHeight = `${saved + window.innerHeight}px`;
           window.scrollTo({ top: saved, behavior: "instant" });
         };
-        router.replace(url as Route, { scroll: false });
+        router.replace(url as Route, { scroll: false, transitionTypes: [PHOTO_NAV] });
       }, 0);
       return true;
     };
