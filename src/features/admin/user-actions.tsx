@@ -51,6 +51,8 @@ export type UserDialog =
 
 interface Props {
   user: AdminUserDetail;
+  /** Reporte que originó el strike o la sanción (llegando desde un reporte). */
+  reportId?: string;
   onClose: () => void;
   onDone: (message: string) => void;
 }
@@ -214,7 +216,7 @@ function EditDataDialog({ user, onClose, onDone }: Props) {
 
 // ---- Sanción (ADR 0029: solo manuales; el usuario ve el motivo) ----
 
-function SanctionDialog({ user, onClose, onDone }: Props) {
+function SanctionDialog({ user, reportId, onClose, onDone }: Props) {
   const id = useId();
   const allowed = accountActions(user);
   const types = (Object.keys(sanctionLabel) as SanctionType[]).filter((type) =>
@@ -234,7 +236,7 @@ function SanctionDialog({ user, onClose, onDone }: Props) {
       onClose={onClose}
       onDone={onDone}
       validate={() => (withEnd && endsAt && new Date(endsAt) <= new Date() ? "La fecha de fin tiene que ser en el futuro." : null)}
-      run={(reason) => applySanction(user.id, { type, reason, ...(withEnd && endsAt ? { endsAt: new Date(endsAt).toISOString() } : {}) })}
+      run={(reason) => applySanction(user.id, { type, reason, ...(withEnd && endsAt ? { endsAt: new Date(endsAt).toISOString() } : {}), ...(reportId ? { reportId } : {}) })}
       done={`Aplicaste: ${sanctionLabel[type].label.toLowerCase()}.`}
     >
       <fieldset className="flex flex-col gap-2">
@@ -266,7 +268,7 @@ function SanctionDialog({ user, onClose, onDone }: Props) {
 
 // ---- Strike (peso 1 a 3 según la gravedad) ----
 
-function StrikeDialog({ user, onClose, onDone }: Props) {
+function StrikeDialog({ user, reportId, onClose, onDone }: Props) {
   const id = useId();
   const [weight, setWeight] = useState(1);
   return (
@@ -278,7 +280,7 @@ function StrikeDialog({ user, onClose, onDone }: Props) {
       reasonHint="Le llega en la notificación y queda en la auditoría."
       onClose={onClose}
       onDone={onDone}
-      run={(reason) => addStrike(user.id, { weight, reason })}
+      run={(reason) => addStrike(user.id, { weight, reason, ...(reportId ? { reportId } : {}) })}
       done={`Agregaste un strike de peso ${weight}.`}
     >
       <div className="flex flex-col gap-1.5">

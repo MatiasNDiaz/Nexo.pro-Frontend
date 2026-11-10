@@ -14,6 +14,8 @@ import {
   Heart,
   LayoutDashboard,
   LifeBuoy,
+  MapPin,
+  Megaphone,
   MessagesSquare,
   ShieldCheck,
   Sparkles,
@@ -21,6 +23,7 @@ import {
   Store,
   UserRound,
   Users,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import type { Route } from "next";
@@ -66,9 +69,26 @@ export function panelGroupsFor(user: Me): PanelGroup[] {
 
   const notifications: PanelLink = { href: "/panel/notificaciones", label: "Notificaciones", icon: Bell, counter: "notifications" };
   if (user.role === "ADMIN") {
-    // Moderación, soporte e ingresos se suman en la 7.2 y la 7.3.
     return [
       { label: "Administración", links: [{ ...home, label: "Resumen" }, { href: "/panel/admin/usuarios", label: "Usuarios", icon: Users }] },
+      {
+        label: "Moderación",
+        links: [
+          { href: "/panel/admin/reportes", label: "Reportes", icon: Flag },
+          { href: "/panel/admin/apelaciones", label: "Apelaciones", icon: Gavel },
+          { href: "/panel/admin/identidades", label: "Identidades", icon: Fingerprint },
+          { href: "/panel/admin/barrios", label: "Barrios", icon: MapPin },
+        ],
+      },
+      {
+        label: "Negocio",
+        links: [
+          { href: "/panel/admin/soporte", label: "Soporte", icon: LifeBuoy },
+          { href: "/panel/admin/opiniones", label: "Opiniones", icon: Sparkles },
+          { href: "/panel/admin/novedades", label: "Novedades", icon: Megaphone },
+          { href: "/panel/admin/ingresos", label: "Ingresos", icon: Wallet },
+        ],
+      },
       { label: "Tu cuenta", links: [notifications, security] },
     ];
   }

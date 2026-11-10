@@ -168,10 +168,13 @@ test.describe("trabajos del profesional", () => {
     await page.goto(`/panel/trabajos/${CONTRACT_ID}`);
     await expect(page.getByRole("heading", { level: 1, name: "Trabajo con Camila Herrera" })).toBeVisible();
 
-    await page.locator("input[type=datetime-local]").fill("2026-11-10T10:00");
+    // Siempre en el futuro (una fecha fija se vuelve pasada y la pantalla la rechaza, con razón).
+    const tomorrow = new Date(Date.now() + 864e5);
+    const day = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
+    await page.locator("input[type=datetime-local]").fill(`${day}T10:00`);
     await page.getByRole("button", { name: "Agendar" }).click();
     await expect(page.getByText("Trabajo agendado")).toBeVisible();
-    expect(calls[0]).toMatch(/^schedule \{"scheduledAt":"2026-11-10T\d\d:00:00\.000Z"\}$/);
+    expect(calls[0]).toMatch(/^schedule \{"scheduledAt":"\d{4}-\d\d-\d\dT\d\d:00:00\.000Z"\}$/);
 
     await page.getByRole("button", { name: "Empezar el trabajo" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Empezar" }).click();

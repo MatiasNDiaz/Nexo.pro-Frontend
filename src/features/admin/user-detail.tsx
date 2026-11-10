@@ -18,8 +18,9 @@ import {
   UserX,
   type LucideIcon,
 } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Badge, EmptyState, Skeleton } from "@/components/ui/feedback";
@@ -43,6 +44,7 @@ import {
   type AdminUserDetail,
   type VerificationStatus,
 } from "./api";
+import { ProContent } from "./pro-content";
 import { UserActionDialog, type UserDialog } from "./user-actions";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -54,6 +56,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function UserDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const valid = UUID.test(id);
+  // Llegando desde un reporte (?reporte=…), el strike o la sanción quedan vinculados a ese reporte.
+  const fromReport = useSearchParams().get("reporte");
+  const reportId = fromReport && UUID.test(fromReport) ? fromReport : undefined;
   const queryClient = useQueryClient();
   const user = useQuery({
     queryKey: adminKeys.user(id),
@@ -116,6 +121,14 @@ export function UserDetailScreen() {
       ) : (
         <>
           <Header user={user.data} />
+          {reportId && (
+            <Alert tone="info" title="Estás actuando por un reporte">
+              El strike o la sanción que apliques quedan vinculados a ese reporte.{" "}
+              <Link href={`/panel/admin/reportes/${reportId}` as Route} className="font-semibold underline">
+                Volver al reporte
+              </Link>
+            </Alert>
+          )}
           {notice && (
             <div ref={noticeRef} tabIndex={-1} className="outline-none">
               <Alert tone="success">{notice}</Alert>
@@ -123,9 +136,10 @@ export function UserDetailScreen() {
           )}
           <Actions user={user.data} onOpen={open} />
           <Moderation user={user.data} onOpen={open} />
+          {user.data.role === "PROFESSIONAL" && !user.data.deletedAt && <ProContent userId={user.data.id} />}
           {user.data.role === "PROFESSIONAL" && <Subscription user={user.data} onOpen={open} />}
           {user.data.role === "PROFESSIONAL" && <Metrics userId={user.data.id} />}
-          {dialog && <UserActionDialog dialog={dialog} user={user.data} onClose={() => setDialog(null)} onDone={done} />}
+          {dialog && <UserActionDialog dialog={dialog} user={user.data} reportId={reportId} onClose={() => setDialog(null)} onDone={done} />}
         </>
       )}
     </div>

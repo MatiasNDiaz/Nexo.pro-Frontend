@@ -128,6 +128,20 @@
 | Editar datos manda solo lo que cambió | El backend aplica lo que recibe; mandar todo registraría cambios que no hubo |
 | Las métricas del profesional en la ficha usan el mismo tablero que ve el profesional (`MetricsBoard`) | El admin las ve aunque el profesional no tenga Premium (E-050) |
 
+## Panel del admin: moderación y negocio (7.2 y 7.3)
+
+| Decisión | Motivo |
+| --- | --- |
+| El menú del admin tiene tres grupos: Administración (resumen, usuarios), Moderación (reportes, apelaciones, identidades, barrios) y Negocio (soporte, opiniones, novedades, ingresos) | Encontrar cada cola sin buscar; el resumen enlaza a cada una con su número |
+| El reporte muestra el contenido como estaba (`target`) y las acciones según lo reportado: ocultar o volver a mostrar foro y reseñas; strike o sanción al reportado | Decidir con el contenido a la vista. El texto del usuario se muestra como texto (nunca HTML) |
+| "Strike o sanción" desde un reporte abre la ficha con `?reporte=` y el strike o la sanción quedan vinculados a ese reporte | El backend guarda el `reportId`; así se sabe por qué se aplicó |
+| La conversación de un reporte de mensaje se abre a pedido, avisando que queda en la auditoría | C-32: cada acceso del admin al chat se audita; no se abre sin querer |
+| El contenido de un profesional (fotos, videos, certificados y datos) se modera desde su ficha | Hacía falta un endpoint de lectura: `GET /admin/professionals/:userId/profile` (etapa 15 del backend), lo mismo que ve el profesional, con los ocultos y su motivo |
+| Barrios: aprobar, renombrar y fusionar (eligiendo un barrio aprobado de la misma localidad) | Los barrios escritos por clientes y profesionales quedan pendientes hasta que el admin los revisa |
+| Novedades: se confirma antes de publicar, diciendo a quiénes les llega | No se puede deshacer: le llega a cada cuenta activa del segmento |
+| Ingresos: resumen (neto, cobrado, devoluciones y comparación), pagos, registros y pagos de Mercado Pago, con exportación a CSV | ADR 0030. El gráfico es una sola serie (neto por período) con tabla; sin movimientos, un aviso en vez de un gráfico vacío |
+| Las respuestas a consultas del formulario público avisan que todavía no llegan | Van por email y falta el proveedor (H-03) |
+
 ## Diseño por sección de la página del profesional (ADR 0034 del backend)
 
 | Decisión | Motivo |

@@ -28,11 +28,11 @@ export function AdminDashboard() {
   const data = dashboard.data;
   const loading = dashboard.isPending;
   const pending: TileProps[] = [
-    { icon: Flag, title: "Reportes", count: data?.openReports, detail: "sin resolver", highlight: (data?.openReports ?? 0) > 0, loading },
-    { icon: Gavel, title: "Apelaciones", count: data?.openAppeals, detail: "esperando decisión", highlight: (data?.openAppeals ?? 0) > 0, loading },
-    { icon: LifeBuoy, title: "Soporte", count: data?.openSupportTickets, detail: "consultas abiertas", highlight: (data?.openSupportTickets ?? 0) > 0, loading },
-    { icon: Fingerprint, title: "Identidades", count: data?.pendingVerifications, detail: "por revisar", highlight: (data?.pendingVerifications ?? 0) > 0, loading },
-    { icon: CreditCard, title: "Pagos", count: data?.paymentsToReview, detail: "aprobados sin aplicar", highlight: (data?.paymentsToReview ?? 0) > 0, loading },
+    { href: "/panel/admin/reportes", icon: Flag, title: "Reportes", count: data?.openReports, detail: "sin resolver", highlight: (data?.openReports ?? 0) > 0, loading },
+    { href: "/panel/admin/apelaciones", icon: Gavel, title: "Apelaciones", count: data?.openAppeals, detail: "esperando decisión", highlight: (data?.openAppeals ?? 0) > 0, loading },
+    { href: "/panel/admin/soporte", icon: LifeBuoy, title: "Soporte", count: data?.openSupportTickets, detail: "consultas abiertas", highlight: (data?.openSupportTickets ?? 0) > 0, loading },
+    { href: "/panel/admin/identidades", icon: Fingerprint, title: "Identidades", count: data?.pendingVerifications, detail: "por revisar", highlight: (data?.pendingVerifications ?? 0) > 0, loading },
+    { href: "/panel/admin/ingresos?vista=mercadopago", icon: CreditCard, title: "Pagos", count: data?.paymentsToReview, detail: "aprobados sin aplicar", highlight: (data?.paymentsToReview ?? 0) > 0, loading },
     // Suspensión, bloqueo o perfil oculto vigente (no cuenta advertencias). Sin enlace: el buscador
     // filtra por estado de la cuenta, y un perfil oculto no cambia el estado.
     { icon: Users, title: "Sancionados", count: data?.sanctionedUsers, detail: "con sanción vigente", loading },

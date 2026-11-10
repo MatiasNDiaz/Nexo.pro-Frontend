@@ -162,3 +162,24 @@ export async function api<T = void>(path: string, options: RequestOptions = {}):
   const text = await response.text();
   return (text ? JSON.parse(text) : undefined) as T;
 }
+
+/**
+ * Pedido que devuelve un archivo (p. ej. la exportación a CSV del admin): mismas cookies, CSRF y
+ * renovación de sesión que `api`, pero el cuerpo se entrega como Blob con el nombre que propone el
+ * backend en Content-Disposition.
+ */
+export async function apiFile(path: string, options: RequestOptions = {}): Promise<{ blob: Blob; filename: string | null }> {
+  const response = await send(path, options);
+  if (!response.ok) {
+    const error = await parseError(response);
+    if (error.status === 401 && error.code === "ACCESS_TOKEN_EXPIRED" && !options.skipRefresh) {
+      if (await refreshSession()) return apiFile(path, { ...options, skipRefresh: true });
+      setCsrfToken(null);
+      sessionLostListeners.forEach((listener) => listener());
+    }
+    throw error;
+  }
+  const disposition = response.headers.get("Content-Disposition") ?? "";
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? null;
+  return { blob: await response.blob(), filename };
+}

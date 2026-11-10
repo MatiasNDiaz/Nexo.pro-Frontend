@@ -31,6 +31,7 @@ export function ActionDialog({
   reasonLabel = "Motivo",
   reasonHint = "Queda en el registro de auditoría.",
   minReason = REASON_MIN,
+  maxReason = REASON_MAX,
   children,
   validate,
   run,
@@ -46,6 +47,7 @@ export function ActionDialog({
   reasonLabel?: string;
   reasonHint?: string;
   minReason?: number;
+  maxReason?: number;
   children?: ReactNode;
   validate?: () => string | null;
   run: (reason: string) => Promise<unknown>;
@@ -83,8 +85,8 @@ export function ActionDialog({
         }}
       >
         {children}
-        <Field id={`${id}-motivo`} label={reasonLabel} required error={reasonError} hint={`${reasonHint} ${reason.length}/${REASON_MAX}`}>
-          {(a11y) => <Textarea {...a11y} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={REASON_MAX} rows={3} />}
+        <Field id={`${id}-motivo`} label={reasonLabel} required error={reasonError} hint={`${reasonHint} ${reason.length}/${maxReason}`}>
+          {(a11y) => <Textarea {...a11y} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={maxReason} rows={3} />}
         </Field>
         {formError && <Alert tone="danger">{formError}</Alert>}
         {action.isError && <Alert tone="danger">{errorFor?.(action.error) ?? adminErrorMessage(action.error)}</Alert>}
