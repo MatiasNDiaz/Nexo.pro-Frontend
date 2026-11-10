@@ -111,10 +111,17 @@ export function AccountStory({ cta }: { cta: ReactNode }) {
                   aria-pressed={active}
                   className={cn(
                     "flex w-full flex-col gap-4 rounded-2xl border p-5 text-left transition-[opacity,background-color,border-color] duration-300 ease-out-soft lg:pointer-events-none lg:border-0 lg:bg-transparent lg:py-0 lg:pr-0 lg:pl-10",
-                    active ? "border-brand-200 bg-surface opacity-100" : "border-transparent opacity-60 lg:opacity-35",
+                    // El paso inactivo se atenúa con el color, no con la opacidad: así el texto conserva el
+                    // contraste mínimo (4,5:1; con opacidad al 60 % bajaba a 2,5:1).
+                    active ? "border-brand-200 bg-surface" : "border-transparent",
                   )}
                 >
-                  <span className="font-display text-2xl leading-tight font-bold text-brand-900 sm:text-3xl lg:text-5xl lg:leading-[1.02]">
+                  <span
+                    className={cn(
+                      "font-display text-2xl leading-tight font-bold transition-colors duration-300 sm:text-3xl lg:text-5xl lg:leading-[1.02]",
+                      active ? "text-brand-900" : "text-muted",
+                    )}
+                  >
                     {benefit.title}
                   </span>
                   <span className="max-w-[46ch] text-lg leading-relaxed text-muted-strong">{benefit.text}</span>
@@ -122,9 +129,12 @@ export function AccountStory({ cta }: { cta: ReactNode }) {
                     {benefit.points.map((point) => (
                       <span
                         key={point}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-800"
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium ring-1 transition-colors duration-300 ring-inset",
+                          active ? "bg-brand-50 text-brand-800 ring-transparent" : "bg-transparent text-muted-strong ring-line",
+                        )}
                       >
-                        <Check className="size-3.5 text-brand-600" strokeWidth={3} aria-hidden="true" />
+                        <Check className={cn("size-3.5", active ? "text-brand-600" : "text-muted")} strokeWidth={3} aria-hidden="true" />
                         {point}
                       </span>
                     ))}

@@ -118,7 +118,8 @@ export function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title={`Fotos de: ${[...new Set(allPhotos.map((photo) => photo.author))].join(", ")}`}
-                className="underline-offset-4 hover:underline"
+                // Subrayado siempre: dentro de un texto, un enlace no se puede distinguir solo por el color (WCAG 1.4.1).
+                className="underline decoration-white/40 underline-offset-4 transition-colors hover:decoration-white"
               >
                 Pexels
                 <span className="sr-only"> (se abre en otra pestaña)</span>

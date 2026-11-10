@@ -17,12 +17,20 @@ const isUnauthorized = (error: unknown) => error instanceof ApiError && error.st
 /**
  * ¿Hay sesión? Las cookies son HttpOnly: no se pueden leer, hay que preguntar.
  * 1. Sin token CSRF en memoria (página recién cargada): `GET /auth/csrf`, que funciona con la cookie
- *    de refresh aunque el access haya vencido. 401 = sin sesión.
+ *    de refresh aunque el access haya vencido. `{ csrfToken: null }` = sin sesión (backend etapa 18;
+ *    antes respondía 401, que se sigue aceptando).
  * 2. `GET /auth/me` (si el access venció, el cliente HTTP renueva y reintenta solo).
  */
 export async function fetchSession(): Promise<Me | null> {
   try {
-    if (!hasCsrfToken()) keepCsrf(await api<Schemas["CsrfTokenDto"]>("/auth/csrf"));
+    if (!hasCsrfToken()) {
+      const { csrfToken } = await api<Schemas["SessionCsrfDto"]>("/auth/csrf");
+      if (!csrfToken) {
+        setCsrfToken(null);
+        return null;
+      }
+      setCsrfToken(csrfToken);
+    }
     return await api<Me>("/auth/me");
   } catch (error) {
     if (isUnauthorized(error)) {

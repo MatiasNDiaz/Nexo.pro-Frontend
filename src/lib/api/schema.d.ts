@@ -905,7 +905,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["AdminProfessionalContentController_profile_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2820,6 +2820,9 @@ export interface components {
             /** @example ABCDE-FGHJK */
             recoveryCode?: string;
         };
+        CsrfTokenDto: {
+            csrfToken: string;
+        };
         MeDto: {
             id: string;
             email: string;
@@ -2844,8 +2847,8 @@ export interface components {
             hasPassword: boolean;
             googleLinked: boolean;
         };
-        CsrfTokenDto: {
-            csrfToken: string;
+        SessionCsrfDto: {
+            csrfToken: string | null;
         };
         SessionSummaryDto: {
             /** @description Id del dispositivo (familia de sesión) */
@@ -5033,7 +5036,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CsrfTokenDto"];
+                };
             };
         };
     };
@@ -5106,7 +5111,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CsrfTokenDto"];
+                    "application/json": components["schemas"]["SessionCsrfDto"];
                 };
             };
         };
@@ -6069,6 +6074,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    AdminProfessionalContentController_profile_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalMeDto"];
+                };
             };
         };
     };

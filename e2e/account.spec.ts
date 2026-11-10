@@ -399,7 +399,7 @@ test.describe("panel: seguridad", () => {
     const api = await mockApi(
       page,
       signedIn(activeCustomer, {
-        "GET /auth/csrf": () => (loggedIn ? json(200, { csrfToken: "csrf-1" }) : apiError(401, "UNAUTHORIZED")),
+        "GET /auth/csrf": () => json(200, { csrfToken: loggedIn ? "csrf-1" : null }),
         "GET /auth/sessions": () => json(200, devices),
         "POST /auth/logout-all": () => {
           loggedIn = false;

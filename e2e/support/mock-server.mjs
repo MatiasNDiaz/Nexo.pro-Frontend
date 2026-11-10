@@ -185,7 +185,7 @@ function route(method, path, query) {
       ? [200, { ...post, replies: post.id === POSTS[0].id ? REPLIES : [] }]
       : [404, { statusCode: 404, code: "FORUM_POST_NOT_FOUND", message: "La publicación no existe." }];
   }
-  if (path === "/auth/csrf") return [401, { statusCode: 401, code: "UNAUTHORIZED", message: "Iniciá sesión." }];
+  if (path === "/auth/csrf") return [200, { csrfToken: null }];
   if (path === "/professions") return [200, PROFESSIONS];
   if (path === "/locations/provinces") return [200, [PROVINCE]];
   if (path === "/locations/localities") return [200, [LOCALITY]];

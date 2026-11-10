@@ -197,6 +197,14 @@
 - **Prueba:** `e2e/smoke.spec.ts` recorre las páginas públicas y falla ante cualquier
   `securitypolicyviolation`.
 
+## Lighthouse: avisos aceptados (etapa 8)
+
+- **"Falta la meta description"** en el catálogo y el perfil. Las dos páginas la tienen. Next 16
+  manda los metadatos de las páginas dinámicas en diferido a los navegadores y a Google, que
+  ejecuta JavaScript. A los robots que solo leen HTML (Bing, Twitter, Slack, WhatsApp) se los manda
+  en el `<head>`: comprobado con el User-Agent de Bingbot. Lighthouse se presenta como navegador.
+- **HTTPS** en "buenas prácticas": solo en local (http); en producción el sitio va con https.
+
 ## 404
 
 Las rutas inexistentes caen en `(sitio)/[...resto]` y muestran `(sitio)/not-found.tsx` dentro del layout del sitio. El `not-found.tsx` raíz es mínimo porque Next lo incluye en lo que manda a **todas** las páginas: con header y footer, cada página pesaba alrededor de un 25 % más.

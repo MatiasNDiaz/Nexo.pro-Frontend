@@ -47,13 +47,14 @@ const catalogs: Record<string, Handler> = {
 
 /**
  * Intercepta la API. Las claves son "MÉTODO /ruta" (sin /api/v1 ni query). Sin manejador, la
- * sesión es anónima (`/auth/csrf` → 401) y cualquier otra ruta responde 404, para que una llamada
- * inesperada se note en la prueba. Devuelve los pedidos recibidos para inspeccionarlos.
+ * sesión es anónima (`/auth/csrf` → `{ csrfToken: null }`, como el backend desde la etapa 18) y
+ * cualquier otra ruta responde 404, para que una llamada inesperada se note en la prueba. Devuelve
+ * los pedidos recibidos para inspeccionarlos.
  */
 export async function mockApi(page: Page, handlers: Record<string, Handler> = {}) {
   const calls: { key: string; request: Request }[] = [];
   const all: Record<string, Handler> = {
-    "GET /auth/csrf": () => apiError(401, "UNAUTHORIZED", "Iniciá sesión."),
+    "GET /auth/csrf": () => json(200, { csrfToken: null }),
     ...catalogs,
     ...handlers,
   };
