@@ -1,11 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Clock3, Loader2, XCircle } from "lucide-react";
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ButtonLink } from "@/components/ui/button";
+import { refreshAfterPlanChange } from "@/features/catalog/refresh-profile";
+import { getMyProfile, proKeys } from "@/features/pro-profile/api";
 import { useViewer } from "@/features/session/viewer";
 import { cn } from "@/lib/cn";
 import { listPayments, workKeys } from "./api";
@@ -38,6 +40,18 @@ export function CheckoutResult() {
     return () => clearTimeout(timer);
   }, [started]);
   const applied = payments.data?.[0]?.applied ?? false;
+
+  // Con el plan ya aplicado, la página pública y el catálogo (en caché) se actualizan enseguida: el
+  // plan cambia el diseño del perfil y la etiqueta de la tarjeta. Sin esto tardaban hasta un minuto.
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!applied) return;
+    void queryClient
+      .fetchQuery({ queryKey: proKeys.me, queryFn: getMyProfile })
+      .then((me) => refreshAfterPlanChange(me.slug))
+      .then(() => queryClient.invalidateQueries({ queryKey: proKeys.subscription }))
+      .catch(() => undefined);
+  }, [applied, queryClient]);
 
   const view =
     outcome === "approved"

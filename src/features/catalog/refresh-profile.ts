@@ -19,6 +19,31 @@ let windowCount = 0;
  * nadie la use para hacer que el servidor de Next le pida de más al backend, que limita por IP.
  */
 export async function refreshPublicProfile(slug: string): Promise<boolean> {
+  if (!allow(slug)) return false;
+  updateTag(`profile:${slug}`);
+  return true;
+}
+
+/** El catálogo es uno solo para todos: se vence como mucho una vez cada 10 s. */
+const CATALOG_EVERY_MS = 10_000;
+let lastCatalog = 0;
+
+/**
+ * Después de un cambio de plan (pago aplicado): el plan cambia el diseño del perfil y el orden y la
+ * etiqueta de la tarjeta en el catálogo. Vence las dos cachés con los mismos límites.
+ */
+export async function refreshAfterPlanChange(slug: string): Promise<boolean> {
+  if (!allow(slug)) return false;
+  updateTag(`profile:${slug}`);
+  const now = Date.now();
+  if (now - lastCatalog >= CATALOG_EVERY_MS) {
+    lastCatalog = now;
+    updateTag("catalog");
+  }
+  return true;
+}
+
+function allow(slug: unknown): slug is string {
   if (typeof slug !== "string" || !SLUG.test(slug)) return false;
   const now = Date.now();
   if (now - (lastBySlug.get(slug) ?? 0) < PER_SLUG_MS) return false;
@@ -30,6 +55,5 @@ export async function refreshPublicProfile(slug: string): Promise<boolean> {
   windowCount++;
   lastBySlug.set(slug, now);
   if (lastBySlug.size > 1_000) lastBySlug.clear();
-  updateTag(`profile:${slug}`);
   return true;
 }
