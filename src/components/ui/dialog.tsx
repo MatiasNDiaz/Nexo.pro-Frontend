@@ -36,8 +36,13 @@ function useNativeDialog(open: boolean, onClose: () => void) {
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    // Esc dispara "cancel" y el navegador cierra solo: avisamos al dueño del estado.
-    const handleClose = () => onClose();
+    // Esc dispara "cancel" y el navegador cierra solo: avisamos al dueño del estado. El evento "close"
+    // llega después (en otra tarea): si para entonces el diálogo está abierto otra vez, ese cierre fue
+    // nuestro y ya se deshizo. Pasa en desarrollo, donde React monta, desmonta y vuelve a montar los
+    // efectos (Strict Mode): sin este control, todo diálogo se cerraba apenas se abría.
+    const handleClose = () => {
+      if (!dialog.open) onClose();
+    };
     dialog.addEventListener("close", handleClose);
     return () => dialog.removeEventListener("close", handleClose);
   }, [onClose]);

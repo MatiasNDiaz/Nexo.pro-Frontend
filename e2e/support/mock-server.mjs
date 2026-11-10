@@ -71,6 +71,27 @@ const PROFILE = {
   },
 };
 
+/**
+ * Perfil con estilo por sección (ADR 0034 del backend). `zonas` trae un valor que no es #rrggbb, como
+ * si el backend dejara pasar algo raro: el frontend no lo tiene que aplicar.
+ */
+const STYLED = {
+  ...PROFILE,
+  slug: "maria-estilo-zz99",
+  firstName: "María",
+  lastName: "Estilo",
+  bio: "Plomería con estilo.",
+  theme: {
+    color: "violeta",
+    sections: {
+      pagina: { background: "#f5f3ff" },
+      sobre: { background: "#fde68a", text: "#1f2937", animation: "rebote" },
+      datos: { background: "#1e3a8a", backgroundTo: "#7c3aed", text: "#ffffff", size: 115 },
+      zonas: { background: "red;position:fixed", text: "#123456" },
+    },
+  },
+};
+
 const review = (n) => ({
   id: `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`,
   rating: n % 2 ? 5 : 4,
@@ -179,9 +200,9 @@ function route(method, path, query) {
   }
   const profile = /^\/catalog\/professionals\/([^/]+)$/.exec(path);
   if (profile) {
-    return profile[1] === PROFILE.slug
-      ? [200, PROFILE]
-      : [404, { statusCode: 404, code: "PROFILE_NOT_FOUND", message: "El perfil no existe." }];
+    if (profile[1] === PROFILE.slug) return [200, PROFILE];
+    if (profile[1] === STYLED.slug) return [200, STYLED];
+    return [404, { statusCode: 404, code: "PROFILE_NOT_FOUND", message: "El perfil no existe." }];
   }
   return [404, { statusCode: 404, code: "NOT_FOUND", message: "Sin simulación" }];
 }

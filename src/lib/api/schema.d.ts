@@ -2989,6 +2989,40 @@ export interface components {
             /** @enum {string} */
             to: "azul" | "celeste" | "turquesa" | "verde" | "lima" | "amarillo" | "naranja" | "rojo" | "rosa" | "violeta" | "gris" | "grafito";
         };
+        SectionStyleDto: {
+            /** @example #123b7a */
+            background?: string;
+            /**
+             * @description Degradé con `background` (solo Premium)
+             * @example #0b1f3a
+             */
+            backgroundTo?: string;
+            /** @example #ffffff */
+            text?: string;
+            /**
+             * @description Escala en %, solo Premium
+             * @enum {number}
+             */
+            size?: 85 | 90 | 95 | 100 | 105 | 110 | 115 | 120 | 125;
+            /**
+             * @description Solo Premium
+             * @enum {string}
+             */
+            animation?: "aparecer" | "subir" | "costado" | "zoom" | "rebote" | "girar";
+        };
+        ThemeSectionsDto: {
+            pagina?: components["schemas"]["SectionStyleDto"];
+            presentacion?: components["schemas"]["SectionStyleDto"];
+            datos?: components["schemas"]["SectionStyleDto"];
+            sobre?: components["schemas"]["SectionStyleDto"];
+            trabajos?: components["schemas"]["SectionStyleDto"];
+            certificados?: components["schemas"]["SectionStyleDto"];
+            resenas?: components["schemas"]["SectionStyleDto"];
+            contacto?: components["schemas"]["SectionStyleDto"];
+            zonas?: components["schemas"]["SectionStyleDto"];
+            horarios?: components["schemas"]["SectionStyleDto"];
+            redes?: components["schemas"]["SectionStyleDto"];
+        };
         ProfileThemeDto: {
             /** @enum {string} */
             color?: "azul" | "celeste" | "turquesa" | "verde" | "lima" | "amarillo" | "naranja" | "rojo" | "rosa" | "violeta" | "gris" | "grafito";
@@ -3001,6 +3035,8 @@ export interface components {
              * @enum {string}
              */
             animation?: "aparecer" | "deslizar" | "zoom" | "rebote";
+            /** @description Estilo por sección (ADR 0034). Medium: fondo y letra; Premium: además degradé, tamaño y animación */
+            sections?: components["schemas"]["ThemeSectionsDto"];
         };
         AttentionDto: {
             /**

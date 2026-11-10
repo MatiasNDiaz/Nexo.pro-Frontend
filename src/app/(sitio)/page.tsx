@@ -87,7 +87,9 @@ function Hero() {
             </Suspense>
           </div>
           <div className="mt-7 animate-fade-up [animation-delay:750ms]">
-            <ShineLink href="/registro?rol=profesional">¿Sos profesional? Sumate</ShineLink>
+            <ShineLink href="/registro?rol=profesional" pace="slow">
+              ¿Sos profesional? Sumate
+            </ShineLink>
           </div>
         </div>
       </HeroSlides>

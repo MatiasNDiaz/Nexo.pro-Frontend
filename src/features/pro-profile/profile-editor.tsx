@@ -14,7 +14,7 @@ import { Listbox } from "@/components/ui/listbox";
 import { AvatarCard } from "@/features/account/avatar-card";
 import { PanelTitle, SettingsSection } from "@/features/account/settings-section";
 import { useMe } from "@/features/account/use-me";
-import { themeAnimations, themeColors, themeFonts, themeStyle, type ThemeColor } from "@/features/catalog/profile-theme";
+import { themeAnimations, themeColors, themeFonts, themeForLevel, themeStyle, type ThemeColor } from "@/features/catalog/profile-theme";
 import { useLocalities, useProfessions, useProvinces } from "@/features/catalogs/queries";
 import { addCertification, removeCertification } from "@/features/pro-work/api";
 import { errorMessage, isApiError } from "@/lib/api/errors";
@@ -592,12 +592,22 @@ function ThemeSection({ me, level }: { me: ProfessionalMe; level: "NONE" | "STAN
   const save = useMutation({
     mutationFn: () => {
       const { gradient, headline, animation, ...rest } = theme;
-      return setTheme({
-        ...rest,
-        ...(useGradient && gradient ? { gradient } : {}),
-        ...(headline?.trim() ? { headline: headline.trim() } : {}),
-        ...(level === "EXTENDED" && animation ? { animation } : {}),
-      });
+      // El backend reemplaza el tema entero: van los estilos por sección más recientes (los del editor
+      // de diseño), no los que había cuando se abrió esta página.
+      const latest = queryClient.getQueryData<ProfessionalMe>(proKeys.me)?.theme ?? me.theme;
+      delete rest.sections;
+      return setTheme(
+        themeForLevel(
+          {
+            ...rest,
+            ...(useGradient && gradient ? { gradient } : {}),
+            ...(headline?.trim() ? { headline: headline.trim() } : {}),
+            ...(animation ? { animation } : {}),
+            ...(latest.sections ? { sections: latest.sections } : {}),
+          },
+          level,
+        ),
+      );
     },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
@@ -695,6 +705,19 @@ function ThemeSection({ me, level }: { me: ProfessionalMe; level: "NONE" | "STAN
             error={save.isError ? (isApiError(save.error, "THEME_NOT_IN_PLAN") ? "Tu plan no incluye alguna de esas opciones." : planError(save.error)) : null}
           />
         </form>
+      )}
+      {!locked && (
+        <div className="flex flex-col items-start gap-3 rounded-2xl bg-brand-950 p-5 text-white sm:flex-row sm:items-center sm:justify-between">
+          <span className="flex flex-col gap-1">
+            <span className="font-semibold">Diseñá cada parte de tu página</span>
+            <span className="text-sm text-brand-200">
+              {level === "EXTENDED" ? "Fondo, degradé, color de letra, tamaño y animación de cada contenedor." : "Color de fondo y de letra de cada contenedor."}
+            </span>
+          </span>
+          <ShineLink href="/panel/perfil/diseno" className="h-11 shrink-0 px-5 text-sm">
+            Abrir el editor de diseño
+          </ShineLink>
+        </div>
       )}
     </SettingsSection>
   );

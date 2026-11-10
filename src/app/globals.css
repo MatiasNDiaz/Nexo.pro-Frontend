@@ -140,15 +140,24 @@
 }
 /*
  * Brillo que cruza de punta a punta (tarjeta Premium y botones destacados). El elemento mide el 40 %
- * de su contenedor: de -160 % a 360 % de su ancho lo recorre entero. Pasa y descansa (55 % → 100 %).
+ * de su contenedor y está inclinado: en una tarjeta alta, la inclinación corre la punta de arriba
+ * hacia adentro, así que arranca y termina bien afuera (-220 % y 380 %). Solo se ve mientras cruza:
+ * quieto (antes de arrancar, entre pasadas o con movimiento reducido) es invisible (`shine-band`).
+ * Pasa y descansa (55 % → 100 %).
  */
 @keyframes shine-sweep {
-  from {
-    transform: translateX(-160%) skewX(-20deg);
+  0% {
+    opacity: 1;
+    transform: translateX(-220%) skewX(-20deg);
   }
-  55%,
-  to {
-    transform: translateX(360%) skewX(-20deg);
+  55% {
+    opacity: 1;
+    transform: translateX(380%) skewX(-20deg);
+  }
+  55.1%,
+  100% {
+    opacity: 0;
+    transform: translateX(380%) skewX(-20deg);
   }
 }
 /*
@@ -157,10 +166,12 @@
  */
 @keyframes shine-once {
   from {
-    transform: translateX(-160%) skewX(-20deg);
+    opacity: 1;
+    transform: translateX(-220%) skewX(-20deg);
   }
   to {
-    transform: translateX(360%) skewX(-20deg);
+    opacity: 1;
+    transform: translateX(380%) skewX(-20deg);
   }
 }
 /* Resplandor que flota lento dentro de la tarjeta Premium. */
@@ -329,7 +340,19 @@
   left: 0;
   width: 45%;
   pointer-events: none;
-  transform: translateX(-160%) skewX(-20deg);
+  opacity: 0;
+  transform: translateX(-220%) skewX(-20deg);
+}
+
+/* Franja del brillo periódico (shine-sweep): invisible y afuera mientras no cruza. */
+@utility shine-band {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 40%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-220%) skewX(-20deg);
 }
 
 /* Contenedor de página: el mismo ancho y márgenes laterales en toda la app (16 px en celular). */
@@ -417,6 +440,116 @@
     opacity: 1;
     transform: none;
     will-change: auto;
+  }
+
+  /*
+   * Animación de entrada elegida por el profesional para una sección (Premium, ADR 0034 del backend):
+   * data-reveal="anim-<nombre>". En vez de la transición común, una animación con keyframes.
+   */
+  .reveal-on [data-reveal^="anim-"] {
+    transform: none;
+    transition: none;
+  }
+  .reveal-on [data-reveal^="anim-"][data-revealed] {
+    animation-duration: 850ms;
+    animation-timing-function: var(--ease-out-soft);
+    animation-fill-mode: both;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal-on [data-reveal="anim-aparecer"][data-revealed] {
+    animation-name: sec-aparecer;
+    animation-duration: 1000ms;
+  }
+  .reveal-on [data-reveal="anim-subir"][data-revealed] {
+    animation-name: sec-subir;
+  }
+  .reveal-on [data-reveal="anim-costado"][data-revealed] {
+    animation-name: sec-costado;
+  }
+  .reveal-on [data-reveal="anim-zoom"][data-revealed] {
+    animation-name: sec-zoom;
+  }
+  .reveal-on [data-reveal="anim-rebote"][data-revealed] {
+    animation-name: sec-rebote;
+    animation-duration: 1000ms;
+  }
+  .reveal-on [data-reveal="anim-girar"][data-revealed] {
+    animation-name: sec-girar;
+    transform-origin: 50% 0;
+  }
+
+  /* Muestra de cada animación en el editor: un cuadradito que la repite. */
+  .anim-demo {
+    animation-duration: 1600ms;
+    animation-timing-function: var(--ease-out-soft);
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+  }
+}
+
+@keyframes sec-aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sec-subir {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sec-costado {
+  from {
+    opacity: 0;
+    transform: translate3d(-56px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sec-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sec-rebote {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 56px, 0);
+  }
+  55% {
+    opacity: 1;
+    transform: translate3d(0, -12px, 0);
+  }
+  78% {
+    transform: translate3d(0, 5px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sec-girar {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateX(-65deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

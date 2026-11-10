@@ -128,6 +128,29 @@
 | Editar datos manda solo lo que cambió | El backend aplica lo que recibe; mandar todo registraría cambios que no hubo |
 | Las métricas del profesional en la ficha usan el mismo tablero que ve el profesional (`MetricsBoard`) | El admin las ve aunque el profesional no tenga Premium (E-050) |
 
+## Diseño por sección de la página del profesional (ADR 0034 del backend)
+
+| Decisión | Motivo |
+| --- | --- |
+| La página pública vive en un componente compartido (`features/catalog/profile-view.tsx`) que usan la ruta pública y el editor (`/panel/perfil/diseno`) | El editor muestra exactamente lo que van a ver los clientes; `preview` quita las acciones reales (contactar, guardar, reportar) |
+| Cada contenedor tiene un menú ⋮ con Color de fondo, Color de letra, Tamaño y Animación; lo que el plan no incluye se ve con la etiqueta Premium, deshabilitado | Pedido del fundador. Medium: fondo y letra sólidos. Premium: además degradé, tamaño (85–125 %) y 6 animaciones |
+| El color de letra se aplica redefiniendo los colores del sistema dentro de la sección (`--color-ink`, grises, cajas internas) | Así el texto y las tarjetas de adentro siguen el color elegido. `brand-800` no se redefine: es la letra de las etiquetas con fondo claro propio |
+| Solo se aplican colores `#rrggbb` (también en el frontend), en atributos `style` de React | Nunca CSS armado con texto del usuario, aunque el backend dejara pasar algo raro |
+| El editor muestra el contraste y avisa por debajo de 4,5:1, sin impedirlo | Es la página de cada profesional; el aviso evita que quede ilegible sin querer |
+| Las animaciones de sección usan la aparición al hacer scroll (`data-reveal="anim-…"`) y respetan "reducir movimiento" | Un solo sistema de aparición; con movimiento reducido el contenido se ve directo |
+| "Aplicar estilos" vence la caché de la página pública con una Server Action (`refreshPublicProfile`, `updateTag`) | Sin eso, la página tardaba hasta un minuto. Es pública: solo vence caché, valida el slug y está limitada (5 s por perfil, 30 por minuto) |
+| El "Estilo" del editor de perfil manda las secciones guardadas más recientes y quita lo que el plan no incluye (`themeForLevel`) | El backend reemplaza el tema entero: con datos viejos pisaba el diseño por sección |
+| En el editor, la columna lateral no queda fija (`sticky`) | Más alta que la pantalla, los menús de sus últimas tarjetas quedaban fuera de alcance |
+
+## Arreglos encontrados al probar contra el backend real (10/11/2026)
+
+| Problema | Causa | Arreglo |
+| --- | --- | --- |
+| En desarrollo, todo diálogo se cerraba apenas se abría | Strict Mode monta, desmonta y vuelve a montar los efectos; el evento `close` del desmontaje llegaba cuando el diálogo ya estaba abierto otra vez | `ui/dialog.tsx` ignora el `close` si el diálogo está abierto |
+| En el celular, el panel medía 1298 px con notificaciones sin leer | El texto `sr-only` del contador (position absolute) no tenía bloque contenedor dentro de la fila que se desplaza | La fila del menú es `relative` |
+| Buscar y tocar un filtro enseguida perdía la búsqueda (admin) | El filtro leía la URL antes de que el router la actualizara | `users-page.tsx` recuerda el último pedido en una referencia |
+| Brillo quieto en la esquina de la tarjeta Premium | En reposo, la franja inclinada asomaba arriba a la izquierda (y con movimiento reducido quedaba en el borde) | El brillo es invisible fuera de su pasada y arranca más afuera (`shine-band`, `shine-hover`) |
+
 ## Interfaz: desplegables, transiciones y scroll
 
 | Decisión | Motivo |
@@ -161,4 +184,5 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | Avisos push en producción | El backend necesita sus claves VAPID; sin ellas la página explica que todavía no están activados | Antes de producción |
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |
+| Cambio de plan y caché de la página pública | Si el admin o un pago cambian el plan, la página pública (en caché) puede tardar hasta un minuto en reflejarlo. Se resolvería con un aviso del backend al frontend | Antes de producción |
 | Aviso de React por el `<script>` del `<head>` | En desarrollo, la consola avisa "Encountered a script tag while rendering React component". Es solo un aviso: el script viene en el HTML del servidor y corre igual. Se resuelve junto con la CSP (nonce) | Etapa 8 |

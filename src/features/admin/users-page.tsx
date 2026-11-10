@@ -5,7 +5,7 @@ import { ChevronRight, Search, UserX } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Pagination } from "@/components/catalog/pagination";
 import { Button } from "@/components/ui/button";
 import { Alert, Badge, EmptyState, Skeleton } from "@/components/ui/feedback";
@@ -81,7 +81,20 @@ export function AdminUsersPage() {
     placeholderData: keepPreviousData,
   });
 
-  const go = (next: UsersQuery) => router.replace(`${pathname}${toSearch(next)}` as Route, { scroll: false });
+  /*
+   * Cada cambio parte del último pedido, no de la URL del último render: si alguien busca y toca un
+   * filtro enseguida, el router todavía no actualizó la URL y se perdería la búsqueda. `latest` se
+   * actualiza en el mismo clic y vuelve a la URL cuando esta cambia (atrás, adelante, enlaces).
+   */
+  const search = params.toString();
+  const latest = useRef<UsersQuery>(query);
+  useEffect(() => {
+    latest.current = readQuery(new URLSearchParams(search));
+  }, [search]);
+  const go = (change: (current: UsersQuery) => UsersQuery) => {
+    latest.current = change(latest.current);
+    router.replace(`${pathname}${toSearch(latest.current)}` as Route, { scroll: false });
+  };
   const totalPages = users.data ? Math.max(1, Math.ceil(users.data.total / USERS_PAGE_SIZE)) : 1;
 
   return (
@@ -100,7 +113,7 @@ export function AdminUsersPage() {
               return;
             }
             setTooShort(false);
-            go({ ...query, q: value || undefined, page: undefined });
+            go((current) => ({ ...current, q: value || undefined, page: undefined }));
           }}
         >
           <Field
@@ -130,7 +143,7 @@ export function AdminUsersPage() {
                     key={role.value}
                     type="button"
                     aria-pressed={active}
-                    onClick={() => go({ ...query, role: role.value || undefined, page: undefined })}
+                    onClick={() => go((current) => ({ ...current, role: role.value || undefined, page: undefined }))}
                     className={cn("h-10 rounded-xl px-4 text-sm font-semibold transition-colors", active ? "bg-brand-700 text-white" : "text-brand-800 hover:bg-brand-50")}
                   >
                     {role.label}
@@ -144,7 +157,7 @@ export function AdminUsersPage() {
               <Listbox
                 {...a11y}
                 value={query.status ?? ""}
-                onChange={(value) => go({ ...query, status: (value || undefined) as AccountStatus | undefined, page: undefined })}
+                onChange={(value) => go((current) => ({ ...current, status: (value || undefined) as AccountStatus | undefined, page: undefined }))}
                 options={[{ value: "", label: "Todos" }, ...STATUSES.map((status) => ({ value: status, label: statusLabel[status].label }))]}
               />
             )}

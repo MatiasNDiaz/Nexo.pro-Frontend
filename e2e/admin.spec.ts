@@ -114,6 +114,16 @@ test.describe("búsqueda de usuarios", () => {
     await expectNoHorizontalScroll(page);
   });
 
+  test("buscar y tocar un filtro enseguida no pierde la búsqueda", async ({ page }) => {
+    await mockApi(page, asAdmin({ "GET /admin/users": () => json(200, { data: [listItem], page: 1, limit: 20, total: 1 }) }));
+    await page.goto("/panel/admin/usuarios");
+    await page.getByRole("searchbox").fill("cami");
+    await page.getByRole("button", { name: "Buscar" }).click();
+    await page.getByRole("button", { name: "Profesionales" }).click();
+    await expect(page).toHaveURL(/q=cami/);
+    await expect(page).toHaveURL(/rol=PROFESSIONAL/);
+  });
+
   test("una búsqueda de una letra no se manda", async ({ page }) => {
     const api = await mockApi(page, asAdmin({ "GET /admin/users": () => json(200, { data: [], page: 1, limit: 20, total: 0 }) }));
     await page.goto("/panel/admin/usuarios");

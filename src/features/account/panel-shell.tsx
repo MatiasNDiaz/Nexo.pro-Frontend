@@ -183,8 +183,12 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
             </span>
           </div>
 
-          {/* Celular: una sola fila que se desplaza. Escritorio: grupos en columna. */}
-          <div ref={row} className="-mx-2 flex gap-1 overflow-x-auto px-2 [scrollbar-width:none] lg:mx-0 lg:mt-3 lg:flex-col lg:gap-4 lg:overflow-visible lg:px-0">
+          {/*
+            Celular: una sola fila que se desplaza. Escritorio: grupos en columna. `relative`: la fila es
+            el bloque contenedor de lo que va con position absolute adentro (el texto sr-only de los
+            contadores); sin eso, ese texto queda fuera del recorte y agranda la página en el celular.
+          */}
+          <div ref={row} className="relative -mx-2 flex gap-1 overflow-x-auto px-2 [scrollbar-width:none] lg:mx-0 lg:mt-3 lg:flex-col lg:gap-4 lg:overflow-visible lg:px-0">
             {groups.map((group) => (
               <div key={group.label} className="flex shrink-0 lg:flex-col lg:gap-1">
                 <p className="hidden px-3 pb-1 text-xs font-semibold text-brand-300 lg:block">{group.label}</p>

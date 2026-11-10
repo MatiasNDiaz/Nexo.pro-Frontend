@@ -76,21 +76,18 @@ export function PlansTable() {
                 // Botón dorado con brillo que lo cruza y halo que respira; al pasar el mouse sube y se aclara.
                 <Link
                   href="/registro?rol=profesional"
-                  className="group/cta relative inline-flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-linear-to-r from-amber-100 via-amber-400 to-amber-500 font-semibold text-brand-900 transition-[translate,filter] duration-200 ease-out-soft [animation:glow-pulse_2.6s_ease-in-out_infinite] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.97]"
+                  className="group/cta relative inline-flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-linear-to-r from-amber-100 via-amber-400 to-amber-500 font-semibold text-brand-900 transition-[translate,filter] duration-700 ease-out-soft [animation:glow-pulse_2.6s_ease-in-out_infinite] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.97]"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-linear-to-r from-transparent via-white/70 to-transparent [animation:shine-sweep_2.8s_var(--ease-in-out-strong)_infinite]"
-                  />
+                  <span aria-hidden="true" className="shine-band bg-linear-to-r from-transparent via-white/70 to-transparent [animation:shine-sweep_2.8s_var(--ease-in-out-strong)_infinite]" />
                   {/*
                     Brillo instantáneo al entrar a la tarjeta y otra vez al llegar al botón (otra
                     duración: un valor de animación distinto la hace arrancar de nuevo).
                   */}
                   <span
                     aria-hidden="true"
-                    className="shine-hover bg-linear-to-r from-transparent via-white/90 to-transparent group-hover/premium:[animation:shine-once_600ms_var(--ease-out-soft)] group-hover/cta:[animation:shine-once_550ms_var(--ease-out-soft)] group-focus-visible/cta:[animation:shine-once_600ms_var(--ease-out-soft)]"
+                    className="shine-hover bg-linear-to-r from-transparent via-white/90 to-transparent group-hover/premium:[animation:shine-once_1100ms_var(--ease-out-soft)] group-hover/cta:[animation:shine-once_1050ms_var(--ease-out-soft)] group-focus-visible/cta:[animation:shine-once_1100ms_var(--ease-out-soft)]"
                   />
-                  <Crown className="relative size-4 transition-transform duration-300 ease-out-soft group-hover/cta:-rotate-12" aria-hidden="true" />
+                  <Crown className="relative size-4 transition-transform duration-800 ease-out-soft group-hover/cta:-rotate-12" aria-hidden="true" />
                   <span className="relative">Probar 30 días</span>
                 </Link>
               ) : (
@@ -140,23 +137,21 @@ export function PlanShell({ tier, children }: { tier: number; children: ReactNod
       className={cn(
         "group/premium relative flex w-full rounded-3xl p-[2px] [animation:plan-spin_5s_linear_infinite]",
         "[background:conic-gradient(from_var(--plan-angle),#f4a340,#ffe1a8,#3b82f6,#f4a340)]",
-        "shadow-[0_20px_60px_-28px_rgb(244_163_64/0.55)] transition-[translate,scale,box-shadow] duration-300 ease-out-soft",
+        // Medio segundo más lenta que el resto de las tarjetas (pedido del fundador): 300 → 800 ms.
+        "shadow-[0_20px_60px_-28px_rgb(244_163_64/0.55)] transition-[translate,scale,box-shadow] duration-800 ease-out-soft",
         "hover:-translate-y-2.5 hover:scale-[1.015] hover:shadow-[0_34px_80px_-24px_rgb(244_163_64/0.75)]",
       )}
     >
       <div className="relative flex w-full flex-col overflow-hidden rounded-[calc(var(--radius-3xl)-2px)] bg-[radial-gradient(120%_80%_at_100%_0%,#3a2a12_0%,#14100c_45%,#07152a_100%)] p-7 sm:p-8">
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute -top-1/4 -right-1/4 size-[70%] rounded-full bg-[radial-gradient(closest-side,rgb(244_163_64/0.35),transparent)] opacity-70 transition-opacity duration-500 [animation:glow-drift_9s_ease-in-out_infinite] group-hover/premium:opacity-100"
+          className="pointer-events-none absolute -top-1/4 -right-1/4 size-[70%] rounded-full bg-[radial-gradient(closest-side,rgb(244_163_64/0.35),transparent)] opacity-70 transition-opacity duration-1000 [animation:glow-drift_9s_ease-in-out_infinite] group-hover/premium:opacity-100"
         />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-linear-to-r from-transparent via-amber-100/20 to-transparent [animation:shine-sweep_4.5s_var(--ease-in-out-strong)_infinite]"
-        />
+        <span aria-hidden="true" className="shine-band bg-linear-to-r from-transparent via-amber-100/20 to-transparent [animation:shine-sweep_4.5s_var(--ease-in-out-strong)_infinite]" />
         {/* Al pasar el mouse, un brillo fuerte cruza al instante (sin esperar el ciclo de arriba). */}
         <span
           aria-hidden="true"
-          className="shine-hover z-1 bg-linear-to-r from-transparent via-amber-50/45 to-transparent group-hover/premium:[animation:shine-once_750ms_var(--ease-out-soft)]"
+          className="shine-hover z-1 bg-linear-to-r from-transparent via-amber-50/45 to-transparent group-hover/premium:[animation:shine-once_1250ms_var(--ease-out-soft)]"
         />
         {[
           "top-6 right-[38%] size-3 [animation-delay:0s]",
