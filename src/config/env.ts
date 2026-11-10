@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+// Sin compilar validadores con `new Function`: la CSP (src/config/csp.ts) no permite eval y zod, al
+// probar si puede, deja un reporte de violación aunque siga andando. Este módulo se carga antes que
+// cualquier otro esquema del sitio.
+z.config({ jitless: true });
+
 /** Origen exacto (esquema + host + puerto opcional), sin path ni barra final: igual que FRONTEND_ORIGINS del backend. */
 const origin = z
   .string()

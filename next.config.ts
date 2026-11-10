@@ -1,14 +1,20 @@
 import type { NextConfig } from "next";
+import { buildCsp } from "./src/config/csp";
 
 /**
- * Encabezados de seguridad base para todas las rutas. La Content-Security-Policy se agrega en la
- * etapa de cierre: con nonces obliga a renderizar dinámicamente, y hay que medir ese costo.
+ * Encabezados de seguridad para todas las rutas. La CSP (src/config/csp.ts) va sin nonce: con
+ * `cacheComponents` las partes estáticas no pueden llevarlo. La URL de la API se valida en
+ * src/config/env.ts al compilar; acá solo se lee.
  */
 const securityHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value: buildCsp({ apiUrl: process.env.NEXT_PUBLIC_API_URL ?? "", dev: process.env.NODE_ENV === "development" }),
+  },
   { key: "X-Content-Type-Options", value: "nosniff" },
   // Las páginas de enlaces de email llevan `?token=`: no se filtra el path completo a otros sitios.
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  // La app nunca se muestra dentro de un iframe (clickjacking). Lo reemplaza `frame-ancestors` con la CSP.
+  // La app nunca se muestra dentro de un iframe (clickjacking). Repite `frame-ancestors` para navegadores viejos.
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
   // Sin `includeSubDomains` ni `preload` hasta definir el dominio de producción (decisión pendiente).

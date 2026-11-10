@@ -172,8 +172,30 @@
 | Desplegables propios (`ui/listbox.tsx`, patrón "combobox de solo selección" de WAI-ARIA) en lugar de `<select>` | El nativo no toma la estética de la página (pedido del fundador). Teclado completo, búsqueda con más de 10 opciones y `FormListbox` para react-hook-form |
 | La foto del profesional vuela entre su tarjeta y su perfil (`<ViewTransition>` con el mismo nombre) | Solo en navegaciones marcadas con el tipo `navegacion` (tarjeta, menú y "atrás"): así no se repite cuando el perfil termina de cargar |
 | El esqueleto del perfil muestra la foto recién tocada (`PhotoStash`) | Si el perfil no estaba precargado, Next mostraba el esqueleto sin foto y el vuelo no se formaba en el primer toque |
-| Script en el `<head>` (`lib/popstate-gate.ts`) que se registra antes que el router de Next | React resuelve sincrónicamente las navegaciones del botón "atrás" y no las anima: el perfil frena ese evento y pide la misma URL como navegación común. **Con la CSP, este script necesita su nonce** |
+| Script en el `<head>` (`lib/popstate-gate.ts`) que se registra antes que el router de Next | React resuelve sincrónicamente las navegaciones del botón "atrás" y no las anima: el perfil frena ese evento y pide la misma URL como navegación común. La CSP lo permite con `'unsafe-inline'` (ver "Content-Security-Policy") |
 | Filtros, pestañas y paginación cambian el contenido sin mover la pantalla (`scroll={false}`) y la zona de resultados guarda un alto mínimo | Pedido del fundador: el salto hacia arriba al filtrar era incómodo |
+
+## Content-Security-Policy (etapa 8)
+
+`src/config/csp.ts` arma la política y `next.config.ts` la manda en todas las páginas.
+
+- **Sin nonce.** Con `cacheComponents`, las partes estáticas de cada página se arman al compilar y no
+  pueden llevar el nonce de cada visita: la guía de CSP de Next 16 lo marca como incompatible con el
+  prerender parcial. Tener nonce obligaría a apagar `cacheComponents` en todo el sitio (más lento y
+  más caro). Por eso los scripts en línea de Next quedan permitidos con `'unsafe-inline'`.
+- **Todo lo demás, cerrado:**
+  - `connect-src`: el sitio, la API (también `ws:`/`wss:` para el chat) y la subida a Cloudinary;
+  - `img-src` y `media-src`: el sitio, Cloudinary y la API;
+  - `script-src` y `frame-src`: solo Turnstile además del sitio;
+  - `frame-ancestors 'none'`, `object-src 'none'`, `base-uri` y `form-action` en `'self'`;
+  - `upgrade-insecure-requests` solo si la API es https.
+
+  Un script inyectado no puede mandar datos a otro servidor. La protección principal contra la
+  inyección sigue siendo que React trata como texto todo lo que escriben los usuarios.
+- **zod sin JIT** (`z.config({ jitless: true })` en `config/env.ts`): zod prueba `new Function` y,
+  aunque sigue andando, el navegador reporta una violación de la CSP.
+- **Prueba:** `e2e/smoke.spec.ts` recorre las páginas públicas y falla ante cualquier
+  `securitypolicyviolation`.
 
 ## 404
 
@@ -199,4 +221,4 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |
 | Cambio de plan y caché de la página pública | Si el admin o un pago cambian el plan, la página pública (en caché) puede tardar hasta un minuto en reflejarlo. Se resolvería con un aviso del backend al frontend | Antes de producción |
-| Aviso de React por el `<script>` del `<head>` | En desarrollo, la consola avisa "Encountered a script tag while rendering React component". Es solo un aviso: el script viene en el HTML del servidor y corre igual. Se resuelve junto con la CSP (nonce) | Etapa 8 |
+| Aviso de React por el `<script>` del `<head>` | En desarrollo, la consola avisa "Encountered a script tag while rendering React component". Es solo un aviso: el script viene en el HTML del servidor y corre igual. Aceptado: pasarlo a `next/script` cambiaría el momento en que corre, y tiene que registrarse antes que el router | Aceptado (etapa 8) |

@@ -10,7 +10,8 @@
  * Lo usa el perfil del profesional (components/catalog/catalog-return.tsx): el "atrás" hacia el
  * catálogo se vuelve una navegación común que React anima, y el scroll del catálogo se repone en el
  * paso pendiente, así la tarjeta ya está en su lugar cuando React decide qué fotos vuelan.
- * Cuando la CSP lleve nonces, este script tiene que llevar el nonce.
+ * La CSP lo permite con 'unsafe-inline' (src/config/csp.ts); si algún día lleva nonces, este script
+ * tiene que llevar el nonce.
  */
 export const POPSTATE_GATE = `(function(){
 addEventListener("popstate",function(e){var h=window.__reparaPopstate;if(typeof h==="function"&&h(e)===true)e.stopImmediatePropagation()});
