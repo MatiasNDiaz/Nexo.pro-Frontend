@@ -88,6 +88,17 @@
 | Las sanciones se ven también con la cuenta suspendida, bloqueada o por verificar | El backend permite consultar y apelar en esos estados (para poder defenderse) |
 | Las opiniones sobre la plataforma solo aparecen en el inicio si el equipo publicó alguna | Nunca se muestran opiniones inventadas |
 
+## Perfil del profesional (etapa 6, primera parte)
+
+| Decisión | Motivo |
+| --- | --- |
+| La personalización del plan se traduce en el frontend (`features/catalog/profile-theme.ts`): 12 colores con contraste ≥ 4,5:1 sobre blanco, 4 tipografías y 4 animaciones | El backend guarda solo nombres de listas cerradas (FI §6.3), nunca CSS del usuario. La tipografía "manuscrita" (Caveat) se descarga solo en las páginas que la usan |
+| Sin portada propia, la cabecera usa una foto ilustrativa de su oficio teñida con su color | Una cabecera vacía se veía pobre; la foto es del sitio (Pexels), no se presenta como del profesional |
+| El editor guarda cada sección por separado y deja en la caché el perfil que devuelve el backend | Casi todos los endpoints responden el perfil completo: no hace falta volver a pedirlo |
+| Lo que el plan no incluye se muestra bloqueado con su explicación (portada, estilo, animación) | El backend igual lo rechaza (`PLAN_LIMIT_REACHED`, `THEME_NOT_IN_PLAN`); así nadie llena un formulario que va a fallar |
+| Las páginas del panel declaran `instant = false` | Se arman en el navegador detrás de la sesión: Next 16 avisaba en desarrollo que no podía validarlas como navegación instantánea |
+| Los bloques con `data-reveal` visibles al cargar llevan `suppressHydrationWarning` | El sistema de aparición puede marcarlos (`data-revealed`) antes de que React hidrate; la diferencia es intencional |
+
 ## Interfaz: desplegables, transiciones y scroll
 
 | Decisión | Motivo |
@@ -118,7 +129,6 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | Tema | Detalle | Cuándo |
 | --- | --- | --- |
 | Límite del detalle de perfil desde el servidor de Next | Todos los pedidos del servidor salen de una IP: con muchos perfiles distintos sin caché podría llegar a 30 por minuto. Solución posible en el backend: reconocer al servidor del frontend con un encabezado secreto | Antes de producción |
-| Personalización del perfil (`theme`: color, fuente, animación) | El backend la devuelve según el plan; todavía no se aplica en la página | Etapa de diseño |
 | Avisos push en producción | El backend necesita sus claves VAPID; sin ellas la página explica que todavía no están activados | Antes de producción |
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |

@@ -223,6 +223,35 @@
     transform: translateX(calc(-50% - 0.5rem));
   }
 }
+/* Animaciones de entrada que elige el profesional para su página (features/catalog/profile-theme.ts). */
+@keyframes pro-slide {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+}
+@keyframes pro-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+@keyframes pro-bounce {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+  75% {
+    transform: translateY(2px);
+  }
+  100% {
+    transform: none;
+  }
+}
 /* Corazón de favoritos: late al guardar. */
 @keyframes heart-pop {
   0% {

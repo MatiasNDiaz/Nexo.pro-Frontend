@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
+  Store,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
@@ -61,7 +62,7 @@ export function panelGroupsFor(user: Me): PanelGroup[] {
   const notifications: PanelLink = { href: "/panel/notificaciones", label: "Notificaciones", icon: Bell, counter: "notifications" };
   if (user.role === "ADMIN") return [{ label: "Tu cuenta", links: [home, notifications, security] }];
 
-  // Chat, pedidos, trabajos, favoritos y reseñas exigen la cuenta activa. Los del profesional llegan en la etapa 6.
+  // Chat, pedidos, trabajos, favoritos y reseñas exigen la cuenta activa.
   const activity: PanelLink[] =
     user.role === "CUSTOMER" && user.status === "ACTIVE"
       ? [
@@ -71,7 +72,10 @@ export function panelGroupsFor(user: Me): PanelGroup[] {
           { href: "/panel/favoritos", label: "Favoritos", icon: Heart },
           { href: "/panel/resenas", label: "Mis reseñas", icon: Star },
         ]
-      : [];
+      : user.role === "PROFESSIONAL"
+        ? // El perfil se edita también con la cuenta por verificar (el backend lo permite).
+          [{ href: "/panel/perfil", label: "Mi perfil", icon: Store }]
+        : [];
   // Soporte, reportes y opinión exigen la cuenta activa; las sanciones se ven también por verificar.
   const help: PanelLink[] =
     user.status === "ACTIVE"
