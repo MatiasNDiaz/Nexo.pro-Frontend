@@ -39,7 +39,8 @@ self.addEventListener("push", function (event) {
   var data = {};
   try {
     data = event.data ? event.data.json() : {};
-  } catch (error) {
+  } catch {
+    // Aviso sin JSON válido: se muestra el genérico.
     data = {};
   }
   event.waitUntil(
