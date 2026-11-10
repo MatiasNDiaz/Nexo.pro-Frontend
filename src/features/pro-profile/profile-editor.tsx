@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, ImagePlus, Loader2, Lock, MapPin, Plus, Star, Trash2, Video } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, FileBadge, ImagePlus, Loader2, Lock, MapPin, Plus, Star, Trash2, Video } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
@@ -16,6 +16,7 @@ import { PanelTitle, SettingsSection } from "@/features/account/settings-section
 import { useMe } from "@/features/account/use-me";
 import { themeAnimations, themeColors, themeFonts, themeStyle, type ThemeColor } from "@/features/catalog/profile-theme";
 import { useLocalities, useProfessions, useProvinces } from "@/features/catalogs/queries";
+import { addCertification, removeCertification } from "@/features/pro-work/api";
 import { errorMessage, isApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
 import { ACCEPTED_TYPES, kindOf, uploadFile } from "@/lib/uploads";
@@ -92,6 +93,7 @@ export function ProfileEditor() {
       <MediaSection me={me} maxImages={sub?.plan?.maxImages ?? 0} maxVideos={sub?.plan?.maxVideos ?? 0} />
       <ProfessionsSection me={me} max={sub?.plan?.maxProfessions ?? 1} />
       <AreasSection me={me} />
+      <CertificatesSection me={me} />
       <SocialsSection me={me} />
       <ThemeSection me={me} level={themeAllows(sub, "EXTENDED") ? "EXTENDED" : themeAllows(sub, "STANDARD") ? "STANDARD" : "NONE"} />
     </div>
@@ -788,5 +790,127 @@ function SaveRow({ pending, saved, error }: { pending: boolean; saved: boolean; 
         )}
       </div>
     </div>
+  );
+}
+
+const MAX_CERTIFICATIONS = 10;
+
+/**
+ * Certificados (ADR 0020): foto o PDF, se publican al momento como "cargado por el profesional" (el
+ * equipo no los verifica). Hay que confirmar que no muestran DNI, dirección ni fecha de nacimiento.
+ */
+function CertificatesSection({ me }: { me: ProfessionalMe }) {
+  const id = useId();
+  const queryClient = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [institution, setInstitution] = useState("");
+  const [year, setYear] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const refresh = () => queryClient.invalidateQueries({ queryKey: proKeys.me });
+  const add = useMutation({
+    mutationFn: async () => {
+      const uploaded = await uploadFile(file!, "CERTIFICATE");
+      return addCertification({
+        fileId: uploaded.id,
+        title: title.trim(),
+        ...(institution.trim() ? { institution: institution.trim() } : {}),
+        ...(year ? { issuedYear: Number(year) } : {}),
+        sensitiveDataConfirmed: true,
+      });
+    },
+    onSuccess: () => {
+      setFile(null);
+      setTitle("");
+      setInstitution("");
+      setYear("");
+      setConfirmed(false);
+      setTouched(false);
+      void refresh();
+    },
+  });
+  const remove = useMutation({ mutationFn: (certId: string) => removeCertification(certId), onSettled: refresh });
+  const full = me.certifications.length >= MAX_CERTIFICATIONS;
+  const titleError = touched && title.trim().length < 2 ? "Escribí el nombre del certificado." : undefined;
+  const fileError = touched && !file ? "Elegí la foto o el PDF." : undefined;
+  const confirmError = touched && !confirmed ? "Confirmá que no muestra datos sensibles." : undefined;
+
+  return (
+    <SettingsSection id="certificados" title="Certificados" description={`Matrículas, cursos o habilitaciones (hasta ${MAX_CERTIFICATIONS}). Se muestran como “cargados por el profesional”.`}>
+      {me.certifications.length > 0 && (
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {me.certifications.map((cert) => (
+            <li key={cert.id} className="flex items-start gap-3 rounded-2xl bg-canvas p-4 animate-[pop-in_200ms_var(--ease-out-soft)]">
+              <FileBadge className="mt-0.5 size-5 shrink-0 text-brand-600" aria-hidden="true" />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="font-semibold text-ink">{cert.title}</span>
+                <span className="text-sm text-muted">{[cert.institution, cert.issuedYear].filter(Boolean).join(" · ") || "Sin datos de emisión"}</span>
+                {cert.status === "HIDDEN_BY_ADMIN" && <span className="text-xs font-semibold text-danger-600">Oculto por el equipo: {cert.hiddenReason ?? "revisalo"}</span>}
+                {cert.url && (
+                  <a href={cert.url} target="_blank" rel="noopener noreferrer" className="mt-1 text-sm font-semibold text-brand-700 underline-offset-4 hover:underline">
+                    Ver<span className="sr-only"> {cert.title} (se abre en otra pestaña)</span>
+                  </a>
+                )}
+              </span>
+              <IconButton label={`Borrar ${cert.title}`} danger disabled={remove.isPending} onClick={() => remove.mutate(cert.id)}>
+                <Trash2 className="size-4" />
+              </IconButton>
+            </li>
+          ))}
+        </ul>
+      )}
+      {full ? (
+        <p className="text-sm text-muted">Llegaste al máximo de certificados. Borrá uno para sumar otro.</p>
+      ) : (
+        <form
+          noValidate
+          className="flex flex-col gap-4 rounded-2xl border border-dashed border-line-strong p-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setTouched(true);
+            if (!file || title.trim().length < 2 || !confirmed) return;
+            add.mutate();
+          }}
+        >
+          <Field id={`${id}-archivo`} label="Foto o PDF" required error={fileError} hint={file ? file.name : "JPG, PNG, WEBP o PDF."}>
+            {(a11y) => (
+              <Input
+                {...a11y}
+                type="file"
+                accept={[...ACCEPTED_TYPES.IMAGE, ...ACCEPTED_TYPES.DOCUMENT].join(",")}
+                className="h-auto py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:font-semibold file:text-brand-800"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+            )}
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-[2fr_2fr_1fr]">
+            <Field id={`${id}-titulo`} label="Nombre" required error={titleError}>
+              {(a11y) => <Input {...a11y} value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="Ej.: Matrícula de electricista" />}
+            </Field>
+            <Field id={`${id}-institucion`} label="Institución (opcional)">
+              {(a11y) => <Input {...a11y} value={institution} maxLength={120} onChange={(e) => setInstitution(e.target.value)} />}
+            </Field>
+            <Field id={`${id}-anio`} label="Año (opcional)">
+              {(a11y) => <Input {...a11y} type="number" inputMode="numeric" min={1950} max={new Date().getFullYear() + 1} value={year} onChange={(e) => setYear(e.target.value)} />}
+            </Field>
+          </div>
+          <label className="flex cursor-pointer items-start gap-3 text-sm text-ink">
+            <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-brand-700" aria-invalid={confirmError ? true : undefined} />
+            <span>
+              Confirmo que el documento <strong>no muestra mi DNI, mi dirección ni mi fecha de nacimiento</strong> (o están tapados).
+              {confirmError && <span role="alert" className="mt-1 block font-medium text-danger-600">{confirmError}</span>}
+            </span>
+          </label>
+          {(add.isError || remove.isError) && (
+            <Alert tone="danger">{isApiError(add.error, "CERTIFICATION_LIMIT_REACHED") ? "Llegaste al máximo de certificados." : planError(add.error ?? remove.error)}</Alert>
+          )}
+          <Button type="submit" variant="secondary" loading={add.isPending} className="self-start">
+            <Plus className="size-4" aria-hidden="true" />
+            Sumar certificado
+          </Button>
+        </form>
+      )}
+    </SettingsSection>
   );
 }

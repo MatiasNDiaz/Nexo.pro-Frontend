@@ -106,7 +106,7 @@ export function PlansTable() {
   );
 }
 
-function PlanShell({ tier, children }: { tier: number; children: ReactNode }) {
+export function PlanShell({ tier, children }: { tier: number; children: ReactNode }) {
   const lift = "transition-[translate,box-shadow] duration-300 ease-out-soft hover:-translate-y-1.5";
 
   if (tier === 0) {

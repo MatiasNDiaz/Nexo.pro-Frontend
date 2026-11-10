@@ -99,6 +99,20 @@
 | Las páginas del panel declaran `instant = false` | Se arman en el navegador detrás de la sesión: Next 16 avisaba en desarrollo que no podía validarlas como navegación instantánea |
 | Los bloques con `data-reveal` visibles al cargar llevan `suppressHydrationWarning` | El sistema de aparición puede marcarlos (`data-revealed`) antes de que React hidrate; la diferencia es intencional |
 
+## Trabajo del profesional (etapa 6, segunda parte)
+
+| Decisión | Motivo |
+| --- | --- |
+| Pedidos recibidos con el filtro "Para responder" por defecto y lo sin responder primero | Responder rápido es lo que más pesa para que lo elijan; el resto queda en "Todos" |
+| El formulario de presupuesto viene precargado con el vigente | Cambiar un presupuesto es corregirlo, no escribirlo de nuevo; el backend reemplaza el anterior |
+| La pantalla del trabajo es una sola para los dos roles (`statusFor` según el rol) | El profesional agenda, empieza y termina (con confirmación); la reseña solo la ve el cliente |
+| Al pagar se redirige a Mercado Pago; `/suscripcion/resultado` consulta el estado y no aplica nada | El plan lo aplica el aviso firmado de Mercado Pago (ADR 0017/0026), nunca la vuelta del navegador, que se puede falsear |
+| En la prueba gratis, pagar el plan propio dice "Pagar", no "Renovar", y se aclara que no se pierden días | Pagando durante la prueba, el mes empieza cuando la prueba termina (ADR 0026) |
+| Las tarjetas de planes del panel van sobre fondo noche, como en el inicio | La tarjeta Basic es translúcida y sobre el fondo claro del panel no se leía |
+| Métricas: un gráfico de barras de una serie a elección, con tooltip por barra, etiqueta solo en el máximo y vista de tabla | Una sola escala por gráfico (sin doble eje); la tabla cubre lectores de pantalla y a quien prefiere números |
+| Sin Premium, métricas muestra qué incluye el plan en vez del error | El backend responde `PLAN_FEATURE_REQUIRED`; el pedido no se reintenta |
+| En el celular, la fila del menú del panel se desplaza sola hasta la sección actual | Se mueve solo la fila (`scrollLeft`), nunca la página |
+
 ## Interfaz: desplegables, transiciones y scroll
 
 | Decisión | Motivo |

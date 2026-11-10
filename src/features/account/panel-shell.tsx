@@ -1,8 +1,12 @@
 "use client";
 
 import {
+  BarChart3,
   Bell,
   Briefcase,
+  CalendarClock,
+  Crown,
+  Inbox,
   FileText,
   Fingerprint,
   Flag,
@@ -21,7 +25,7 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, type ReactNode } from "react";
 import { RemoteImage } from "@/components/catalog/remote-image";
 import { totalUnread } from "@/features/chat/cache";
 import { useConversations } from "@/features/chat/inbox";
@@ -73,8 +77,7 @@ export function panelGroupsFor(user: Me): PanelGroup[] {
           { href: "/panel/resenas", label: "Mis reseñas", icon: Star },
         ]
       : user.role === "PROFESSIONAL"
-        ? // El perfil se edita también con la cuenta por verificar (el backend lo permite).
-          [{ href: "/panel/perfil", label: "Mi perfil", icon: Store }]
+        ? professionalLinks(user.status === "ACTIVE")
         : [];
   // Soporte, reportes y opinión exigen la cuenta activa; las sanciones se ven también por verificar.
   const help: PanelLink[] =
@@ -100,6 +103,25 @@ export function panelGroupsFor(user: Me): PanelGroup[] {
   ];
 }
 
+/**
+ * Secciones del profesional. Chat, pedidos, trabajos y reseñas exigen la cuenta activa; agenda,
+ * perfil, métricas y plan se usan también con la cuenta por verificar (el backend lo permite).
+ */
+function professionalLinks(active: boolean): PanelLink[] {
+  const links: PanelLink[] = [];
+  if (active) {
+    links.push(
+      { href: "/panel/mensajes", label: "Mensajes", icon: MessagesSquare, counter: "messages" },
+      { href: "/panel/solicitudes", label: "Pedidos recibidos", icon: Inbox },
+      { href: "/panel/trabajos", label: "Trabajos", icon: Briefcase },
+    );
+  }
+  links.push({ href: "/panel/agenda", label: "Agenda", icon: CalendarClock }, { href: "/panel/perfil", label: "Mi perfil", icon: Store });
+  if (active) links.push({ href: "/panel/resenas", label: "Reseñas", icon: Star });
+  links.push({ href: "/panel/metricas", label: "Métricas", icon: BarChart3 }, { href: "/panel/plan", label: "Mi plan", icon: Crown });
+  return links;
+}
+
 export function PanelShell({ children }: { children: ReactNode }) {
   // Suspense: RequireSession lee la URL, que en las rutas con parámetros ([id]) recién existe al pedirla.
   return (
@@ -117,6 +139,18 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
   const pathname = usePathname();
   const groups = panelGroupsFor(user);
   const isActive = (href: string) => (href === "/panel" ? pathname === "/panel" : pathname.startsWith(href));
+  const row = useRef<HTMLDivElement>(null);
+
+  // Celular: la fila muestra la sección actual. Se mueve solo la fila (scrollLeft), nunca la página.
+  useEffect(() => {
+    const container = row.current;
+    const current = container?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!container || !current || container.scrollWidth <= container.clientWidth) return;
+    const left = current.getBoundingClientRect().left - container.getBoundingClientRect().left + container.scrollLeft;
+    if (left < container.scrollLeft || left + current.offsetWidth > container.scrollLeft + container.clientWidth) {
+      container.scrollTo({ left: left - 16, behavior: "smooth" });
+    }
+  }, [pathname]);
 
   return (
     // minmax(0, …): la columna no se estira con el menú horizontal (que se desplaza dentro de su espacio).
@@ -143,7 +177,7 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
           </div>
 
           {/* Celular: una sola fila que se desplaza. Escritorio: grupos en columna. */}
-          <div className="-mx-2 flex gap-1 overflow-x-auto px-2 [scrollbar-width:none] lg:mx-0 lg:mt-3 lg:flex-col lg:gap-4 lg:overflow-visible lg:px-0">
+          <div ref={row} className="-mx-2 flex gap-1 overflow-x-auto px-2 [scrollbar-width:none] lg:mx-0 lg:mt-3 lg:flex-col lg:gap-4 lg:overflow-visible lg:px-0">
             {groups.map((group) => (
               <div key={group.label} className="flex shrink-0 lg:flex-col lg:gap-1">
                 <p className="hidden px-3 pb-1 text-xs font-semibold text-brand-300 lg:block">{group.label}</p>
