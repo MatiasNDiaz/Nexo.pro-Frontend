@@ -268,6 +268,17 @@ test.describe("plan", () => {
     await expect(page.getByText("Prueba gratis")).toBeVisible();
     // En la prueba, pagar el plan propio no es "renovar".
     await expect(page.getByRole("button", { name: "Pagar Basic" })).toBeVisible();
+    // El detalle de los planes: en pantallas anchas, tabla con encabezados de fila y el plan actual
+    // marcado; en celular, cada cosa con sus tres valores abajo y sin desplazamiento horizontal.
+    if ((page.viewportSize()?.width ?? 0) >= 640) {
+      const comparison = page.getByRole("table", { name: "Qué incluye cada plan" });
+      await expect(comparison.getByRole("rowheader", { name: /Certificados y matrículas/ })).toBeVisible();
+      await expect(comparison.getByRole("columnheader", { name: /Basic\s*Tu plan/ })).toBeVisible();
+    } else {
+      await expect(page.getByRole("table")).toBeHidden();
+      await expect(page.getByText("Certificados y matrículas").filter({ visible: true })).toBeVisible();
+    }
+    await expectNoHorizontalScroll(page);
     await page.getByRole("button", { name: "Elegir Premium" }).click();
     await page.waitForURL("https://checkout.example.test/pref-1");
     expect(chosen).toEqual({ planCode: "PREMIUM" });

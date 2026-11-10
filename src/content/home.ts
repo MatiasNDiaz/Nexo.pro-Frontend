@@ -16,11 +16,16 @@ export const plans = [
   { code: "PREMIUM", name: "Premium", price: 20000, pitch: "La máxima visibilidad y tus números." },
 ] as const;
 
+/** Valor de un plan: `true` = incluido, `false` = no incluido, texto = el valor. */
+export type PlanValue = string | boolean;
+type PlanValues = readonly [PlanValue, PlanValue, PlanValue];
+
 /**
- * Qué incluye cada plan, en el orden de `plans` (Basic, Medium, Premium). `true` = incluido,
- * `false` = no incluido, texto = el valor. Columnas de `subscription_plans`.
+ * Qué incluye cada plan, en el orden de `plans` (Basic, Medium, Premium). Columnas de
+ * `subscription_plans`. El aviso de disponibilidad es igual en Medium y Premium: el "mensaje propio"
+ * de Premium (`custom_alert_message`) todavía no está implementado en el backend.
  */
-export const planFeatures: { label: string; values: readonly [string | boolean, string | boolean, string | boolean] }[] = [
+export const planFeatures: { label: string; values: PlanValues }[] = [
   { label: "Oficios", values: ["1", "Hasta 2", "Hasta 3"] },
   { label: "Fotos de tus trabajos", values: ["5", "5", "5"] },
   { label: "Videos", values: [false, "1", "2"] },
@@ -29,9 +34,61 @@ export const planFeatures: { label: string; values: readonly [string | boolean, 
   { label: "Posición en el catálogo", values: ["Base", "Mejor", "La mejor"] },
   { label: "Colores, tipografía y banner con foto en tu perfil", values: [false, true, true] },
   { label: "Animación y banner con video", values: [false, false, true] },
-  { label: "Avisos de disponibilidad a quienes te guardaron", values: [false, true, "Con tu mensaje"] },
+  { label: "Avisos de disponibilidad a quienes te guardaron", values: [false, true, true] },
   { label: "Estadísticas de visitas", values: [false, false, true] },
 ];
+
+export interface PlanDetail {
+  key: "professions" | "photos" | "videos" | "cover" | "style" | "motion" | "ranking" | "alerts" | "metrics" | "chat" | "jobs" | "agenda" | "certificates";
+  label: string;
+  detail: string;
+  values: PlanValues;
+}
+
+/**
+ * El detalle de los planes para el panel del profesional (/panel/plan). Cada dato sale del backend:
+ * límites de `subscription_plans`, niveles de estilo (professionals/profile-theme.ts), orden del
+ * catálogo (catalog.service.ts: plan, disponible, perfil completo) y 10 certificados en todos los
+ * planes (ADR 0020).
+ */
+export const planDetailGroups: { title: string; items: PlanDetail[] }[] = [
+  {
+    title: "Tu página",
+    items: [
+      { key: "professions", label: "Oficios", detail: "Los oficios que mostrás en tu página. Aparecés en las búsquedas de cada uno.", values: ["1", "Hasta 2", "Hasta 3"] },
+      { key: "photos", label: "Fotos de tus trabajos", detail: "Hasta 5 MB cada una en Basic y Medium, y hasta 10 MB en Premium.", values: ["5", "5", "5"] },
+      { key: "videos", label: "Videos de tus trabajos", detail: "De hasta 15 segundos. Hasta 30 MB cada uno en Medium y 50 MB en Premium.", values: [false, "1", "2"] },
+      { key: "cover", label: "Portada con tu foto", detail: "Una foto tuya o de tu trabajo arriba de todo. Sin portada, mostramos una foto ilustrativa de tu oficio.", values: [false, true, true] },
+      { key: "style", label: "Color, tipografía y frase destacada", detail: "12 colores o un degradé, 4 tipografías para tu nombre y una frase de hasta 80 letras.", values: [false, true, true] },
+      { key: "motion", label: "Animación y portada con video", detail: "Tu nombre entra con una de 4 animaciones y la portada puede ser un video.", values: [false, false, true] },
+    ],
+  },
+  {
+    title: "Visibilidad",
+    items: [
+      {
+        key: "ranking",
+        label: "Lugar en las búsquedas",
+        detail: "Primero aparecen los planes más altos. Dentro de cada plan, quienes están disponibles y tienen la página más completa.",
+        values: ["Base", "Antes que Basic", "Primero"],
+      },
+      { key: "alerts", label: "Aviso a quienes te guardaron", detail: "Cuando te ponés disponible, les avisamos a los clientes que te tienen en favoritos con el aviso activado.", values: [false, true, true] },
+      { key: "metrics", label: "Estadísticas", detail: "Visitas a tu página, veces que aparecés en las búsquedas, pedidos y trabajos, día por día.", values: [false, false, true] },
+    ],
+  },
+  {
+    title: "En todos los planes",
+    items: [
+      { key: "chat", label: "Pedidos y presupuestos por chat", detail: "Los clientes te escriben y te mandan fotos; vos respondés con tu presupuesto.", values: [true, true, true] },
+      { key: "jobs", label: "Trabajos y reseñas", detail: "Agendás, empezás y terminás cada trabajo. Al terminar, el cliente deja su reseña y vos la respondés.", values: [true, true, true] },
+      { key: "agenda", label: "Agenda y estado de atención", detail: "Tu horario semanal, tus días libres y si estás disponible, trabajando o descansando.", values: [true, true, true] },
+      { key: "certificates", label: "Certificados y matrículas", detail: "Hasta 10 en tu página.", values: ["Hasta 10", "Hasta 10", "Hasta 10"] },
+    ],
+  },
+];
+
+/** Lo que cambia entre planes (sin el grupo "En todos los planes"). */
+export const planDifferences = planDetailGroups.slice(0, 2).flatMap((group) => group.items);
 
 /**
  * Lo que gana un cliente al crear su cuenta (todo existe hoy en el panel). Cada uno es un paso de la

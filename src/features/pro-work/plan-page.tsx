@@ -6,12 +6,13 @@ import { PlanShell } from "@/components/home/plans-table";
 import { revealDelay } from "@/components/motion/reveal";
 import { Alert, Badge, Skeleton } from "@/components/ui/feedback";
 import { PanelTitle, SettingsSection } from "@/features/account/settings-section";
-import { planFeatures } from "@/content/home";
+import { planDifferences } from "@/content/home";
 import { getSubscription, proKeys } from "@/features/pro-profile/api";
 import { errorMessage, isApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
 import { formatDate, formatMoney } from "@/lib/format";
 import { checkout, listPayments, listPlans, paymentStatus, workKeys, type PlanOption } from "./api";
+import { PlanComparison } from "./plan-comparison";
 
 const TIERS = ["BASIC", "MEDIUM", "PREMIUM"];
 
@@ -101,7 +102,8 @@ export function PlanPage() {
                       </span>
                     </p>
                     <ul className="mt-7 flex flex-1 flex-col gap-3 border-t border-white/10 pt-6">
-                      {planFeatures.map((feature) => {
+                      {/* En la tarjeta solo lo que cambia entre planes; el detalle y lo común, en la tabla de abajo. */}
+                      {planDifferences.map((feature) => {
                         const value = feature.values[tier]!;
                         const included = value !== false;
                         return (
@@ -163,6 +165,10 @@ export function PlanPage() {
         </ul>
       )}
       <p className="-mt-4 text-sm text-muted-strong">El pago se hace en Mercado Pago. Al volver, tu plan se activa en unos segundos.</p>
+
+      <SettingsSection title="Qué incluye cada plan" description="El detalle de cada cosa, y lo que tenés en cualquier plan.">
+        <PlanComparison currentCode={sub?.plan?.code} />
+      </SettingsSection>
 
       <SettingsSection title="Tus pagos" description="Los pagos de tus planes, el más reciente primero.">
         {payments.isPending ? (
