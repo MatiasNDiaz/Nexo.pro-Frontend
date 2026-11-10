@@ -53,6 +53,14 @@ export function ProfileFields() {
   );
 }
 
+/**
+ * Solo la ubicación del rol (sin nombre ni teléfono), dentro de un formulario con los campos de
+ * LocationValues. La usa el admin al cambiar el rol de una cuenta.
+ */
+export function LocationFields({ role }: { role: "CUSTOMER" | "PROFESSIONAL" }) {
+  return role === "PROFESSIONAL" ? <ProfessionalLocation /> : <CustomerLocation />;
+}
+
 /** Provincia elegida. Hoy hay una sola activa (Córdoba): se elige sola. */
 function useProvinceChoice() {
   const provinces = useProvinces();

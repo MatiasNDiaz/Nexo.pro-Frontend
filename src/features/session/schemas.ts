@@ -63,43 +63,70 @@ const serviceArea = z.object({
 /** Máximo de zonas por profesional (MAX_SERVICE_AREAS del backend, por defecto 20). */
 export const MAX_SERVICE_AREAS = 20;
 
+/** Ubicación según el rol: barrio del cliente, u oficio y zonas del profesional. */
+const locationShape = {
+  role: z.enum(["CUSTOMER", "PROFESSIONAL"]),
+  // Cliente
+  customerLocalityId: z.string(),
+  customerNeighborhood: z.string(),
+  // Profesional
+  professionId: z.string(),
+  serviceAreas: z.array(serviceArea).max(MAX_SERVICE_AREAS, `Podés cargar hasta ${MAX_SERVICE_AREAS} zonas.`),
+};
+
+type LocationOutput = z.output<z.ZodObject<typeof locationShape>>;
+
+function checkLocation(values: LocationOutput, ctx: z.RefinementCtx) {
+  if (values.role === "CUSTOMER") {
+    if (!z.uuid().safeParse(values.customerLocalityId).success) {
+      ctx.addIssue({ code: "custom", path: ["customerLocalityId"], message: "Elegí la localidad." });
+    }
+    const neighborhood = neighborhoodName.safeParse(values.customerNeighborhood);
+    if (!neighborhood.success) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["customerNeighborhood"],
+        message: values.customerNeighborhood.trim() ? neighborhood.error.issues[0]!.message : "Ingresá el barrio.",
+      });
+    }
+  } else {
+    if (!z.uuid().safeParse(values.professionId).success) {
+      ctx.addIssue({ code: "custom", path: ["professionId"], message: "Elegí el oficio principal." });
+    }
+    if (values.serviceAreas.length === 0) {
+      ctx.addIssue({ code: "custom", path: ["serviceAreas"], message: "Agregá al menos una zona de trabajo." });
+    }
+  }
+}
+
+/** Solo la ubicación: la usa el admin al cambiar el rol de una cuenta (ChangeRoleDto). */
+export const locationSchema = z.object(locationShape).superRefine(checkLocation);
+export type LocationValues = z.input<typeof locationSchema>;
+
 /** Datos personales y de ubicación: comunes al registro con contraseña y al registro con Google. */
 export const profileSchema = z
   .object({
-    role: z.enum(["CUSTOMER", "PROFESSIONAL"]),
+    ...locationShape,
     firstName: personName("nombre"),
     lastName: personName("apellido"),
     phone: phoneSchema,
-    // Cliente
-    customerLocalityId: z.string(),
-    customerNeighborhood: z.string(),
-    // Profesional
-    professionId: z.string(),
-    serviceAreas: z.array(serviceArea).max(MAX_SERVICE_AREAS, `Podés cargar hasta ${MAX_SERVICE_AREAS} zonas.`),
   })
-  .superRefine((values, ctx) => {
-    if (values.role === "CUSTOMER") {
-      if (!z.uuid().safeParse(values.customerLocalityId).success) {
-        ctx.addIssue({ code: "custom", path: ["customerLocalityId"], message: "Elegí tu localidad." });
-      }
-      const neighborhood = neighborhoodName.safeParse(values.customerNeighborhood);
-      if (!neighborhood.success) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["customerNeighborhood"],
-          message: values.customerNeighborhood.trim() ? neighborhood.error.issues[0]!.message : "Ingresá tu barrio.",
-        });
-      }
-    } else {
-      if (!z.uuid().safeParse(values.professionId).success) {
-        ctx.addIssue({ code: "custom", path: ["professionId"], message: "Elegí tu oficio principal." });
-      }
-      if (values.serviceAreas.length === 0) {
-        ctx.addIssue({ code: "custom", path: ["serviceAreas"], message: "Agregá al menos una zona donde trabajás." });
-      }
-    }
-  });
+  .superRefine(checkLocation);
 export type ProfileValues = z.input<typeof profileSchema>;
+
+/** La parte de ubicación del cuerpo de registro o de cambio de rol, solo con los campos del rol. */
+export function toLocationBody(values: LocationOutput) {
+  if (values.role === "CUSTOMER") {
+    return { neighborhood: { localityId: values.customerLocalityId, name: values.customerNeighborhood.trim() } };
+  }
+  return {
+    professionId: values.professionId,
+    serviceAreas: values.serviceAreas.map((area) => ({
+      localityId: area.localityId,
+      ...(area.neighborhoodName.trim() ? { neighborhoodName: area.neighborhoodName.trim() } : {}),
+    })),
+  };
+}
 
 export const registerSchema = profileSchema.and(
   z.object({
@@ -119,25 +146,12 @@ export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 /** Arma el cuerpo de `POST /auth/register` o `/auth/google/register` con solo los campos del rol. */
 export function toRegistrationBody(values: z.output<typeof profileSchema>) {
-  const base = {
+  return {
     role: values.role,
     firstName: values.firstName,
     lastName: values.lastName,
     phone: values.phone,
-  };
-  if (values.role === "CUSTOMER") {
-    return {
-      ...base,
-      neighborhood: { localityId: values.customerLocalityId, name: values.customerNeighborhood.trim() },
-    };
-  }
-  return {
-    ...base,
-    professionId: values.professionId,
-    serviceAreas: values.serviceAreas.map((area) => ({
-      localityId: area.localityId,
-      ...(area.neighborhoodName.trim() ? { neighborhoodName: area.neighborhoodName.trim() } : {}),
-    })),
+    ...toLocationBody(values),
   };
 }
 

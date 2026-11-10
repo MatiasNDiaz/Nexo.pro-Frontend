@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, BarChart3, Eye, FileText, Lock, Minus, Search, Star, Trophy, Wrench, type LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { Alert, Skeleton } from "@/components/ui/feedback";
 import { PanelTitle } from "@/features/account/settings-section";
@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
 import { formatRating } from "@/lib/format";
 import { getMetrics, workKeys, type Metrics } from "./api";
 
-type GroupBy = "day" | "week" | "month";
+export type GroupBy = "day" | "week" | "month";
 type MetricKey = "profileViewers" | "searchAppearances" | "requests";
 
 const iso = (date: Date) => date.toISOString().slice(0, 10);
@@ -36,35 +36,65 @@ const chartMetrics: { key: MetricKey; label: string }[] = [
  * por barra y vista en tabla). Sin el plan, el backend responde PLAN_FEATURE_REQUIRED.
  */
 export function MetricsPage() {
+  return (
+    <MetricsBoard
+      queryKey={workKeys.metrics}
+      load={getMetrics}
+      header={<PanelTitle title="Métricas" description="Cuánta gente te ve y te elige. Se cuentan personas distintas por día." />}
+      replaceOnError={(error) =>
+        isApiError(error, "PLAN_FEATURE_REQUIRED") ? (
+          <div className="flex flex-col gap-8">
+            <PanelTitle title="Métricas" description="Cuánta gente te ve y te elige." />
+            <section className="relative isolate flex flex-col items-start gap-4 overflow-hidden rounded-3xl bg-brand-950 p-6 text-white sm:p-10">
+              <span aria-hidden="true" className="absolute -top-24 -right-16 -z-1 size-80 rounded-full bg-[radial-gradient(closest-side,rgb(244_163_64/0.35),transparent)]" />
+              <Lock className="size-8 text-amber-400" aria-hidden="true" />
+              <h2 className="font-display text-3xl font-bold">Tus estadísticas, con Premium</h2>
+              <p className="max-w-[52ch] text-brand-100">Mirá cuántas personas abren tu perfil, cuántas veces aparecés en las búsquedas y cuántas te piden presupuesto, mes a mes.</p>
+              <ButtonLink href="/panel/plan" variant="accent">
+                Ver planes
+              </ButtonLink>
+            </section>
+          </div>
+        ) : null
+      }
+    />
+  );
+}
+
+/**
+ * Período + números + gráfico. Lo usan el profesional (sus métricas) y el admin (las de un
+ * profesional, solo lectura: E-050). `replaceOnError` reemplaza todo el tablero ante errores que
+ * tienen su propia pantalla (sin Premium); si devuelve null, se muestra el aviso común.
+ */
+export function MetricsBoard({
+  queryKey,
+  load,
+  header,
+  replaceOnError,
+  errorTitle = "No pudimos cargar tus métricas",
+}: {
+  queryKey: (from: string, to: string, groupBy: GroupBy) => readonly unknown[];
+  load: (from: string, to: string, groupBy: GroupBy) => Promise<Metrics>;
+  header?: ReactNode;
+  replaceOnError?: (error: unknown) => ReactNode;
+  errorTitle?: string;
+}) {
   const [rangeId, setRangeId] = useState("month");
   const [metric, setMetric] = useState<MetricKey>("profileViewers");
   const range = ranges.find((r) => r.id === rangeId)!.build();
   const data = useQuery({
-    queryKey: workKeys.metrics(range.from, range.to, range.groupBy),
-    queryFn: () => getMetrics(range.from, range.to, range.groupBy),
-    retry: (count, error) => !isApiError(error, "PLAN_FEATURE_REQUIRED") && count < 2,
+    queryKey: queryKey(range.from, range.to, range.groupBy),
+    queryFn: () => load(range.from, range.to, range.groupBy),
+    // Los 4xx (sin plan, sin perfil) no se arreglan reintentando.
+    retry: (count, error) => !isApiError(error, "PLAN_FEATURE_REQUIRED", "PROFILE_NOT_FOUND") && count < 2,
   });
 
-  if (data.isError && isApiError(data.error, "PLAN_FEATURE_REQUIRED")) {
-    return (
-      <div className="flex flex-col gap-8">
-        <PanelTitle title="Métricas" description="Cuánta gente te ve y te elige." />
-        <section className="relative isolate flex flex-col items-start gap-4 overflow-hidden rounded-3xl bg-brand-950 p-6 text-white sm:p-10">
-          <span aria-hidden="true" className="absolute -top-24 -right-16 -z-1 size-80 rounded-full bg-[radial-gradient(closest-side,rgb(244_163_64/0.35),transparent)]" />
-          <Lock className="size-8 text-amber-400" aria-hidden="true" />
-          <h2 className="font-display text-3xl font-bold">Tus estadísticas, con Premium</h2>
-          <p className="max-w-[52ch] text-brand-100">Mirá cuántas personas abren tu perfil, cuántas veces aparecés en las búsquedas y cuántas te piden presupuesto, mes a mes.</p>
-          <ButtonLink href="/panel/plan" variant="accent">
-            Ver planes
-          </ButtonLink>
-        </section>
-      </div>
-    );
-  }
+  const replacement = data.isError ? replaceOnError?.(data.error) : null;
+  if (replacement) return replacement;
 
   return (
     <div className="flex flex-col gap-8">
-      <PanelTitle title="Métricas" description="Cuánta gente te ve y te elige. Se cuentan personas distintas por día." />
+      {header}
       <div className="flex flex-wrap gap-2" role="group" aria-label="Período">
         {ranges.map((r) => (
           <button
@@ -89,7 +119,7 @@ export function MetricsPage() {
           <Skeleton className="h-80 rounded-3xl" />
         </div>
       ) : data.isError ? (
-        <Alert tone="danger" title="No pudimos cargar tus métricas">
+        <Alert tone="danger" title={errorTitle}>
           {errorMessage(data.error)}
         </Alert>
       ) : (

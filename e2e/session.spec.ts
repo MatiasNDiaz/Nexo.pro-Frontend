@@ -205,7 +205,7 @@ test.describe("registro", () => {
     await page.getByRole("button", { name: "Crear mi cuenta" }).click();
     await expect(page.getByText(/El nombre solo puede tener letras/)).toBeVisible();
     await expect(page.getByText(/Ingresá un teléfono con código de área/)).toBeVisible();
-    await expect(page.getByText("Ingresá tu barrio.")).toBeVisible();
+    await expect(page.getByText("Ingresá el barrio.")).toBeVisible();
     expect(api.find("POST /auth/register")).toHaveLength(0);
   });
 });

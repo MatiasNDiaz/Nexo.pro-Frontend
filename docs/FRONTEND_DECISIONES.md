@@ -113,6 +113,21 @@
 | Sin Premium, métricas muestra qué incluye el plan en vez del error | El backend responde `PLAN_FEATURE_REQUIRED`; el pedido no se reintenta |
 | En el celular, la fila del menú del panel se desplaza sola hasta la sección actual | Se mueve solo la fila (`scrollLeft`), nunca la página |
 
+## Panel del admin: resumen y usuarios (7.1)
+
+| Decisión | Motivo |
+| --- | --- |
+| El panel del admin vive en `/panel/admin/...` con el mismo marco y la misma sesión del panel; su "Inicio" es el resumen | Una sola forma de entrar y de cerrar sesión. `AdminOnly` arma las páginas solo para el admin: es experiencia, el backend responde 403 a cualquier otro rol |
+| La etapa 7 se divide en 7.1 (resumen y usuarios), 7.2 (moderación) y 7.3 (soporte, opiniones, novedades e ingresos) | Son 56 rutas del backend: cada parte se revisa por separado |
+| En el resumen, las tarjetas de lo pendiente (reportes, apelaciones, soporte, identidades y pagos) van sin enlace hasta que existan sus secciones | No llevar a una página que todavía no existe |
+| Los filtros de la búsqueda viven en la URL (`q`, `rol`, `estado`, `pagina`) | Al volver de una ficha, la búsqueda queda como estaba |
+| La ficha ofrece solo las acciones válidas para el estado de la cuenta (`accountActions`, mismas reglas que `accounts.service.ts`) | Evita el `409 INVALID_STATE_TRANSITION`, cuyo texto del backend nombra estados en inglés; si igual llega (la cuenta cambió en otra pestaña), se muestra un texto propio |
+| Toda acción se confirma en un diálogo con motivo obligatorio (10 a 500 caracteres; 5 para levantar una sanción o anular un strike) | El backend lo exige y lo guarda en la auditoría. Al terminar se vuelve a pedir la ficha: lo que se ve siempre es lo que dice el backend |
+| Suspender y bloquear se hacen desde "Sancionar" (`POST /admin/users/:id/sanctions`), no desde `/suspend` y `/ban` | Es la misma operación en el backend y así las cuatro sanciones están en un solo lugar |
+| El cambio de rol se intenta primero sin datos; si el backend pide barrio u oficio y zonas, aparecen los campos del registro | Si la cuenta ya tuvo ese rol, el backend reutiliza sus datos. El intento fallido corre en una transacción y no deja nada a medias |
+| Editar datos manda solo lo que cambió | El backend aplica lo que recibe; mandar todo registraría cambios que no hubo |
+| Las métricas del profesional en la ficha usan el mismo tablero que ve el profesional (`MetricsBoard`) | El admin las ve aunque el profesional no tenga Premium (E-050) |
+
 ## Interfaz: desplegables, transiciones y scroll
 
 | Decisión | Motivo |
@@ -146,3 +161,4 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | Avisos push en producción | El backend necesita sus claves VAPID; sin ellas la página explica que todavía no están activados | Antes de producción |
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |
+| Aviso de React por el `<script>` del `<head>` | En desarrollo, la consola avisa "Encountered a script tag while rendering React component". Es solo un aviso: el script viene en el HTML del servidor y corre igual. Se resuelve junto con la CSP (nonce) | Etapa 8 |

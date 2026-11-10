@@ -20,6 +20,7 @@ import {
   Star,
   Store,
   UserRound,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import type { Route } from "next";
@@ -64,7 +65,13 @@ export function panelGroupsFor(user: Me): PanelGroup[] {
   if (user.status === "SUSPENDED" || user.status === "BANNED") return [{ label: "Tu cuenta", links: [home, moderation, security] }];
 
   const notifications: PanelLink = { href: "/panel/notificaciones", label: "Notificaciones", icon: Bell, counter: "notifications" };
-  if (user.role === "ADMIN") return [{ label: "Tu cuenta", links: [home, notifications, security] }];
+  if (user.role === "ADMIN") {
+    // Moderación, soporte e ingresos se suman en la 7.2 y la 7.3.
+    return [
+      { label: "Administración", links: [{ ...home, label: "Resumen" }, { href: "/panel/admin/usuarios", label: "Usuarios", icon: Users }] },
+      { label: "Tu cuenta", links: [notifications, security] },
+    ];
+  }
 
   // Chat, pedidos, trabajos, favoritos y reseñas exigen la cuenta activa.
   const activity: PanelLink[] =
