@@ -217,6 +217,12 @@
     rotate: 2deg;
   }
 }
+/* Cinta de opiniones del inicio: la lista va dos veces, se corre la mitad y vuelve a empezar sin corte. */
+@keyframes opinions-marquee {
+  to {
+    transform: translateX(calc(-50% - 0.5rem));
+  }
+}
 /* Corazón de favoritos: late al guardar. */
 @keyframes heart-pop {
   0% {

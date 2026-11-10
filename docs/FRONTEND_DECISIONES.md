@@ -29,7 +29,7 @@
 
 | Decisión | Motivo |
 | --- | --- |
-| Foro de solo lectura en esta etapa; publicar, responder y "me gusta" llegan con el panel | No se muestran botones que todavía no funcionan |
+| Foro: lectura pública; publicar, responder, "me gusta", editar, borrar y resolver con cuenta activa (5.3) | Sin sesión se invita a ingresar; no se muestran botones que no se pueden usar |
 | Respuestas eliminadas u ocultas se muestran como "Respuesta eliminada" solo si el backend las devuelve (cuando tienen respuestas) | Igual que el backend: se conserva el hilo sin mostrar el contenido |
 | Contacto público con las mismas reglas que `ContactDto`, CAPTCHA si hay clave y aviso específico ante el límite de 3 por hora | El backend responde `{ received: true }`; el plazo que se comunica es de 48 a 72 horas hábiles |
 | `robots.txt` permite todo; las páginas privadas no se bloquean ahí | Llevan `noindex`: un buscador bloqueado por robots no lo ve y podría listar la URL igual |
@@ -77,6 +77,17 @@
 | La campana y el contador se vuelven a pedir con cada `notification:new` del tiempo real y, por las dudas, cada minuto | Con la cuenta por verificar no hay tiempo real, y una conexión cortada pierde avisos |
 | Avisos push con un service worker propio y mínimo (`public/sw.js`): solo muestra avisos | No guarda páginas ni intercepta pedidos: no puede servir contenido viejo ni interferir con la sesión. Sin clave VAPID en el backend (`enabled: false`), la página lo explica en vez de ofrecer el botón |
 
+## Comunidad y ayuda (5.3)
+
+| Decisión | Motivo |
+| --- | --- |
+| La publicación del foro se arma en el servidor (caché, buscadores) y la interactividad corre en el navegador sobre esos datos (`ForumThread`) | Después de cada cambio se vuelve a pedir desde el navegador, fresca: la caché del servidor (minutos) no hace esperar a quien participa |
+| Fotos de reportes, soporte y foro se suben al elegirlas (`ui/media-picker.tsx`) y el envío espera a que terminen | Los formularios mandan solo ids de archivos listos; así no se envía nada a medias |
+| En soporte solo se enlazan las fotos propias | `GET /evidence/:fileId` las sirve solo a quien las subió (o al admin): las del equipo darían 403 |
+| "Reportar" en perfiles, mensajes de la otra persona, foro y reseñas públicas; el motivo se elige entre los que tienen sentido para cada cosa | El backend acepta cualquier motivo; mostrar "No se presentó" para una reseña confundiría |
+| Las sanciones se ven también con la cuenta suspendida, bloqueada o por verificar | El backend permite consultar y apelar en esos estados (para poder defenderse) |
+| Las opiniones sobre la plataforma solo aparecen en el inicio si el equipo publicó alguna | Nunca se muestran opiniones inventadas |
+
 ## Interfaz: desplegables, transiciones y scroll
 
 | Decisión | Motivo |
@@ -108,7 +119,6 @@ Un perfil inexistente responde **200** con `noindex` y la pantalla de "no dispon
 | --- | --- | --- |
 | Límite del detalle de perfil desde el servidor de Next | Todos los pedidos del servidor salen de una IP: con muchos perfiles distintos sin caché podría llegar a 30 por minuto. Solución posible en el backend: reconocer al servidor del frontend con un encabezado secreto | Antes de producción |
 | Personalización del perfil (`theme`: color, fuente, animación) | El backend la devuelve según el plan; todavía no se aplica en la página | Etapa de diseño |
-| Reportar desde el perfil | Chat, pedido de presupuesto y favoritos ya están (5.1 y 5.2) | 5.3 |
 | Avisos push en producción | El backend necesita sus claves VAPID; sin ellas la página explica que todavía no están activados | Antes de producción |
 | Respuesta al formulario de contacto | El admin responde por email: sin proveedor real de email (H-03) no le llega a quien escribió | Antes de producción |
 | Consentimiento de términos en el registro | El backend no registra la aceptación; los textos legales son provisorios | Con el texto legal definitivo |

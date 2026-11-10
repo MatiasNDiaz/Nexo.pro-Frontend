@@ -81,6 +81,16 @@ export function notificationHref(n: Pick<AppNotification, "targetType" | "target
       return "/panel/favoritos" as Route;
     case "REVIEW":
       return "/panel/resenas" as Route;
+    case "ANNOUNCEMENT":
+      return id ? (`/panel/novedades/${id}` as Route) : null;
+    case "SUPPORT_TICKET":
+      return id ? (`/panel/soporte/${id}` as Route) : "/panel/soporte";
+    case "REPORT":
+      return "/panel/reportes";
+    case "SANCTION":
+    case "STRIKE":
+    case "APPEAL":
+      return "/panel/moderacion";
     default:
       return null;
   }

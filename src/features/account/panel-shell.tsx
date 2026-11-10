@@ -5,10 +5,14 @@ import {
   Briefcase,
   FileText,
   Fingerprint,
+  Flag,
+  Gavel,
   Heart,
   LayoutDashboard,
+  LifeBuoy,
   MessagesSquare,
   ShieldCheck,
+  Sparkles,
   Star,
   UserRound,
   type LucideIcon,
@@ -50,7 +54,9 @@ const roleLabel: Record<Me["role"], string> = { CUSTOMER: "Cliente", PROFESSIONA
 export function panelGroupsFor(user: Me): PanelGroup[] {
   const home: PanelLink = { href: "/panel", label: "Inicio", icon: LayoutDashboard };
   const security: PanelLink = { href: "/panel/seguridad", label: "Seguridad", icon: ShieldCheck };
-  if (user.status === "SUSPENDED" || user.status === "BANNED") return [{ label: "Tu cuenta", links: [home, security] }];
+  const moderation: PanelLink = { href: "/panel/moderacion", label: "Sanciones", icon: Gavel };
+  // Con la cuenta suspendida o bloqueada, el backend permite ver las sanciones y apelar.
+  if (user.status === "SUSPENDED" || user.status === "BANNED") return [{ label: "Tu cuenta", links: [home, moderation, security] }];
 
   const notifications: PanelLink = { href: "/panel/notificaciones", label: "Notificaciones", icon: Bell, counter: "notifications" };
   if (user.role === "ADMIN") return [{ label: "Tu cuenta", links: [home, notifications, security] }];
@@ -66,8 +72,19 @@ export function panelGroupsFor(user: Me): PanelGroup[] {
           { href: "/panel/resenas", label: "Mis reseñas", icon: Star },
         ]
       : [];
+  // Soporte, reportes y opinión exigen la cuenta activa; las sanciones se ven también por verificar.
+  const help: PanelLink[] =
+    user.status === "ACTIVE"
+      ? [
+          { href: "/panel/soporte", label: "Soporte", icon: LifeBuoy },
+          { href: "/panel/reportes", label: "Mis reportes", icon: Flag },
+          moderation,
+          { href: "/panel/opinion", label: "Tu opinión", icon: Sparkles },
+        ]
+      : [moderation];
   return [
     { label: "Tu actividad", links: [home, ...activity, notifications] },
+    { label: "Ayuda", links: help },
     {
       label: "Tu cuenta",
       links: [

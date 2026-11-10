@@ -20,6 +20,16 @@ function hrefFor(data) {
       return "/panel/favoritos";
     case "REVIEW":
       return "/panel/resenas";
+    case "ANNOUNCEMENT":
+      return id ? "/panel/novedades/" + id : "/panel/notificaciones";
+    case "SUPPORT_TICKET":
+      return id ? "/panel/soporte/" + id : "/panel/soporte";
+    case "REPORT":
+      return "/panel/reportes";
+    case "SANCTION":
+    case "STRIKE":
+    case "APPEAL":
+      return "/panel/moderacion";
     default:
       return "/panel/notificaciones";
   }

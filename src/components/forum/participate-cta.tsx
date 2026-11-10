@@ -1,29 +1,53 @@
 "use client";
 
-import { MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus, PenSquare } from "lucide-react";
 import type { Route } from "next";
+import { ShineLink } from "@/components/home/shine-link";
 import { ButtonLink } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/feedback";
 import { useViewer } from "@/features/session/viewer";
 
 /**
  * Participar en el foro (publicar, responder, "me gusta") requiere sesión: clientes activos y
- * profesionales con plan (E-109). Esas acciones llegan con el panel; acá no se muestran botones que
- * todavía no funcionan.
+ * profesionales con plan (E-109). Sin sesión invita a ingresar; con la cuenta por activar explica qué
+ * falta; al admin no se le muestra (modera desde su panel).
  */
-export function ParticipateCta({ returnTo, text }: { returnTo: string; text: string }) {
+export function ParticipateCta({ returnTo, text, showPublish = false }: { returnTo: string; text: string; showPublish?: boolean }) {
   const viewer = useViewer();
   if (viewer.status === "loading") return <Skeleton className="h-20 w-full rounded-2xl" />;
+  if (viewer.status === "authenticated" && viewer.user.role === "ADMIN") return null;
 
+  if (viewer.status === "authenticated" && viewer.user.status === "ACTIVE") {
+    if (!showPublish) return null;
+    return (
+      <div className="relative isolate flex flex-col gap-4 overflow-hidden rounded-3xl bg-brand-950 p-5 text-white sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <span aria-hidden="true" className="absolute -top-20 -right-10 -z-1 size-60 rounded-full bg-[radial-gradient(closest-side,rgb(59_130_246/0.35),transparent)]" />
+        <div className="flex items-start gap-3">
+          <PenSquare className="mt-0.5 size-5 shrink-0 text-amber-400" aria-hidden="true" />
+          <p>
+            <span className="block font-display text-xl font-bold">¿Tenés una duda o buscás a alguien?</span>
+            <span className="text-brand-200">Preguntale a la comunidad o publicá lo que necesitás.</span>
+          </p>
+        </div>
+        <ShineLink href="/foro/nueva" className="shrink-0">
+          Publicar en el foro
+        </ShineLink>
+      </div>
+    );
+  }
+
+  const pending = viewer.status === "authenticated";
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-brand-100 bg-brand-50 p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-3">
         <MessageSquarePlus className="mt-0.5 size-5 shrink-0 text-brand-700" aria-hidden="true" />
-        <p className="text-sm text-brand-900">
-          {viewer.status === "anonymous" ? text : "Muy pronto vas a poder publicar y responder desde acá con tu cuenta."}
-        </p>
+        <p className="text-sm text-brand-900">{pending ? "Para publicar y responder, primero activá tu cuenta." : text}</p>
       </div>
-      {viewer.status === "anonymous" && (
+      {pending ? (
+        <ButtonLink href="/panel" size="sm" variant="secondary" className="shrink-0">
+          Ver cómo activarla
+        </ButtonLink>
+      ) : (
         <ButtonLink href={`/ingresar?siguiente=${encodeURIComponent(returnTo)}` as Route} size="sm" className="shrink-0">
           Ingresar
         </ButtonLink>

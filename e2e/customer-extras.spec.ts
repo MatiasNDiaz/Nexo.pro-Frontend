@@ -109,7 +109,10 @@ test.describe("favoritos", () => {
 
     await page.goto("/panel/favoritos");
     await expect(page.getByRole("heading", { level: 2, name: "Ana Pérez" })).toBeVisible();
-    await page.getByRole("switch", { name: "Avisarme cuando Ana Pérez esté disponible" }).check({ force: true });
+    // Como una persona: toca el interruptor visible (la casilla real está oculta).
+    const alertsSwitch = page.getByRole("switch", { name: "Avisarme cuando Ana Pérez esté disponible" });
+    await page.locator("label").filter({ has: alertsSwitch }).click();
+    await expect(alertsSwitch).toBeChecked();
     await expect.poll(() => alerts).toBe(true);
     await page.getByRole("button", { name: "Quitar" }).click();
     await expect(page.getByText("Todavía no guardaste a nadie")).toBeVisible();
@@ -187,7 +190,9 @@ test.describe("notificaciones", () => {
     await expect(page.getByText("2 notificaciones, todas leídas")).toBeVisible();
 
     await expect(page.getByText("todavía no están activados en Repara Ya")).toBeVisible();
-    await page.getByRole("switch", { name: /Comunidad/ }).uncheck({ force: true });
+    const community = page.getByRole("switch", { name: /Comunidad/ });
+    await page.locator("label").filter({ has: community }).click();
+    await expect(community).not.toBeChecked();
     await expect.poll(() => preferences.find((p) => p.category === "COMMUNITY")?.push).toBe(false);
     await expectNoHorizontalScroll(page);
   });

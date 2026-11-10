@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AccountStory } from "@/components/home/account-story";
 import { HeroSlides } from "@/components/home/hero-slides";
+import { Opinions } from "@/components/home/opinions";
 import { PlansTable } from "@/components/home/plans-table";
 import { ShineLink } from "@/components/home/shine-link";
 import { WordsUp } from "@/components/motion/words-up";
@@ -47,6 +48,10 @@ export default function HomePage() {
       </section>
       <Professionals />
       <About />
+      {/* Opiniones reales publicadas; sin ninguna, no aparece. */}
+      <Suspense fallback={null}>
+        <Opinions />
+      </Suspense>
       <Faq />
       <FinalCta />
     </>

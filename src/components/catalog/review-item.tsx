@@ -1,5 +1,6 @@
 import { MessageSquareReply } from "lucide-react";
 import type { PublicReview } from "@/features/catalog/types";
+import { ReportButton } from "@/features/reports/report-dialog";
 import { formatDate, formatRating } from "@/lib/format";
 import { Stars } from "./rating";
 
@@ -20,6 +21,9 @@ export function ReviewItem({ review, professionalName }: { review: PublicReview;
         </span>
       </header>
       {review.comment && <p className="leading-relaxed whitespace-pre-line text-ink">{review.comment}</p>}
+      <div className="-mb-2 flex justify-end">
+        <ReportButton targetType="REVIEW" targetId={review.id} subject={`la reseña de ${review.author.displayName}`} compact />
+      </div>
       {review.reply && (
         <div className="flex gap-3 rounded-xl bg-canvas p-4">
           <MessageSquareReply className="mt-0.5 size-4 shrink-0 text-brand-600" aria-hidden="true" />

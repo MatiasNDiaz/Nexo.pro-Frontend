@@ -33,7 +33,7 @@ export default function ForumPage({ searchParams }: PageProps<"/foro">) {
         description="Preguntas sobre arreglos y pedidos de clientes que buscan un profesional en su zona."
       />
       <div className="container-page flex flex-col gap-6 py-8 sm:py-10">
-        <ParticipateCta returnTo="/foro" text="Ingresá para hacer una pregunta o publicar lo que necesitás." />
+        <ParticipateCta returnTo="/foro" text="Ingresá para hacer una pregunta o publicar lo que necesitás." showPublish />
         <Suspense fallback={<Skeleton className="h-28 w-full rounded-2xl" />}>
           <Controls searchParams={searchParams} />
         </Suspense>

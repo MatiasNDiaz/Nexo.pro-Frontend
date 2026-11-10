@@ -28,6 +28,7 @@ import { env } from "@/config/env";
 import { cn } from "@/lib/cn";
 import { getProfileReviews, getPublicProfile } from "@/features/catalog/data";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
+import { ReportButton } from "@/features/reports/report-dialog";
 import { ProfileActions } from "@/features/requests/profile-actions";
 import { REVIEWS_PAGE_SIZE } from "@/features/catalog/filters";
 import {
@@ -250,6 +251,7 @@ async function Profile({ params }: { params: Promise<{ slug: string }> }) {
               />
               <ProfileContact slug={profile.slug} name={profile.firstName} />
               <FavoriteButton professionalUserId={profile.professionalUserId} name={profile.firstName} />
+              <ReportButton targetType="PROFILE" targetId={profile.professionalUserId} subject={`el perfil de ${profile.firstName}`} className="self-center" />
             </div>
 
             <SideCard icon={MapPin} title="Zonas de trabajo">

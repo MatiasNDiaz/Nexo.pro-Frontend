@@ -71,6 +71,10 @@ test.describe("panel: navegación", () => {
       "Favoritos",
       "Mis reseñas",
       "Notificaciones",
+      "Soporte",
+      "Mis reportes",
+      "Sanciones",
+      "Tu opinión",
       "Mi cuenta",
       "Verificación",
       "Seguridad",
@@ -96,7 +100,7 @@ test.describe("panel: navegación", () => {
     }
   });
 
-  test("una cuenta suspendida solo ve Inicio y Seguridad, sin contraseña ni baja", async ({ page }) => {
+  test("una cuenta suspendida solo ve Inicio, Sanciones y Seguridad, sin contraseña ni baja", async ({ page }) => {
     await mockApi(
       page,
       signedIn(me({ status: "SUSPENDED", statusReason: "Revisión" }), {
@@ -104,7 +108,7 @@ test.describe("panel: navegación", () => {
       }),
     );
     await page.goto("/panel/seguridad");
-    await expect(page.getByRole("navigation", { name: "Panel" }).getByRole("link")).toHaveText(["Inicio", "Seguridad"]);
+    await expect(page.getByRole("navigation", { name: "Panel" }).getByRole("link")).toHaveText(["Inicio", "Sanciones", "Seguridad"]);
     await expect(page.getByText("Chrome en Windows")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Cambiar contraseña" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Dar de baja mi cuenta" })).toHaveCount(0);

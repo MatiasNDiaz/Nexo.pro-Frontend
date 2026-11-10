@@ -44,9 +44,9 @@ test.describe("foro", () => {
     await expect(main(page).locator("p").filter({ hasText: "<script>window.__xss = true</script>" })).toBeVisible();
     expect(await page.evaluate(() => (window as unknown as { __xss?: boolean }).__xss)).toBeUndefined();
     await expect(main(page).getByText("Propone: $")).toBeVisible();
-    await expect(main(page).getByText("Respuesta eliminada")).toBeVisible();
+    await expect(main(page).getByText("Respuesta eliminada", { exact: true })).toBeVisible();
     // La respuesta a un mensaje borrado queda anidada debajo del lugar vacío.
-    const removed = main(page).locator("li").filter({ has: page.getByText("Respuesta eliminada") });
+    const removed = main(page).locator("li").filter({ has: page.getByText("Respuesta eliminada", { exact: true }) });
     await expect(removed.getByText("Respuesta a un mensaje borrado.")).toBeVisible();
     const jsonLd = JSON.parse((await main(page).locator('script[type="application/ld+json"]').textContent()) ?? "{}");
     expect(jsonLd).toMatchObject({ "@type": "DiscussionForumPosting", commentCount: 3 });

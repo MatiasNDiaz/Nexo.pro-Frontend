@@ -5,6 +5,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ReportButton } from "@/features/reports/report-dialog";
 import { cn } from "@/lib/cn";
 import { dayKey, formatDayHeading, formatTime } from "@/lib/format";
 import { attachmentUrl, canEdit, type Conversation, type Message } from "./api";
@@ -159,7 +160,7 @@ function Bubble({ message, mine, author, editable, seen, onEdit, onDelete }: Bub
   const canAct = mine && !message.deleted;
 
   return (
-    <div className={cn("flex flex-col gap-1", mine ? "items-end" : "items-start")}>
+    <div className={cn("group/msg flex flex-col gap-1", mine ? "items-end" : "items-start")}>
       <div className={cn("flex max-w-[85%] items-end gap-1.5 sm:max-w-[75%]", mine && "flex-row-reverse")}>
         <div
           className={cn(
@@ -225,6 +226,12 @@ function Bubble({ message, mine, author, editable, seen, onEdit, onDelete }: Bub
               ))}
           </span>
         </div>
+        {/* Mensajes de la otra persona: se pueden reportar (aparece al pasar el mouse o con el teclado). */}
+        {!mine && !message.deleted && (
+          <span className="opacity-0 transition-opacity duration-200 group-hover/msg:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
+            <ReportButton targetType="MESSAGE" targetId={message.id} subject={`el mensaje de ${author}`} compact />
+          </span>
+        )}
         {canAct && (
           <button
             type="button"
