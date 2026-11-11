@@ -65,6 +65,11 @@ function ReviewForm({ contractId, review, onDone }: { contractId: string; review
 
   const save = useMutation({
     mutationFn: () => (review ? updateReview(review.id, rating, comment) : createReview(contractId, rating, comment)),
+    meta: {
+      success: review
+        ? "Guardamos los cambios de tu reseña"
+        : { title: "¡Gracias por tu reseña!", description: "Ayuda a otras personas a elegir y al profesional a mejorar." },
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: reviewKeys.mine });
       onDone();
@@ -132,6 +137,7 @@ export function ReviewSummary({ review, name, onEdit }: { review: OwnReview; nam
   const queryClient = useQueryClient();
   const remove = useMutation({
     mutationFn: () => deleteReview(review.id),
+    meta: { success: "Borraste tu reseña" },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: reviewKeys.mine }),
   });
 

@@ -149,6 +149,10 @@ function useAddMedia() {
       const uploaded = await uploadFile(file, "PROFILE_MEDIA");
       return addMedia(uploaded.id, purpose);
     },
+    meta: {
+      success: (_data, variables) =>
+        (variables as { file: File }).file.type.startsWith("video/") ? "Agregamos el video a tu perfil" : "Agregamos la foto a tu perfil",
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: proKeys.me }),
   });
 }
@@ -161,6 +165,7 @@ function CoverSection({ me, allowed, allowsVideo }: { me: ProfessionalMe; allowe
   const add = useAddMedia();
   const remove = useMutation({
     mutationFn: (id: string) => removeMedia(id),
+    meta: { success: "Quitamos la portada" },
     onSettled: () => queryClient.invalidateQueries({ queryKey: proKeys.me }),
   });
   const accept = [...ACCEPTED_TYPES.IMAGE, ...(allowsVideo ? ACCEPTED_TYPES.VIDEO : [])].join(",");
@@ -259,6 +264,7 @@ function DetailsSection({ me }: { me: ProfessionalMe }) {
         rateMode: rate === "" ? null : rateMode || null,
         ...flags,
       }),
+    meta: { success: "Guardamos los datos del perfil" },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   const rateIncomplete = rate !== "" && !rateMode;
@@ -297,7 +303,7 @@ function DetailsSection({ me }: { me: ProfessionalMe }) {
           <Toggle label="Tengo movilidad propia" checked={flags.hasMobility} onChange={(v) => setFlags({ ...flags, hasMobility: v })} />
           <Toggle label="Trabajo con equipo" checked={flags.worksWithTeam} onChange={(v) => setFlags({ ...flags, worksWithTeam: v })} />
         </div>
-        <SaveRow pending={save.isPending} saved={save.isSuccess} error={save.isError ? planError(save.error) : null} />
+        <SaveRow pending={save.isPending} error={save.isError ? planError(save.error) : null} />
       </form>
     </SettingsSection>
   );
@@ -313,7 +319,11 @@ function MediaSection({ me, maxImages, maxVideos }: { me: ProfessionalMe; maxIma
   const videos = work.filter((m) => m.kind === "VIDEO").length;
   const canAddImage = images < maxImages;
   const canAddVideo = videos < maxVideos;
-  const remove = useMutation({ mutationFn: (id: string) => removeMedia(id), onSettled: () => queryClient.invalidateQueries({ queryKey: proKeys.me }) });
+  const remove = useMutation({
+    mutationFn: (id: string) => removeMedia(id),
+    meta: { success: "Lo quitamos de tus trabajos" },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: proKeys.me }),
+  });
   const reorder = useMutation({
     mutationFn: (ids: string[]) => reorderMedia(ids),
     onMutate: (ids) =>
@@ -414,6 +424,7 @@ function ProfessionsSection({ me, max }: { me: ProfessionalMe; max: number }) {
   const [primary, setPrimary] = useState(me.professions.find((p) => p.isPrimary)?.id ?? me.professions[0]?.id ?? "");
   const save = useMutation({
     mutationFn: () => replaceProfessions(selected, primary),
+    meta: { success: "Guardamos tus oficios" },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   const toggle = (id: string) => {
@@ -472,7 +483,7 @@ function ProfessionsSection({ me, max }: { me: ProfessionalMe; max: number }) {
           save.mutate();
         }}
       >
-        <SaveRow pending={save.isPending} saved={save.isSuccess} error={save.isError ? planError(save.error) : null} />
+        <SaveRow pending={save.isPending} error={save.isError ? planError(save.error) : null} />
       </form>
     </SettingsSection>
   );
@@ -489,6 +500,7 @@ function AreasSection({ me }: { me: ProfessionalMe }) {
       replaceServiceAreas(
         areas.filter((a) => a.localityId).map((a) => ({ localityId: a.localityId, ...(a.neighborhoodName.trim() ? { neighborhoodName: a.neighborhoodName.trim() } : {}) })),
       ),
+    meta: { success: "Guardamos tus zonas de trabajo" },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   const options = (localities.data ?? []).map((l) => ({ value: l.id, label: l.name }));
@@ -530,7 +542,7 @@ function AreasSection({ me }: { me: ProfessionalMe }) {
           save.mutate();
         }}
       >
-        <SaveRow pending={save.isPending} saved={save.isSuccess} error={save.isError ? planError(save.error) : null} />
+        <SaveRow pending={save.isPending} error={save.isError ? planError(save.error) : null} />
       </form>
     </SettingsSection>
   );
@@ -545,6 +557,7 @@ function SocialsSection({ me }: { me: ProfessionalMe }) {
       replaceSocialLinks(
         socialNetworks.flatMap((n) => (links[n.value]?.trim() ? [{ network: n.value, url: links[n.value]!.trim() }] : [])),
       ),
+    meta: { success: "Guardamos tus redes y tu sitio web" },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   return (
@@ -576,7 +589,6 @@ function SocialsSection({ me }: { me: ProfessionalMe }) {
         </div>
         <SaveRow
           pending={save.isPending}
-          saved={save.isSuccess}
           error={save.isError ? (isApiError(save.error, "INVALID_SOCIAL_LINKS") ? "Revisá los enlaces: cada uno tiene que ser de su red y empezar con https://." : errorMessage(save.error)) : null}
         />
       </form>
@@ -609,6 +621,7 @@ function ThemeSection({ me, level }: { me: ProfessionalMe; level: "NONE" | "STAN
         ),
       );
     },
+    meta: { success: { title: "Guardamos el estilo de tu página", description: "En tu página pública se ve en menos de un minuto." } },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   const locked = level === "NONE";
@@ -701,7 +714,6 @@ function ThemeSection({ me, level }: { me: ProfessionalMe; level: "NONE" | "STAN
 
           <SaveRow
             pending={save.isPending}
-            saved={save.isSuccess}
             error={save.isError ? (isApiError(save.error, "THEME_NOT_IN_PLAN") ? "Tu plan no incluye alguna de esas opciones." : planError(save.error)) : null}
           />
         </form>
@@ -796,22 +808,14 @@ function IconButton({ label, onClick, disabled, danger = false, children }: { la
   );
 }
 
-/** Botón de guardar con confirmación que aparece y se va sola. */
-function SaveRow({ pending, saved, error }: { pending: boolean; saved: boolean; error: string | null }) {
+/** Botón de guardar con el error al lado. Lo guardado se avisa con un aviso flotante (meta.success). */
+function SaveRow({ pending, error }: { pending: boolean; error: string | null }) {
   return (
     <div className="flex flex-col gap-3">
       {error && <Alert tone="danger">{error}</Alert>}
-      <div className="flex items-center gap-3">
-        <Button type="submit" loading={pending}>
-          Guardar
-        </Button>
-        {saved && !pending && !error && (
-          <span role="status" className="inline-flex items-center gap-1.5 text-sm font-semibold text-success-800 animate-[pop-in_220ms_var(--ease-out-soft)]">
-            <Check className="size-4" aria-hidden="true" />
-            Guardado
-          </span>
-        )}
-      </div>
+      <Button type="submit" loading={pending} className="self-start">
+        Guardar
+      </Button>
     </div>
   );
 }
@@ -843,6 +847,7 @@ function CertificatesSection({ me }: { me: ProfessionalMe }) {
         sensitiveDataConfirmed: true,
       });
     },
+    meta: { success: { title: "Publicamos el certificado", description: "Se ve en tu perfil como cargado por vos." } },
     onSuccess: () => {
       setFile(null);
       setTitle("");
@@ -853,7 +858,7 @@ function CertificatesSection({ me }: { me: ProfessionalMe }) {
       void refresh();
     },
   });
-  const remove = useMutation({ mutationFn: (certId: string) => removeCertification(certId), onSettled: refresh });
+  const remove = useMutation({ mutationFn: (certId: string) => removeCertification(certId), meta: { success: "Quitamos el certificado" }, onSettled: refresh });
   const full = me.certifications.length >= MAX_CERTIFICATIONS;
   const titleError = touched && title.trim().length < 2 ? "Escribí el nombre del certificado." : undefined;
   const fileError = touched && !file ? "Elegí la foto o el PDF." : undefined;

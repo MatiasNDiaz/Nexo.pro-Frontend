@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/feedback";
+import { FeedbackIcon } from "@/components/ui/feedback-icon";
 import { Field, Textarea } from "@/components/ui/form-controls";
 import { formatDate, formatMoney } from "@/lib/format";
 import { REASON_MAX, type Quote } from "./api";
@@ -36,7 +37,7 @@ export function ReasonDialog({ open, onClose, title, description, confirmLabel, 
   const id = useId();
   const [reason, setReason] = useState("");
   return (
-    <Dialog open={open} onClose={onClose} title={title} description={description}>
+    <Dialog open={open} onClose={onClose} title={title} description={description} role="alertdialog" icon={<FeedbackIcon tone="warning" size="lg" />}>
       <form
         onSubmit={(event) => {
           event.preventDefault();

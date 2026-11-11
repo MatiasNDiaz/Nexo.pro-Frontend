@@ -75,6 +75,7 @@ function RequestDetail({ request }: { request: ServiceRequest }) {
 
   const cancel = useMutation({
     mutationFn: (reason: string) => cancelRequest(request.id, reason),
+    meta: { success: { title: "Cancelaste el pedido", description: "Les avisamos a los profesionales por el chat." } },
     onSuccess: (updated) => {
       setCancelling(false);
       applyUpdate(updated);
@@ -155,6 +156,7 @@ function TargetCard({ target, conversation, requestOpen }: TargetCardProps) {
 
   const select = useMutation({
     mutationFn: () => selectTarget(target.id, quote?.id),
+    meta: { success: { title: `¡Elegiste a ${name}!`, description: "Seguí el trabajo desde acá: vas a ver cuándo lo agenda, empieza y termina." } },
     onSuccess: async (contract) => {
       queryClient.setQueryData(contractKeys.detail(contract.id), contract);
       await Promise.all([

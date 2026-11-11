@@ -94,7 +94,7 @@ test.describe("perfil profesional", () => {
 
     await page.getByRole("textbox", { name: "Descripción" }).fill("Electricista con 5 años de oficio. Trabajo prolijo.");
     await page.locator("#datos").getByRole("button", { name: "Guardar" }).click();
-    await expect(page.locator("#datos").getByText("Guardado")).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "Guardamos los datos del perfil" })).toBeVisible();
     expect(patch).toMatchObject({ bio: "Electricista con 5 años de oficio. Trabajo prolijo.", yearsExperience: 5, hasMobility: true, freeQuote: true });
 
     await page.locator("#trabajos input[type=file]").setInputFiles({
@@ -110,7 +110,7 @@ test.describe("perfil profesional", () => {
     await style.locator("label").filter({ hasText: "Manuscrita" }).click();
     await style.getByRole("textbox", { name: /Frase destacada/ }).fill("Trabajos con garantía");
     await style.getByRole("button", { name: "Guardar" }).click();
-    await expect(style.getByText("Guardado")).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "Guardamos el estilo de tu página" })).toBeVisible();
     expect(theme).toEqual({ color: "verde", font: "manuscrita", headline: "Trabajos con garantía" });
     await expectNoHorizontalScroll(page);
   });

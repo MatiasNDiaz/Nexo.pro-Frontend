@@ -113,7 +113,8 @@ export function Dialog({ open, onClose, title, description, children, className,
               </p>
             )}
           </div>
-          <div className="w-full">{children}</div>
+          {/* Los campos de un formulario se leen mejor alineados a la izquierda. */}
+          <div className="w-full text-left">{children}</div>
         </div>
       ) : (
         <div className="flex flex-col gap-4 p-5 sm:p-6">

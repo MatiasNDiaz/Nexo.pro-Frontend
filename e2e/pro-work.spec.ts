@@ -177,11 +177,11 @@ test.describe("trabajos del profesional", () => {
     expect(calls[0]).toMatch(/^schedule \{"scheduledAt":"\d{4}-\d\d-\d\dT\d\d:00:00\.000Z"\}$/);
 
     await page.getByRole("button", { name: "Empezar el trabajo" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Empezar" }).click();
+    await page.locator("dialog[open]").getByRole("button", { name: "Empezar" }).click();
     await expect(page.getByText("¿Terminaste?")).toBeVisible();
 
     await page.getByRole("button", { name: "Marcar como terminado" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Terminado" }).click();
+    await page.locator("dialog[open]").getByRole("button", { name: "Terminado" }).click();
     await expect(page.getByRole("button", { name: "Marcar como terminado" })).toBeHidden();
     expect(calls.map((c) => c.split(" ")[0])).toEqual(["schedule", "start", "complete"]);
     // La reseña la deja el cliente: el profesional no ve el formulario.

@@ -21,7 +21,7 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, Badge, EmptyState, Skeleton } from "@/components/ui/feedback";
 import { SettingsSection } from "@/features/account/settings-section";
@@ -44,6 +44,7 @@ import {
   type AdminUserDetail,
   type VerificationStatus,
 } from "./api";
+import { Notice } from "./admin-ui";
 import { ProContent } from "./pro-content";
 import { UserActionDialog, type UserDialog } from "./user-actions";
 
@@ -68,12 +69,6 @@ export function UserDetailScreen() {
   });
   const [dialog, setDialog] = useState<UserDialog | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const noticeRef = useRef<HTMLDivElement>(null);
-
-  // El aviso se lleva el foco (y el lector de pantalla lo lee) al cerrar el diálogo.
-  useEffect(() => {
-    if (notice) noticeRef.current?.focus();
-  }, [notice]);
 
   if (!valid || (user.isError && isApiError(user.error) && user.error.status === 404)) {
     return (
@@ -129,11 +124,7 @@ export function UserDetailScreen() {
               </Link>
             </Alert>
           )}
-          {notice && (
-            <div ref={noticeRef} tabIndex={-1} className="outline-none">
-              <Alert tone="success">{notice}</Alert>
-            </div>
-          )}
+          <Notice message={notice} />
           <Actions user={user.data} onOpen={open} />
           <Moderation user={user.data} onOpen={open} />
           {user.data.role === "PROFESSIONAL" && !user.data.deletedAt && <ProContent userId={user.data.id} />}

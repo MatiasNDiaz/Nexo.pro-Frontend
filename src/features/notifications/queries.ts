@@ -44,6 +44,7 @@ export function useMarkAllRead() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: markAllRead,
+    meta: { success: "Marcamos todas como leídas", error: "No pudimos marcarlas como leídas. Probá de nuevo." },
     onMutate: () => {
       queryClient.setQueriesData<NotificationPage>({ queryKey: ["notifications", "page"] }, (page) =>
         page ? { ...page, unread: 0, data: page.data.map((n) => ({ ...n, read: true })) } : page,

@@ -166,6 +166,7 @@ function AppealDialog({ target, onClose }: { target: { strikeId?: string; sancti
         method: "POST",
         body: { body: body.trim(), ...(target.strikeId ? { strikeId: target.strikeId } : { sanctionId: target.sanctionId }) },
       }),
+    meta: { success: { title: "Enviamos tu apelación", description: "Nuestro equipo la revisa y te avisamos lo que decida." } },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: moderationKey });
       onClose();

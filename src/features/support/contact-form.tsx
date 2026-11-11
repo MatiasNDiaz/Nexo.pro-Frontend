@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MailCheck, Send } from "lucide-react";
+import { Send } from "lucide-react";
+import { FeedbackIcon } from "@/components/ui/feedback-icon";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -80,9 +81,7 @@ export function ContactForm() {
   if (sent) {
     return (
       <div role="status" className="flex flex-col items-center gap-4 py-6 text-center">
-        <span className="grid size-14 place-items-center rounded-2xl bg-success-50 text-success-600">
-          <MailCheck className="size-7" aria-hidden="true" />
-        </span>
+        <FeedbackIcon tone="success" size="lg" />
         <h2 className="text-2xl font-bold text-brand-900">¡Recibimos tu mensaje!</h2>
         <p className="max-w-md text-muted">Te respondemos al email que nos dejaste, dentro de las 48 a 72 horas hábiles.</p>
       </div>

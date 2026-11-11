@@ -131,7 +131,7 @@ test.describe("panel: mi cuenta", () => {
     await page.getByRole("textbox", { name: "Teléfono" }).fill("(351) 765-4321");
     await save.click();
 
-    await expect(page.getByText("Guardamos tus datos.")).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "Guardamos tus datos" })).toBeVisible();
     expect(api.find("PATCH /users/me")[0]!.postDataJSON()).toEqual({ phone: "3517654321" });
     expect(api.find("PATCH /users/me")[0]!.headers()["x-csrf-token"]).toBe("csrf-1");
     // Lo guardado pasa a ser el estado sin cambios.
@@ -173,16 +173,43 @@ test.describe("panel: mi cuenta", () => {
     const save = page.getByRole("button", { name: "Guardar", exact: true });
     await field.fill("  Timbre 3B, de 9 a 13.  ");
     await save.click();
-    await expect(page.getByText("Guardamos los datos.")).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "Guardamos los datos" })).toBeVisible();
     await expect(save).toBeDisabled();
 
     await field.fill("");
     await save.click();
-    await expect(page.getByText("Guardamos los datos.")).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "Guardamos los datos" })).toBeVisible();
     expect(api.find("PATCH /customers/me").map((r) => r.postDataJSON())).toEqual([
       { extraInfo: "Timbre 3B, de 9 a 13." },
       { extraInfo: null },
     ]);
+  });
+
+  test("el aviso de guardado se puede cerrar y se va solo", async ({ page }) => {
+    await mockApi(
+      page,
+      signedIn(activeCustomer, {
+        "GET /users/me": () => json(200, personal()),
+        "GET /customers/me": () => json(200, { extraInfo: null }),
+        "PATCH /customers/me": () => json(200, { extraInfo: "Timbre 3B" }),
+      }),
+    );
+    await page.goto("/panel/cuenta");
+    const field = page.getByRole("textbox", { name: "Datos útiles (opcional)" });
+    const save = page.getByRole("button", { name: "Guardar", exact: true });
+    const notice = page.getByRole("region", { name: "Avisos" }).getByRole("status");
+
+    await field.fill("Timbre 3B");
+    await save.click();
+    await expect(notice).toContainText("Guardamos los datos");
+    await notice.getByRole("button", { name: "Cerrar aviso" }).click();
+    await expect(notice).toHaveCount(0);
+
+    await field.fill("Timbre 3B, piso 2");
+    await save.click();
+    await expect(notice).toContainText("Guardamos los datos");
+    // Éxito: 4 s visible (+ la salida).
+    await expect(notice).toHaveCount(0, { timeout: 6000 });
   });
 
   test("un profesional no ve los datos para el profesional", async ({ page }) => {
@@ -350,7 +377,7 @@ test.describe("panel: seguridad", () => {
 
     await page.getByLabel(/^Contraseña actual/).fill("la-clave-actual");
     await page.getByRole("button", { name: "Cambiar contraseña" }).click();
-    await expect(page.getByText("Cambiaste tu contraseña.")).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "Cambiaste tu contraseña" })).toBeVisible();
     expect(api.find("POST /auth/password/change")[1]!.postDataJSON()).toEqual({
       currentPassword: "la-clave-actual",
       newPassword: "una-clave-nueva",
@@ -409,7 +436,11 @@ test.describe("panel: seguridad", () => {
     );
     await page.goto("/panel/seguridad");
     await page.getByRole("button", { name: "Cerrar sesión en todos los dispositivos" }).click();
+    // Pide confirmación (también se cierra este dispositivo).
+    const confirm = page.getByRole("alertdialog", { name: "¿Cerrar la sesión en todos los dispositivos?" });
+    await confirm.getByRole("button", { name: "Cerrar en todos" }).click();
     await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole("status").filter({ hasText: "Cerramos tu sesión en todos los dispositivos" })).toBeVisible();
     expect(api.find("POST /auth/logout-all")[0]!.headers()["x-csrf-token"]).toBe("csrf-1");
     if (isMobile) await page.getByRole("button", { name: "Abrir menú" }).click();
     await expect(page.getByRole("link", { name: "Ingresar" }).first()).toBeVisible();
@@ -426,7 +457,7 @@ test.describe("panel: seguridad", () => {
     );
     await page.goto("/panel/seguridad");
     await page.getByRole("button", { name: "Dar de baja mi cuenta" }).click();
-    const dialog = page.getByRole("dialog", { name: "¿Dar de baja tu cuenta?" });
+    const dialog = page.getByRole("alertdialog", { name: "¿Dar de baja tu cuenta?" });
     const confirm = dialog.getByRole("button", { name: "Dar de baja" });
     await expect(confirm).toBeDisabled();
     await dialog.getByLabel(/^Tu contraseña/).fill("incorrecta-000");

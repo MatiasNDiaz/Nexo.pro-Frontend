@@ -53,10 +53,19 @@ function AttentionCard({ me }: { me: ProfessionalMe }) {
   const [until, setUntil] = useState("");
   const change = useMutation({
     mutationFn: (status: AttentionStatus) => setAttention(status, until ? new Date(until).toISOString() : null),
+    meta: {
+      success: (_updated, status) =>
+        status === "AVAILABLE"
+          ? { title: "Estás disponible", description: "Los clientes te ven como “Disponible ya” en el catálogo." }
+          : status === "WORKING"
+            ? "Te pusiste en “Trabajando”"
+            : "Te pusiste en “Descansando”",
+    },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   const auto = useMutation({
     mutationFn: (on: boolean) => updateProfile({ autoStatusFromSchedule: on }),
+    meta: { success: (_updated, on) => (on ? "Tu estado va a seguir tus horarios" : "Tu estado ya no sigue tus horarios") },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   const { attention } = me;
@@ -134,6 +143,7 @@ function WeeklySchedule({ me }: { me: ProfessionalMe }) {
   const total = Object.values(days).reduce((sum, list) => sum + list.length, 0);
   const save = useMutation({
     mutationFn: () => replaceAvailability(Object.entries(days).flatMap(([weekday, list]) => list.map((slot) => ({ weekday: Number(weekday), ...slot })))),
+    meta: { success: { title: "Guardamos tus horarios", description: "Se ven en tu página pública." } },
     onSuccess: (updated) => queryClient.setQueryData(proKeys.me, updated),
   });
   const setDay = (weekday: number, list: Slot[]) => setDays({ ...days, [weekday]: list });
@@ -226,6 +236,7 @@ function Exceptions({ me }: { me: ProfessionalMe }) {
   const [note, setNote] = useState("");
   const add = useMutation({
     mutationFn: () => addException({ type, startDate: from, endDate: to || from, ...(note.trim() ? { note: note.trim() } : {}) }),
+    meta: { success: { title: "Agregamos los días sin atención", description: "Se muestran en tu página para que nadie te espere." } },
     onSuccess: (updated) => {
       queryClient.setQueryData(proKeys.me, updated);
       setFrom("");
@@ -233,7 +244,7 @@ function Exceptions({ me }: { me: ProfessionalMe }) {
       setNote("");
     },
   });
-  const remove = useMutation({ mutationFn: (exceptionId: string) => removeException(exceptionId), onSettled: () => queryClient.invalidateQueries({ queryKey: proKeys.me }) });
+  const remove = useMutation({ mutationFn: (exceptionId: string) => removeException(exceptionId), meta: { success: "Quitamos esos días sin atención" }, onSettled: () => queryClient.invalidateQueries({ queryKey: proKeys.me }) });
   const today = new Date().toISOString().slice(0, 10);
 
   return (

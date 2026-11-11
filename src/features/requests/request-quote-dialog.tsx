@@ -65,6 +65,7 @@ export function RequestQuoteDialog({ open, onClose, professional }: RequestQuote
   const create = useMutation({
     mutationFn: (values: z.output<typeof schema>) =>
       createRequest({ professionalIds: [professional.userId], ...values }),
+    meta: { success: { title: "Enviamos tu pedido", description: "El profesional lo ve en su panel y te responde por el chat." } },
     onSuccess: async (request) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: requestKeys.all }),

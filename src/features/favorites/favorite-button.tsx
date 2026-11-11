@@ -38,13 +38,19 @@ export function FavoriteButton({
   const { enabled, query } = useFavorites();
   const saved = query.data?.some((f) => f.professionalId === professionalUserId) ?? false;
 
+  // `wasSaved` viaja como variable: el aviso se arma al terminar, cuando el corazón ya cambió.
   const toggle = useMutation({
-    mutationFn: () => (saved ? removeFavorite(professionalUserId) : saveFavorite(professionalUserId)),
-    onMutate: async () => {
+    mutationFn: (wasSaved: boolean) => (wasSaved ? removeFavorite(professionalUserId) : saveFavorite(professionalUserId)),
+    meta: {
+      success: (_data, wasSaved) =>
+        wasSaved ? `Quitaste a ${name} de favoritos` : { title: `Guardaste a ${name} en favoritos`, description: "Lo encontrás en tu panel, en Favoritos." },
+      error: "No pudimos actualizar tus favoritos. Probá de nuevo.",
+    },
+    onMutate: async (wasSaved) => {
       await queryClient.cancelQueries({ queryKey: favoriteKeys.all });
       const previous = queryClient.getQueryData<Favorite[]>(favoriteKeys.all);
       queryClient.setQueryData<Favorite[]>(favoriteKeys.all, (list = []) =>
-        saved
+        wasSaved
           ? list.filter((f) => f.professionalId !== professionalUserId)
           : [...list, { professionalId: professionalUserId } as Favorite],
       );
@@ -92,7 +98,7 @@ export function FavoriteButton({
       aria-label={variant === "card" ? label : undefined}
       onClick={(event) => {
         event.preventDefault();
-        toggle.mutate();
+        toggle.mutate(saved);
       }}
       disabled={toggle.isPending}
       className={variant === "card" ? cardClass : profileClass}

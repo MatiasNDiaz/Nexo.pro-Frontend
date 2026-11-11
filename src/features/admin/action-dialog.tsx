@@ -5,6 +5,7 @@ import { useId, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/feedback";
+import { FeedbackIcon } from "@/components/ui/feedback-icon";
 import { Field, Textarea } from "@/components/ui/form-controls";
 import { errorMessage, isApiError } from "@/lib/api/errors";
 import { REASON_MAX, REASON_MIN } from "./api";
@@ -71,7 +72,14 @@ export function ActionDialog({
   const reasonError = touched && trimmed < minReason ? `Escribí el motivo (al menos ${minReason} caracteres).` : undefined;
 
   return (
-    <Dialog open onClose={onClose} title={title} description={description}>
+    // Las acciones que castigan o borran (tone="danger") van con el ícono de advertencia.
+    <Dialog
+      open
+      onClose={onClose}
+      title={title}
+      description={description}
+      {...(tone === "danger" ? { role: "alertdialog" as const, icon: <FeedbackIcon tone="warning" size="lg" /> } : {})}
+    >
       <form
         noValidate
         className="flex flex-col gap-5"

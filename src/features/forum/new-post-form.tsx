@@ -59,6 +59,7 @@ export function NewPostForm() {
         ...(deadline ? { deadline } : {}),
         ...(media.fileIds.length ? { mediaFileIds: media.fileIds } : {}),
       }),
+    meta: { success: { title: "Publicamos tu pedido en el foro", description: "Los profesionales te responden acá y te avisamos de cada respuesta." } },
     onSuccess: (post) => router.push(`/foro/${post.id}` as Route),
   });
 

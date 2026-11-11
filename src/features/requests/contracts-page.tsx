@@ -142,6 +142,7 @@ function ContractDetail({ contract }: { contract: Contract }) {
 
   const cancel = useMutation({
     mutationFn: (reason: string) => cancelContract(contract.id, reason),
+    meta: { success: { title: "Cancelaste el trabajo", description: `Le avisamos a ${name} por el chat.` } },
     onSuccess: (updated) => {
       setCancelling(false);
       queryClient.setQueryData(contractKeys.detail(updated.id), updated);
@@ -252,9 +253,21 @@ function ProActions({ contract, name }: { contract: Contract; name: string }) {
     // Al empezar, el backend sugiere ponerse en "Trabajando" (C-30): se refleja en la agenda.
     void queryClient.invalidateQueries({ queryKey: ["professional", "me"] });
   };
-  const schedule = useMutation({ mutationFn: () => scheduleContract(contract.id, new Date(when).toISOString()), onSuccess: done });
-  const start = useMutation({ mutationFn: () => startContract(contract.id), onSuccess: done });
-  const complete = useMutation({ mutationFn: () => completeContract(contract.id), onSuccess: done });
+  const schedule = useMutation({
+    mutationFn: () => scheduleContract(contract.id, new Date(when).toISOString()),
+    meta: { success: (updated) => ({ title: `Agendaste el trabajo para el ${formatDateTime((updated as Contract).scheduledAt!)}`, description: `Le avisamos a ${name} por el chat.` }) },
+    onSuccess: done,
+  });
+  const start = useMutation({
+    mutationFn: () => startContract(contract.id),
+    meta: { success: { title: "¡Arrancaste el trabajo!", description: `Le avisamos a ${name}. Cuando termines, marcalo como terminado.` } },
+    onSuccess: done,
+  });
+  const complete = useMutation({
+    mutationFn: () => completeContract(contract.id),
+    meta: { success: { title: "¡Trabajo terminado!", description: `Le avisamos a ${name} por el chat. Ya puede dejarte su reseña.` } },
+    onSuccess: done,
+  });
   const minDate = toLocalInput(new Date().toISOString());
   const error = schedule.error ?? start.error ?? complete.error;
 

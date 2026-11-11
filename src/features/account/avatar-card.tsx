@@ -5,6 +5,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { RemoteImage } from "@/components/catalog/remote-image";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
+import { toast } from "@/components/ui/toast";
 import { useSessionActions } from "@/features/session/session-provider";
 import { errorMessage } from "@/lib/api/errors";
 import { ACCEPTED_TYPES, uploadFile } from "@/lib/uploads";
@@ -15,7 +16,7 @@ import { useMe } from "./use-me";
 /** Peso máximo de la foto de perfil (file-policies.ts: AVATAR 5 MB). El backend lo vuelve a controlar. */
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
-type Status = { kind: "idle" } | { kind: "saving" } | { kind: "saved"; underReview: boolean } | { kind: "error"; message: string };
+type Status = { kind: "idle" } | { kind: "saving" } | { kind: "error"; message: string };
 
 /**
  * Foto de perfil: elegir, ver cómo queda y guardar. Se sube en tres pasos (lib/uploads.ts) y se
@@ -59,7 +60,12 @@ export function AvatarCard() {
       await refreshSession();
       setFile(null);
       if (inputRef.current) inputRef.current.value = "";
-      setStatus({ kind: "saved", underReview: result.underReview });
+      setStatus({ kind: "idle" });
+      if (result.underReview) {
+        toast.success("Foto enviada a revisión", "Como tu identidad ya está aprobada, nuestro equipo revisa la foto nueva. Mientras tanto se ve la anterior.");
+      } else {
+        toast.success("Foto guardada", "Ya es tu foto de perfil.");
+      }
     } catch (error) {
       setStatus({ kind: "error", message: errorMessage(error) });
     }
@@ -119,13 +125,6 @@ export function AvatarCard() {
         </div>
       </div>
       {status.kind === "error" && <Alert tone="danger">{status.message}</Alert>}
-      {status.kind === "saved" && (
-        <Alert tone="success" title={status.underReview ? "Foto enviada a revisión" : "Foto guardada"}>
-          {status.underReview
-            ? "Como tu identidad ya está aprobada, nuestro equipo revisa la foto nueva. Mientras tanto se ve la anterior."
-            : "Ya es tu foto de perfil."}
-        </Alert>
-      )}
     </SettingsSection>
   );
 }

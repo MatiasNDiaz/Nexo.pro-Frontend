@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useId, useRef } from "react";
-import { Alert } from "@/components/ui/feedback";
+import { useEffect, useId } from "react";
+import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
 
 /** Pestañas de filtro (botones con aria-pressed), como las del buscador de usuarios. */
@@ -62,16 +62,13 @@ export function PageControls({ page, total, pageSize, onPage }: { page: number; 
   );
 }
 
-/** Aviso de que una acción salió bien: se lleva el foco para que el lector de pantalla lo lea. */
+/**
+ * Aviso de que una acción del admin salió bien: se muestra como aviso flotante (components/ui/toast),
+ * que el lector de pantalla anuncia sin mover el foco. Cada mensaje nuevo dispara un aviso.
+ */
 export function Notice({ message }: { message: string | null }) {
-  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (message) ref.current?.focus();
+    if (message) toast.success(message);
   }, [message]);
-  if (!message) return null;
-  return (
-    <div ref={ref} tabIndex={-1} className="outline-none">
-      <Alert tone="success">{message}</Alert>
-    </div>
-  );
+  return null;
 }

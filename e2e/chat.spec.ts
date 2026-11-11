@@ -163,7 +163,7 @@ test.describe("perfil: chat y presupuesto", () => {
     await expect(page.getByText("Sin respuesta todavía")).toBeVisible();
     // Se navegó desde un diálogo abierto: la página nueva tiene que responder a los clics.
     await page.getByRole("button", { name: "Cancelar el pedido" }).click({ timeout: 5_000 });
-    await expect(page.getByRole("dialog", { name: "¿Cancelar el pedido?" })).toBeVisible();
+    await expect(page.getByRole("alertdialog", { name: "¿Cancelar el pedido?" })).toBeVisible();
   });
 });
 
@@ -334,7 +334,7 @@ test.describe("pedidos y trabajos", () => {
     await expect(page.getByText("Mandó presupuesto")).toBeVisible();
     await expect(page.getByText("$ 45.000").first()).toBeVisible();
     await page.getByRole("button", { name: "Aceptar presupuesto" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: /^Aceptar/ }).click();
+    await page.locator("dialog[open]").getByRole("button", { name: /^Aceptar/ }).click();
     await expect(page).toHaveURL(new RegExp(`/panel/trabajos/${CONTRACT_ID}$`));
     expect(api.find(`POST /requests/targets/${TARGET_ID}/select`)[0]!.postDataJSON()).toEqual({ quoteId: QUOTE_ID });
     await expect(page.getByRole("heading", { level: 1, name: "Trabajo con Ana Pérez" })).toBeVisible();
@@ -353,7 +353,7 @@ test.describe("pedidos y trabajos", () => {
     );
     await page.goto(`/panel/pedidos/${REQUEST_ID}`);
     await page.getByRole("button", { name: "Cancelar el pedido" }).click();
-    const dialog = page.getByRole("dialog", { name: "¿Cancelar el pedido?" });
+    const dialog = page.getByRole("alertdialog", { name: "¿Cancelar el pedido?" });
     await dialog.getByRole("button", { name: "Cancelar el pedido" }).click();
     await expect(page.getByText("Cancelado", { exact: true })).toBeVisible();
     // Sin motivo no se manda el campo (el backend pide 1 a 300 caracteres si viene).
@@ -377,7 +377,7 @@ test.describe("pedidos y trabajos", () => {
     await expect(page.getByText("Con fecha")).toBeVisible();
     await expect(page.getByText("Fecha agendada")).toBeVisible();
     await page.getByRole("button", { name: "Cancelar el trabajo" }).click();
-    const dialog = page.getByRole("dialog", { name: "¿Cancelar el trabajo?" });
+    const dialog = page.getByRole("alertdialog", { name: "¿Cancelar el trabajo?" });
     await dialog.getByRole("textbox", { name: "Motivo (opcional)" }).fill("  Ya lo resolví  ");
     await dialog.getByRole("button", { name: "Cancelar el trabajo" }).click();
     await expect(page.getByText("Lo cancelaste")).toBeVisible();

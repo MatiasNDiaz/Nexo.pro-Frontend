@@ -37,14 +37,13 @@ function ExtraInfoForm({ initial }: { initial: string }) {
   const [text, setText] = useState(initial);
   // Último valor guardado: habilita "Guardar" solo si hay cambios respecto de él.
   const [savedText, setSavedText] = useState(initial);
-  const [saved, setSaved] = useState(false);
   const mutation = useMutation({
     // Vacío = se borra (el backend acepta null o texto vacío).
     mutationFn: () => updateCustomerProfile(text.trim() || null),
+    meta: { success: { title: "Guardamos los datos", description: "Los van a ver los profesionales con los que coordines un trabajo." } },
     onSuccess: (data) => {
       queryClient.setQueryData(accountKeys.customer, data);
       setSavedText(text);
-      setSaved(true);
     },
   });
 
@@ -52,13 +51,11 @@ function ExtraInfoForm({ initial }: { initial: string }) {
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        setSaved(false);
         mutation.mutate();
       }}
       className="flex flex-col gap-4"
     >
       {mutation.isError && <Alert tone="danger">{errorMessage(mutation.error)}</Alert>}
-      {saved && <Alert tone="success">Guardamos los datos.</Alert>}
       <Field id="extra-info" label="Datos útiles (opcional)" hint={`${text.length}/${MAX} caracteres`}>
         {(a11y) => (
           <Textarea
@@ -66,10 +63,7 @@ function ExtraInfoForm({ initial }: { initial: string }) {
             value={text}
             maxLength={MAX}
             rows={3}
-            onChange={(event) => {
-              setSaved(false);
-              setText(event.target.value);
-            }}
+            onChange={(event) => setText(event.target.value)}
           />
         )}
       </Field>

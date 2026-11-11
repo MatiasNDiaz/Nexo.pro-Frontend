@@ -8,10 +8,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Dialog } from "@/components/ui/dialog";
 import { Alert, Badge, Skeleton } from "@/components/ui/feedback";
+import { FeedbackIcon } from "@/components/ui/feedback-icon";
 import { Field } from "@/components/ui/form-controls";
 import { PasswordInput } from "@/components/ui/password-input";
+import { toast } from "@/components/ui/toast";
 import { newPasswordSchema } from "@/features/session/schemas";
 import { useSessionActions } from "@/features/session/session-provider";
 import { errorMessage, isApiError } from "@/lib/api/errors";
@@ -78,7 +81,6 @@ function PasswordSection() {
 
 function ChangePasswordForm() {
   const queryClient = useQueryClient();
-  const [done, setDone] = useState(false);
   const {
     register,
     handleSubmit,
@@ -91,11 +93,10 @@ function ChangePasswordForm() {
   });
 
   const submit = handleSubmit(async (values) => {
-    setDone(false);
     try {
       await changePassword(values.currentPassword, values.newPassword);
       reset();
-      setDone(true);
+      toast.success("Cambiaste tu contraseña", "Cerramos la sesión en tus otros dispositivos.");
       await queryClient.invalidateQueries({ queryKey: accountKeys.devices });
     } catch (error) {
       if (isApiError(error, "INVALID_CURRENT_PASSWORD")) setError("currentPassword", { message: "La contraseña actual no es correcta." });
@@ -106,7 +107,6 @@ function ChangePasswordForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       {errors.root && <Alert tone="danger">{errors.root.message}</Alert>}
-      {done && <Alert tone="success">Cambiaste tu contraseña. Cerramos la sesión en tus otros dispositivos.</Alert>}
       <Field id="pw-actual" label="Contraseña actual" error={errors.currentPassword?.message}>
         {(a11y) => <PasswordInput {...a11y} {...register("currentPassword")} autoComplete="current-password" />}
       </Field>
@@ -139,6 +139,7 @@ function SetPasswordForm() {
     try {
       await setPassword(values.newPassword);
       await refreshSession(); // hasPassword pasa a true: se muestra "Cambiar contraseña".
+      toast.success("Creaste tu contraseña", "Ya podés ingresar también con tu email y esta contraseña.");
     } catch (error) {
       setError("root", { message: isApiError(error, "REAUTH_REQUIRED") ? REAUTH_MESSAGE : errorMessage(error) });
     }
@@ -172,7 +173,11 @@ function SetPasswordForm() {
 function GoogleSection() {
   const me = useMe();
   const { refreshSession } = useSessionActions();
-  const unlink = useMutation({ mutationFn: unlinkGoogle, onSuccess: () => refreshSession() });
+  const unlink = useMutation({
+    mutationFn: unlinkGoogle,
+    meta: { success: { title: "Desvinculaste Google", description: "Desde ahora ingresás con tu email y tu contraseña." } },
+    onSuccess: () => refreshSession(),
+  });
   return (
     <SettingsSection id="google" title="Ingreso con Google" description="Tu cuenta está vinculada con Google.">
       {unlink.isError && <Alert tone="danger">{errorMessage(unlink.error)}</Alert>}
@@ -194,13 +199,17 @@ function DevicesSection() {
   const queryClient = useQueryClient();
   const { signOut, sessionEnded } = useSessionActions();
   const devices = useQuery({ queryKey: accountKeys.devices, queryFn: getDevices });
+  const [confirmAll, setConfirmAll] = useState(false);
   const close = useMutation({
     mutationFn: closeDevice,
+    meta: { success: "Cerramos la sesión en ese dispositivo" },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: accountKeys.devices }),
   });
   const closeAll = useMutation({
     mutationFn: closeAllDevices,
+    meta: { success: { title: "Cerramos tu sesión en todos los dispositivos", description: "Para seguir, volvé a ingresar." } },
     onSuccess: () => {
+      setConfirmAll(false);
       sessionEnded();
       router.push("/");
     },
@@ -252,10 +261,20 @@ function DevicesSection() {
           ))}
         </ul>
       )}
-      {(close.isError || closeAll.isError) && <Alert tone="danger">{errorMessage(close.error ?? closeAll.error)}</Alert>}
-      <Button variant="ghost" onClick={() => closeAll.mutate()} loading={closeAll.isPending} className="self-start">
+      {close.isError && <Alert tone="danger">{errorMessage(close.error)}</Alert>}
+      <Button variant="ghost" onClick={() => setConfirmAll(true)} className="self-start">
         Cerrar sesión en todos los dispositivos
       </Button>
+      <ConfirmDialog
+        open={confirmAll}
+        onClose={() => setConfirmAll(false)}
+        title="¿Cerrar la sesión en todos los dispositivos?"
+        description="También en este. Vas a tener que volver a ingresar en cada uno."
+        confirmLabel="Cerrar en todos"
+        onConfirm={() => closeAll.mutate()}
+        pending={closeAll.isPending}
+        error={closeAll.isError ? errorMessage(closeAll.error) : null}
+      />
     </SettingsSection>
   );
 }
@@ -278,6 +297,13 @@ function DeleteAccountSection() {
   const [password, setPasswordValue] = useState("");
   const remove = useMutation({
     mutationFn: () => deleteOwnAccount(me.hasPassword ? password : undefined),
+    meta: {
+      success: {
+        title: "Diste de baja tu cuenta",
+        description: "Si te arrepentís, escribinos dentro de los próximos 30 días y la restauramos.",
+        tone: "info",
+      },
+    },
     onSuccess: () => {
       setOpen(false);
       sessionEnded();
@@ -308,6 +334,8 @@ function DeleteAccountSection() {
         onClose={() => setOpen(false)}
         title="¿Dar de baja tu cuenta?"
         description="Tus reseñas quedan publicadas como de un usuario eliminado. Tenés 30 días para pedir que la restauremos."
+        role="alertdialog"
+        icon={<FeedbackIcon tone="warning" size="lg" />}
       >
         <form
           onSubmit={(event) => {

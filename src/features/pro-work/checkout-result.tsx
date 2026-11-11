@@ -1,15 +1,15 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Clock3, Loader2, XCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ButtonLink } from "@/components/ui/button";
+import { FeedbackIcon, type FeedbackTone } from "@/components/ui/feedback-icon";
 import { refreshAfterPlanChange } from "@/features/catalog/refresh-profile";
 import { getMyProfile, proKeys } from "@/features/pro-profile/api";
 import { useViewer } from "@/features/session/viewer";
-import { cn } from "@/lib/cn";
 import { listPayments, workKeys } from "./api";
 
 /** Hasta cuándo se espera el aviso de Mercado Pago que aplica el plan. */
@@ -53,25 +53,29 @@ export function CheckoutResult() {
       .catch(() => undefined);
   }, [applied, queryClient]);
 
-  const view =
+  // `fx`: ícono animado de los avisos (null = todavía confirmando: se ve girando).
+  const view: { fx: FeedbackTone | null; title: string; text: string } =
     outcome === "approved"
       ? applied
-        ? { icon: CheckCircle2, tone: "bg-success-600", title: "¡Listo! Tu plan está activo", text: "Ya podés aprovechar todo lo que incluye." }
+        ? { fx: "success", title: "¡Listo! Tu plan está activo", text: "Ya podés aprovechar todo lo que incluye." }
         : timedOut
-          ? { icon: Clock3, tone: "bg-amber-500", title: "Recibimos tu pago", text: "Mercado Pago todavía nos está avisando. Tu plan se activa en unos minutos; te mandamos una notificación." }
-          : { icon: Loader2, tone: "bg-brand-700", title: "Confirmando tu pago…", text: "Esperamos el aviso de Mercado Pago. Es cuestión de segundos.", spin: true }
+          ? { fx: "info", title: "Recibimos tu pago", text: "Mercado Pago todavía nos está avisando. Tu plan se activa en unos minutos; te mandamos una notificación." }
+          : { fx: null, title: "Confirmando tu pago…", text: "Esperamos el aviso de Mercado Pago. Es cuestión de segundos." }
       : outcome === "pending"
-        ? { icon: Clock3, tone: "bg-amber-500", title: "Tu pago está pendiente", text: "Mercado Pago lo está procesando. Cuando se apruebe, tu plan se activa solo y te avisamos." }
+        ? { fx: "warning", title: "Tu pago está pendiente", text: "Mercado Pago lo está procesando. Cuando se apruebe, tu plan se activa solo y te avisamos." }
         : outcome === "failed"
-          ? { icon: XCircle, tone: "bg-danger-600", title: "El pago no se completó", text: "No se cobró nada. Podés intentar de nuevo con otro medio de pago." }
-          : { icon: Clock3, tone: "bg-brand-700", title: "Volviste de Mercado Pago", text: "Fijate el estado de tu plan en el panel." };
-  const Icon = view.icon;
+          ? { fx: "error", title: "El pago no se completó", text: "No se cobró nada. Podés intentar de nuevo con otro medio de pago." }
+          : { fx: "info", title: "Volviste de Mercado Pago", text: "Fijate el estado de tu plan en el panel." };
 
   return (
     <div className="container-page flex max-w-xl flex-col items-center gap-6 py-16 text-center sm:py-24">
-      <span className={cn("grid size-20 place-items-center rounded-full text-white shadow-raised animate-[pop-in_320ms_var(--ease-out-soft)]", view.tone)}>
-        <Icon className={cn("size-10", "spin" in view && view.spin && "animate-spin")} aria-hidden="true" />
-      </span>
+      {view.fx ? (
+        <FeedbackIcon key={view.fx} tone={view.fx} size="lg" />
+      ) : (
+        <span className="grid size-20 place-items-center rounded-full bg-brand-50 text-brand-700">
+          <Loader2 className="size-10 animate-spin" aria-hidden="true" />
+        </span>
+      )}
       <h1 className="text-4xl leading-tight font-bold text-brand-900" aria-live="polite">
         {view.title}
       </h1>

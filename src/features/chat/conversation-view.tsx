@@ -126,6 +126,7 @@ function OpenConversation({ conversation }: { conversation: Conversation }) {
 
   const remove = useMutation({
     mutationFn: (message: Message) => deleteMessage(message.id),
+    meta: { success: "Borraste el mensaje" },
     onSuccess: (_, message) => {
       applyLocal({ ...message, body: "", deleted: true, attachments: [] });
       setToDelete(null);

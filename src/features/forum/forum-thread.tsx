@@ -119,10 +119,12 @@ function PostCard({
 
   const remove = useMutation({
     mutationFn: () => deletePost(post.id),
+    meta: { success: "Borraste la publicación" },
     onSuccess: () => router.push("/foro"),
   });
   const resolve = useMutation({
     mutationFn: () => resolvePost(post.id),
+    meta: { success: { title: "¡Qué bueno que lo resolviste!", description: "Marcamos la publicación como resuelta." } },
     onSuccess: (updated) => {
       queryClient.setQueryData(forumKeys.post(post.id), updated);
       setConfirm(null);
@@ -331,7 +333,7 @@ function ReplyItem({
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<"view" | "edit" | "reply">("view");
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const remove = useMutation({ mutationFn: () => deleteReply(reply.id), onSuccess: () => { setConfirmDelete(false); onChanged(); } });
+  const remove = useMutation({ mutationFn: () => deleteReply(reply.id), meta: { success: "Borraste tu respuesta" }, onSuccess: () => { setConfirmDelete(false); onChanged(); } });
 
   if (reply.removed || !reply.author) {
     return <p className="rounded-2xl border border-dashed border-line px-4 py-3 text-sm text-muted italic">Respuesta eliminada</p>;
@@ -424,6 +426,7 @@ function ReplyComposer({
   const allowPrice = isProfessional && post.type === "PROFESSIONAL_WANTED";
   const send = useMutation({
     mutationFn: () => createReply(post.id, body.trim(), parent?.id, allowPrice && Number(price) > 0 ? Math.round(Number(price)) : undefined),
+    meta: { success: "Publicamos tu respuesta" },
     onSuccess: () => {
       setBody("");
       setPrice("");
@@ -487,7 +490,7 @@ function TextEditor<T>({
   onCancel: () => void;
 }) {
   const [body, setBody] = useState(initial);
-  const mutation = useMutation({ mutationFn: () => save(body.trim()), onSuccess: onSaved });
+  const mutation = useMutation({ mutationFn: () => save(body.trim()), meta: { success: "Guardamos los cambios" }, onSuccess: onSaved });
   const valid = body.trim().length >= min;
   return (
     <form
@@ -535,6 +538,8 @@ function LikeButton({
   const [optimistic, setOptimistic] = useState<{ liked: boolean; count: number } | null>(null);
   const mutation = useMutation({
     mutationFn: (next: boolean) => toggle(next),
+    // El corazón cambia al instante (sin aviso); si falla vuelve atrás y se explica.
+    meta: { error: "No pudimos registrar tu “me gusta”. Probá de nuevo." },
     onMutate: (next) => setOptimistic({ liked: next, count: count + (next ? 1 : -1) }),
     onSuccess: (_data, next) => onToggled(next),
     onSettled: () => setOptimistic(null),

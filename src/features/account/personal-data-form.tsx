@@ -3,11 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock } from "lucide-react";
-import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Alert, Skeleton } from "@/components/ui/feedback";
+import { toast } from "@/components/ui/toast";
 import { Field, Input } from "@/components/ui/form-controls";
 import { FormListbox } from "@/components/ui/form-listbox";
 import { useLocalities, useNeighborhoodSuggestions, useProvinces } from "@/features/catalogs/queries";
@@ -61,7 +61,6 @@ function PersonalDataForm({ data }: { data: PersonalData }) {
   const me = useMe();
   const queryClient = useQueryClient();
   const { refreshSession } = useSessionActions();
-  const [saved, setSaved] = useState<string | null>(null);
   const isCustomer = me.role === "CUSTOMER";
   const identityApproved = me.verificationStatus === "APPROVED";
 
@@ -88,6 +87,12 @@ function PersonalDataForm({ data }: { data: PersonalData }) {
 
   const mutation = useMutation({
     mutationFn: updatePersonalData,
+    meta: {
+      success: (updated) =>
+        (updated as PersonalData).pendingFirstName || (updated as PersonalData).pendingLastName
+          ? { title: "Guardamos tus datos", description: "El nombre nuevo queda en revisión; mientras tanto se ve el anterior." }
+          : "Guardamos tus datos",
+    },
     onSuccess: async (updated) => {
       queryClient.setQueryData(accountKeys.personal, updated);
       // Lo guardado pasa a ser el estado "sin cambios" del formulario.
@@ -100,16 +105,10 @@ function PersonalDataForm({ data }: { data: PersonalData }) {
         neighborhood: "",
       });
       await refreshSession();
-      setSaved(
-        updated.pendingFirstName || updated.pendingLastName
-          ? "Guardamos tus datos. El nombre nuevo queda en revisión y mientras tanto se ve el anterior."
-          : "Guardamos tus datos.",
-      );
     },
   });
 
   const submit = handleSubmit((values) => {
-    setSaved(null);
     const parsed = schema.parse(values);
     // Solo lo que cambió: un nombre sin cambios no vuelve a revisión.
     const body: Parameters<typeof updatePersonalData>[0] = {};
@@ -120,7 +119,7 @@ function PersonalDataForm({ data }: { data: PersonalData }) {
       body.neighborhood = { localityId: parsed.localityId, name: parsed.neighborhood.trim() };
     }
     if (Object.keys(body).length === 0) {
-      setSaved("No había cambios para guardar.");
+      toast.info("No había cambios para guardar");
       return;
     }
     mutation.mutate(body, {
@@ -147,7 +146,6 @@ function PersonalDataForm({ data }: { data: PersonalData }) {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       {errors.root && <Alert tone="danger">{errors.root.message}</Alert>}
-      {saved && <Alert tone="success">{saved}</Alert>}
       {(data.pendingFirstName || data.pendingLastName) && (
         <p className="flex items-center gap-1.5 text-sm text-amber-800">
           <Clock className="size-4" aria-hidden="true" />

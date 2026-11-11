@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Briefcase, Home, MailCheck, UserPlus } from "lucide-react";
+import { Briefcase, Home, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { AuthDivider, GoogleButton } from "@/components/forms/google-button";
 import { Turnstile } from "@/components/forms/turnstile";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { FeedbackIcon } from "@/components/ui/feedback-icon";
 import { Alert } from "@/components/ui/feedback";
 import { Field, Input } from "@/components/ui/form-controls";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -180,9 +181,7 @@ export function RegisterForm() {
 function RegistrationSent({ email }: { email: string }) {
   return (
     <div className="flex flex-col items-center gap-4 py-4 text-center" role="status">
-      <span className="grid size-14 place-items-center rounded-2xl bg-success-50 text-success-600">
-        <MailCheck className="size-7" aria-hidden="true" />
-      </span>
+      <FeedbackIcon tone="success" size="lg" />
       <h2 className="text-2xl font-bold text-brand-900">Revisá tu email</h2>
       <p className="text-muted">
         Si <span className="font-semibold break-all text-ink">{email}</span> no estaba registrado, te enviamos un enlace

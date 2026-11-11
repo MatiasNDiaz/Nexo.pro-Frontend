@@ -105,6 +105,7 @@ function NewTicket({ onClose }: { onClose: () => void }) {
   const [touched, setTouched] = useState(false);
   const create = useMutation({
     mutationFn: () => createTicket(category as TicketCategory, body.trim(), photo.fileIds[0]),
+    meta: { success: { title: "Recibimos tu consulta", description: "Te respondemos acá y te avisamos con una notificación." } },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: supportKeys.all });
       onClose();
@@ -189,6 +190,7 @@ function TicketThread({ ticket }: { ticket: Ticket }) {
   const status = ticketStatus[ticket.status];
   const reply = useMutation({
     mutationFn: () => addTicketMessage(ticket.id, body.trim(), photo.fileIds[0]),
+    meta: { success: "Enviamos tu mensaje" },
     onSuccess: (updated) => {
       queryClient.setQueryData(supportKeys.detail(ticket.id), updated);
       void queryClient.invalidateQueries({ queryKey: supportKeys.all, exact: true });

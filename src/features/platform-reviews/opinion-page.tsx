@@ -28,6 +28,7 @@ export function OpinionPage() {
 
   const remove = useMutation({
     mutationFn: () => api("/platform-reviews/me", { method: "DELETE" }),
+    meta: { success: "Borraste tu opinión" },
     onSuccess: () => queryClient.setQueryData(opinionKey, null),
   });
 
@@ -76,6 +77,7 @@ function OpinionForm({ current, onDone }: { current: PlatformReview | null; onDo
   const [missing, setMissing] = useState(false);
   const save = useMutation({
     mutationFn: () => api<PlatformReview>("/platform-reviews/me", { method: "PUT", body: { rating, comment: comment.trim() || null } }),
+    meta: { success: { title: "¡Gracias por tu opinión!", description: "La revisamos antes de publicarla." } },
     onSuccess: (saved) => {
       queryClient.setQueryData(opinionKey, saved);
       onDone();

@@ -156,7 +156,7 @@ test.describe("ficha del usuario", () => {
     );
     await page.goto(`/panel/admin/usuarios/${USER_ID}`);
     await page.getByRole("button", { name: "Sancionar" }).click();
-    const dialog = page.getByRole("dialog");
+    const dialog = page.locator("dialog[open]");
     await dialog.getByRole("radio", { name: /Suspensión/ }).check();
     await dialog.getByRole("button", { name: "Aplicar suspensión" }).click();
     await expect(dialog.getByText("Escribí el motivo (al menos 10 caracteres).")).toBeVisible();
@@ -187,8 +187,8 @@ test.describe("ficha del usuario", () => {
     await page.goto(`/panel/admin/usuarios/${USER_ID}`);
     await expect(page.getByRole("heading", { name: "Strikes (suman 2)" })).toBeVisible();
     await page.getByRole("button", { name: "Anular", exact: true }).click();
-    await page.getByRole("dialog").getByRole("textbox", { name: "Motivo" }).fill("Fue un error.");
-    await page.getByRole("dialog").getByRole("button", { name: "Anular el strike" }).click();
+    await page.locator("dialog[open]").getByRole("textbox", { name: "Motivo" }).fill("Fue un error.");
+    await page.locator("dialog[open]").getByRole("button", { name: "Anular el strike" }).click();
     await expect(page.getByText("Anulaste el strike.")).toBeVisible();
     expect(voided).toEqual({ reason: "Fue un error." });
     await expect(page.getByRole("heading", { name: "Strikes (suman 0)" })).toBeVisible();
@@ -211,7 +211,7 @@ test.describe("ficha del usuario", () => {
     );
     await page.goto(`/panel/admin/usuarios/${USER_ID}`);
     await page.getByRole("button", { name: "Pasar a profesional" }).click();
-    const dialog = page.getByRole("dialog");
+    const dialog = page.locator("dialog[open]");
     await dialog.getByRole("textbox", { name: "Motivo" }).fill("Lo pidió por soporte, ticket 123.");
     await dialog.getByRole("button", { name: "Cambiar el rol" }).click();
     await expect(dialog.getByText("Esta cuenta nunca fue profesional")).toBeVisible();

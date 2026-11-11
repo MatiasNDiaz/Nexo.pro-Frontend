@@ -61,8 +61,12 @@ function ReceivedReview({ review }: { review: OwnReview }) {
   const [editing, setEditing] = useState(false);
   const [body, setBody] = useState(review.reply?.body ?? "");
   const refresh = () => queryClient.invalidateQueries({ queryKey: workKeys.reviewsReceived });
-  const reply = useMutation({ mutationFn: () => replyReview(review.id, body.trim()), onSuccess: () => { setEditing(false); void refresh(); } });
-  const remove = useMutation({ mutationFn: () => deleteReply(review.id), onSuccess: () => { setBody(""); void refresh(); } });
+  const reply = useMutation({
+    mutationFn: () => replyReview(review.id, body.trim()),
+    meta: { success: { title: "Publicamos tu respuesta", description: "Se ve debajo de la reseña en tu página." } },
+    onSuccess: () => { setEditing(false); void refresh(); },
+  });
+  const remove = useMutation({ mutationFn: () => deleteReply(review.id), meta: { success: "Borramos tu respuesta" }, onSuccess: () => { setBody(""); void refresh(); } });
 
   return (
     <article className="flex flex-col gap-3 rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-6">

@@ -68,14 +68,14 @@ test("reportes: la cola lleva al reporte, se oculta el contenido y se resuelve",
   expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
 
   await page.getByRole("button", { name: "Ocultar el contenido" }).click();
-  await page.getByRole("dialog").getByRole("textbox", { name: /Motivo/ }).fill("Spam repetido");
-  await page.getByRole("dialog").getByRole("button", { name: "Ocultar", exact: true }).click();
+  await page.locator("dialog[open]").getByRole("textbox", { name: /Motivo/ }).fill("Spam repetido");
+  await page.locator("dialog[open]").getByRole("button", { name: "Ocultar", exact: true }).click();
   await expect(page.getByText("Ocultaste el contenido.")).toBeVisible();
   expect(bodies.hide).toEqual({ reason: "Spam repetido" });
   await expect(page.getByRole("button", { name: "Volver a mostrar" })).toBeVisible();
 
   await page.getByRole("button", { name: "Resolver" }).click();
-  const dialog = page.getByRole("dialog");
+  const dialog = page.locator("dialog[open]");
   await dialog.getByRole("textbox", { name: /Nota/ }).fill("Confirmado");
   await dialog.getByRole("button", { name: "Resolver" }).click();
   await expect(dialog.getByText("Elegí si el reporte es válido o no.")).toBeVisible();
@@ -102,8 +102,8 @@ test("apelaciones: aceptar manda la decisión con la nota", async ({ page }) => 
   );
   await page.goto("/panel/admin/apelaciones");
   await page.getByRole("button", { name: "Aceptar" }).click();
-  await page.getByRole("dialog").getByRole("textbox", { name: /Nota/ }).fill("Revisamos y fue un error.");
-  await page.getByRole("dialog").getByRole("button", { name: "Aceptar" }).click();
+  await page.locator("dialog[open]").getByRole("textbox", { name: /Nota/ }).fill("Revisamos y fue un error.");
+  await page.locator("dialog[open]").getByRole("button", { name: "Aceptar" }).click();
   await expect(page.getByText("Aceptaste la apelación.")).toBeVisible();
   expect(body).toEqual({ decision: "ACCEPTED", note: "Revisamos y fue un error." });
 });
@@ -138,8 +138,8 @@ test("identidades: un cambio de foto muestra la actual y la nueva, y se aprueba"
   await page.goto("/panel/admin/identidades");
   await expect(page.getByText("Foto nueva")).toBeVisible();
   await page.getByRole("button", { name: "Aprobar" }).click();
-  await page.getByRole("dialog").getByRole("textbox", { name: /Motivo/ }).fill("Coincide la cara.");
-  await page.getByRole("dialog").getByRole("button", { name: "Aprobar" }).click();
+  await page.locator("dialog[open]").getByRole("textbox", { name: /Motivo/ }).fill("Coincide la cara.");
+  await page.locator("dialog[open]").getByRole("button", { name: "Aprobar" }).click();
   await expect(page.getByText("Aprobaste la verificación.")).toBeVisible();
   expect(body).toEqual({ decision: "APPROVE", reason: "Coincide la cara." });
 });
@@ -160,7 +160,7 @@ test("barrios: aprobar uno pendiente", async ({ page }) => {
   await page.goto("/panel/admin/barrios");
   await expect(page.getByText("2 clientes · 1 zona de trabajo", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "Aprobar" }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "Aprobar" }).click();
+  await page.locator("dialog[open]").getByRole("button", { name: "Aprobar" }).click();
   await expect(page.getByText("Aprobaste «Villa Belgrano».")).toBeVisible();
 });
 
@@ -205,9 +205,9 @@ test("novedades: pide confirmación y manda el segmento elegido", async ({ page 
   await page.getByRole("textbox", { name: "Mensaje" }).fill("Mensaje");
   await page.getByRole("checkbox", { name: "Clientes" }).check();
   await page.getByRole("button", { name: "Publicar" }).click();
-  await expect(page.getByRole("dialog")).toContainText("clientes");
+  await expect(page.locator("dialog[open]")).toContainText("clientes");
   expect(body).toBeNull();
-  await page.getByRole("dialog").getByRole("button", { name: "Publicar" }).click();
+  await page.locator("dialog[open]").getByRole("button", { name: "Publicar" }).click();
   await expect(page.getByText("Publicaste la novedad: le llegó a 12 personas.")).toBeVisible();
   expect(body).toEqual({ title: "Hola", body: "Mensaje", segment: { roles: ["CUSTOMER"] } });
 });

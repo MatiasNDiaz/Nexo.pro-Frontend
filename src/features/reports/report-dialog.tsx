@@ -1,11 +1,12 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Flag } from "lucide-react";
+import { Flag } from "lucide-react";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/feedback";
+import { FeedbackIcon } from "@/components/ui/feedback-icon";
 import { Field, Textarea } from "@/components/ui/form-controls";
 import { Listbox } from "@/components/ui/listbox";
 import { MediaPicker } from "@/components/ui/media-picker";
@@ -101,9 +102,7 @@ function ReportDialog({ targetType, targetId, subject, onClose }: { targetType: 
     <Dialog open onClose={onClose} title={report.isSuccess ? "Gracias por avisarnos" : `Reportar ${subject}`}>
       {report.isSuccess ? (
         <div className="flex flex-col items-center gap-4 py-2 text-center">
-          <span className="grid size-14 place-items-center rounded-full bg-success-50 text-success-600 animate-[pop-in_260ms_var(--ease-out-soft)]">
-            <CheckCircle2 className="size-8" aria-hidden="true" />
-          </span>
+          <FeedbackIcon tone="success" size="lg" />
           <p className="text-muted-strong">Nuestro equipo lo va a revisar. Podés seguir el estado en “Mis reportes” de tu panel.</p>
           <Button onClick={onClose}>Listo</Button>
         </div>

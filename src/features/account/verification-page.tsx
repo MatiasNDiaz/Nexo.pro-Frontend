@@ -81,6 +81,7 @@ function VerificationState({ verification, ready }: { verification: Verification
   const { refreshSession } = useSessionActions();
   const start = useMutation({
     mutationFn: startVerification,
+    meta: { success: { title: "Recibimos tu pedido de verificación", description: "Nuestro equipo lo revisa y te avisamos por notificación." } },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: accountKeys.verification });
       await refreshSession();

@@ -182,10 +182,19 @@ function RequestDetail({ request }: { request: ServiceRequest }) {
         ...(description.trim() ? { description: description.trim() } : {}),
         ...(date ? { proposedDate: date } : {}),
       }),
+    meta: { success: { title: "Enviamos tu presupuesto", description: "Le llega al cliente por el chat. Te avisamos cuando responda." } },
     onSuccess: update,
   });
-  const withdraw = useMutation({ mutationFn: () => withdrawQuote(quote!.id), onSuccess: (updated) => { update(updated); setWithdrawing(false); } });
-  const decline = useMutation({ mutationFn: (reason: string) => declineTarget(target.id, reason), onSuccess: (updated) => { update(updated); setDeclining(false); } });
+  const withdraw = useMutation({
+    mutationFn: () => withdrawQuote(quote!.id),
+    meta: { success: { title: "Retiraste el presupuesto", description: "Podés mandar otro cuando quieras." } },
+    onSuccess: (updated) => { update(updated); setWithdrawing(false); },
+  });
+  const decline = useMutation({
+    mutationFn: (reason: string) => declineTarget(target.id, reason),
+    meta: { success: { title: "Rechazaste el pedido", description: "Le avisamos al cliente por el chat." } },
+    onSuccess: (updated) => { update(updated); setDeclining(false); },
+  });
   const today = new Date().toISOString().slice(0, 10);
 
   return (

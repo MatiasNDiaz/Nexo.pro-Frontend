@@ -114,6 +114,7 @@ export function RevenuePage() {
 function ExportButton({ input }: { input: Parameters<typeof exportRevenue>[0] }) {
   const download = useMutation({
     mutationFn: () => exportRevenue(input),
+    meta: { success: { title: "Descargamos el CSV", description: "Quedó registrado en la auditoría." } },
     onSuccess: ({ blob, filename }) => saveFile(blob, filename ?? `ingresos-${input.report.toLowerCase()}.csv`),
   });
   return (

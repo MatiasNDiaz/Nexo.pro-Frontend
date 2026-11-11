@@ -115,6 +115,14 @@ function PushSettings() {
 
   const toggleDevice = useMutation({
     mutationFn: () => (state === "on" ? disablePush() : enablePush()),
+    meta: {
+      success: (next) =>
+        next === "on"
+          ? { title: "Activaste los avisos en este dispositivo", description: "Te llegan aunque no tengas el sitio abierto." }
+          : next === "off"
+            ? "Desactivaste los avisos en este dispositivo"
+            : null,
+    },
     onMutate: () => setError(null),
     onSuccess: setState,
     onError: (err) => setError(errorMessage(err)),
@@ -122,6 +130,7 @@ function PushSettings() {
 
   const savePreferences = useMutation({
     mutationFn: updatePreferences,
+    meta: { success: "Guardamos tus preferencias de avisos" },
     onMutate: (next) => {
       const previous = queryClient.getQueryData<PushPreference[]>(notificationKeys.preferences);
       queryClient.setQueryData(notificationKeys.preferences, next);

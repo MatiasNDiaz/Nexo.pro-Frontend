@@ -60,9 +60,13 @@ function FavoriteCard({ favorite }: { favorite: Favorite }) {
   const name = favorite.listed ? [favorite.firstName, favorite.lastName].filter(Boolean).join(" ") : "Profesional no disponible";
   const refresh = () => queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
 
-  const remove = useMutation({ mutationFn: () => removeFavorite(favorite.professionalId), onSettled: refresh });
+  const remove = useMutation({ mutationFn: () => removeFavorite(favorite.professionalId), meta: { success: "Lo quitaste de tus favoritos" }, onSettled: refresh });
   const alerts = useMutation({
     mutationFn: (on: boolean) => setFavoriteAlerts(favorite.professionalId, on),
+    meta: {
+      success: (_data, on) =>
+        on ? { title: "Te vamos a avisar", description: "Te llega una notificación cuando se ponga “Disponible ya”." } : "Ya no te avisamos cuando esté disponible",
+    },
     onMutate: (on) =>
       queryClient.setQueryData<Favorite[]>(favoriteKeys.all, (list) =>
         list?.map((f) => (f.professionalId === favorite.professionalId ? { ...f, availabilityAlerts: on } : f)),
