@@ -9,8 +9,16 @@ import { Providers } from "./providers";
 // de layout). Inter para textos largos e interfaz; Archivo (con su eje de ancho) para títulos.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
-// Serif de exhibición, solo para acentos (nombres de los planes).
-const instrument = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
+// Serif de exhibición, solo para acentos (nombres de los planes, más abajo en la página). Sin precarga:
+// no compite con la foto principal ni con las fuentes de los títulos (31 KB menos al abrir el sitio).
+const instrument = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument",
+  display: "swap",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),

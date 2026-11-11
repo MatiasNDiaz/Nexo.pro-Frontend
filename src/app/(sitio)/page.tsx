@@ -165,7 +165,7 @@ async function Trades() {
                     src={photo.src}
                     alt=""
                     fill
-                    sizes="(min-width: 1024px) 25vw, 70vw"
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 40vw, 68vw"
                     className="object-cover transition-transform duration-700 ease-out-soft group-hover:scale-[1.04]"
                   />
                   <span aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-brand-950/85 via-brand-950/10 to-transparent" />
