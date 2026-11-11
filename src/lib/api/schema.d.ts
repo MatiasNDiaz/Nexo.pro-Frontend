@@ -1330,6 +1330,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/professionals/me/public-page": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["OwnPublicPageController_get_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/professionals/me/metrics": {
         parameters: {
             query?: never;
@@ -3557,7 +3573,7 @@ export interface components {
              * @enum {string}
              */
             attentionStatus: "AVAILABLE" | "WORKING" | "RESTING";
-            /** @description Siempre true: el catálogo solo muestra identidades aprobadas */
+            /** @description Siempre true en el catálogo (solo muestra identidades aprobadas); en la vista previa del dueño, el estado real */
             identityVerified: boolean;
             professions: components["schemas"]["PublicProfessionDto"][];
             serviceAreas: components["schemas"]["PublicAreaDto"][];
@@ -3626,7 +3642,7 @@ export interface components {
              * @enum {string}
              */
             attentionStatus: "AVAILABLE" | "WORKING" | "RESTING";
-            /** @description Siempre true: el catálogo solo muestra identidades aprobadas */
+            /** @description Siempre true en el catálogo (solo muestra identidades aprobadas); en la vista previa del dueño, el estado real */
             identityVerified: boolean;
             professions: components["schemas"]["PublicProfessionDto"][];
             serviceAreas: components["schemas"]["PublicAreaDto"][];
@@ -3649,6 +3665,14 @@ export interface components {
             certifications: components["schemas"]["PublicCertificationDto"][];
             socialLinks: components["schemas"]["PublicSocialLinkDto"][];
             availability: components["schemas"]["PublicAvailabilityDto"];
+        };
+        OwnPublicPageDto: {
+            /** @description true si cualquiera puede verla (y compartir el enlace) */
+            published: boolean;
+            /** @description Lo que falta para publicarla, en el orden en que conviene resolverlo */
+            missing: ("ACCOUNT_NOT_ACTIVE" | "ACCOUNT_RESTRICTED" | "IDENTITY_NOT_VERIFIED" | "NO_AVATAR" | "NO_BIO" | "NO_PROFESSION" | "NO_SERVICE_AREA" | "NO_LIVE_PLAN" | "PROFILE_DEACTIVATED" | "PROFILE_HIDDEN")[];
+            /** @description Cómo se ve (o se vería) publicada */
+            profile: components["schemas"]["PublicProfileDto"];
         };
         MetricsBucketDto: {
             /** @description Personas distintas que abrieron el perfil (por día, sumadas) */
@@ -4487,17 +4511,49 @@ export interface components {
             /** @description Pagos aprobados sin aplicar (ADR 0026) */
             paymentsToReview: number;
         };
+        AdminProfessionalSummaryDto: {
+            slug: string;
+            businessName: string | null;
+            /** @description true si cualquiera la ve en el catálogo */
+            published: boolean;
+            /** @description Oficios activos (el principal primero) */
+            professions: string[];
+            /** @description Plan vigente (en prueba es el de la prueba); null sin prueba ni plan vigente */
+            planCode: string | null;
+            /** @description TRIAL o ACTIVE; null si no tiene vigente */
+            subscriptionStatus: string | null;
+        };
         AdminUserItemDto: {
             /** Format: uuid */
             id: string;
             email: string;
             firstName: string;
             lastName: string;
+            avatarUrl: string | null;
+            phone: string | null;
             /** @enum {string} */
             role: "CUSTOMER" | "PROFESSIONAL" | "ADMIN";
             /** @enum {string} */
             status: "PENDING_VERIFICATION" | "ACTIVE" | "SUSPENDED" | "BANNED" | "DEACTIVATED";
             verificationStatus: string;
+            /** @description Tiene Google vinculado */
+            google: boolean;
+            /** @description Tiene contraseña (si no, solo entra con Google) */
+            hasPassword: boolean;
+            /** Format: date-time */
+            emailVerifiedAt: string | null;
+            /** Format: date-time */
+            lastLoginAt: string | null;
+            /** @description Localidad (y barrio) del perfil */
+            location: string | null;
+            professional: components["schemas"]["AdminProfessionalSummaryDto"] | null;
+            /** @description Sanciones vigentes */
+            activeSanctions: number;
+            /** @description Suma del peso de los strikes no anulados */
+            activeStrikeWeight: number;
+            reportsAgainst: number;
+            /** @description Reportes en contra sin resolver */
+            openReportsAgainst: number;
             /** Format: date-time */
             createdAt: string;
         };
@@ -4534,6 +4590,20 @@ export interface components {
             firstName: string;
             lastName: string;
             phone: string;
+            avatarUrl: string | null;
+            /** @description Foto nueva esperando revisión */
+            pendingAvatarUrl: string | null;
+            /** @description Tiene Google vinculado */
+            google: boolean;
+            hasPassword: boolean;
+            /** Format: date-time */
+            emailVerifiedAt: string | null;
+            /** Format: date-time */
+            lastLoginAt: string | null;
+            location: string | null;
+            professional: components["schemas"]["AdminProfessionalSummaryDto"] | null;
+            /** @description Profesionales: lo que le falta a su página para ser pública (vacío = publicada) */
+            publicationMissing: ("ACCOUNT_NOT_ACTIVE" | "ACCOUNT_RESTRICTED" | "IDENTITY_NOT_VERIFIED" | "NO_AVATAR" | "NO_BIO" | "NO_PROFESSION" | "NO_SERVICE_AREA" | "NO_LIVE_PLAN" | "PROFILE_DEACTIVATED" | "PROFILE_HIDDEN")[] | null;
             /** @enum {string} */
             role: "CUSTOMER" | "PROFESSIONAL" | "ADMIN";
             /** @enum {string} */
@@ -6873,6 +6943,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublicProfileDto"];
+                };
+            };
+        };
+    };
+    OwnPublicPageController_get_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnPublicPageDto"];
                 };
             };
         };
@@ -9337,6 +9426,20 @@ export interface operations {
                 q?: string;
                 role?: "CUSTOMER" | "PROFESSIONAL";
                 status?: "PENDING_VERIFICATION" | "ACTIVE" | "SUSPENDED" | "BANNED" | "DEACTIVATED";
+                /** @description Verificación de identidad */
+                verification?: "NOT_STARTED" | "PENDING" | "REQUIRES_REVIEW" | "APPROVED" | "REJECTED" | "REVOKED";
+                /** @description Recién agregados: hoy, últimos 7 o 30 días */
+                joined?: "today" | "7d" | "30d";
+                /** @description Moderación, separadas por coma (tienen que cumplirse todas): sanción vigente, strikes sin anular, algún reporte en contra, reportes sin resolver */
+                flags?: ("sanctioned" | "strikes" | "reported" | "open_reports")[];
+                /** @description Profesionales: en prueba, con un plan pago vigente o sin ninguno (NONE) */
+                plan?: "TRIAL" | "BASIC" | "MEDIUM" | "PREMIUM" | "NONE";
+                /** @description Profesionales: página pública o no */
+                pageState?: "published" | "unpublished";
+                /** @description Cómo ingresa: con Google o solo con contraseña */
+                login?: "google" | "password";
+                /** @description Por defecto, los más nuevos primero */
+                sort?: "recent" | "oldest" | "name" | "last_login";
                 page?: components["schemas"]["Object"];
                 limit?: components["schemas"]["Object"];
             };

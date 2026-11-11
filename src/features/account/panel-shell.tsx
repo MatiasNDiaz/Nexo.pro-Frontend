@@ -1,34 +1,7 @@
 "use client";
 
-import {
-  BarChart3,
-  Bell,
-  Briefcase,
-  CalendarClock,
-  Crown,
-  Inbox,
-  FileText,
-  Fingerprint,
-  Flag,
-  Gavel,
-  Heart,
-  LayoutDashboard,
-  LifeBuoy,
-  MapPin,
-  Megaphone,
-  MessagesSquare,
-  ShieldCheck,
-  Sparkles,
-  Star,
-  Store,
-  UserRound,
-  Users,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
-import type { Route } from "next";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Suspense, useEffect, useRef, type ReactNode } from "react";
 import { RemoteImage } from "@/components/catalog/remote-image";
 import { totalUnread } from "@/features/chat/cache";
@@ -37,117 +10,16 @@ import { useUnreadNotifications } from "@/features/notifications/queries";
 import type { Me } from "@/features/session/api";
 import { RequireSession, SessionSkeleton } from "@/features/session/require-session";
 import { cn } from "@/lib/cn";
-
-type Counter = "messages" | "notifications";
-
-interface PanelLink {
-  href: Route;
-  label: string;
-  icon: LucideIcon;
-  counter?: Counter;
-}
-
-interface PanelGroup {
-  label: string;
-  links: PanelLink[];
-}
+import { activeHref, panelGroupsFor } from "./panel-nav";
 
 const roleLabel: Record<Me["role"], string> = { CUSTOMER: "Cliente", PROFESSIONAL: "Profesional", ADMIN: "Administración" };
 
-/**
- * Secciones del panel según el rol y el estado de la cuenta (solo experiencia: el backend autoriza).
- * - Suspendida o bloqueada: el backend solo le permite ver su cuenta, sus dispositivos y apelar.
- * - Admin: datos personales y verificación son de clientes y profesionales; su panel es otro.
- * - Notificaciones: cuenta activa o por verificar (como el backend).
- */
-export function panelGroupsFor(user: Me): PanelGroup[] {
-  const home: PanelLink = { href: "/panel", label: "Inicio", icon: LayoutDashboard };
-  const security: PanelLink = { href: "/panel/seguridad", label: "Seguridad", icon: ShieldCheck };
-  const moderation: PanelLink = { href: "/panel/moderacion", label: "Sanciones", icon: Gavel };
-  // Con la cuenta suspendida o bloqueada, el backend permite ver las sanciones y apelar.
-  if (user.status === "SUSPENDED" || user.status === "BANNED") return [{ label: "Tu cuenta", links: [home, moderation, security] }];
-
-  const notifications: PanelLink = { href: "/panel/notificaciones", label: "Notificaciones", icon: Bell, counter: "notifications" };
-  if (user.role === "ADMIN") {
-    return [
-      { label: "Administración", links: [{ ...home, label: "Resumen" }, { href: "/panel/admin/usuarios", label: "Usuarios", icon: Users }] },
-      {
-        label: "Moderación",
-        links: [
-          { href: "/panel/admin/reportes", label: "Reportes", icon: Flag },
-          { href: "/panel/admin/apelaciones", label: "Apelaciones", icon: Gavel },
-          { href: "/panel/admin/identidades", label: "Identidades", icon: Fingerprint },
-          { href: "/panel/admin/barrios", label: "Barrios", icon: MapPin },
-        ],
-      },
-      {
-        label: "Negocio",
-        links: [
-          { href: "/panel/admin/soporte", label: "Soporte", icon: LifeBuoy },
-          { href: "/panel/admin/opiniones", label: "Opiniones", icon: Sparkles },
-          { href: "/panel/admin/novedades", label: "Novedades", icon: Megaphone },
-          { href: "/panel/admin/ingresos", label: "Ingresos", icon: Wallet },
-        ],
-      },
-      { label: "Tu cuenta", links: [notifications, security] },
-    ];
-  }
-
-  // Chat, pedidos, trabajos, favoritos y reseñas exigen la cuenta activa.
-  const activity: PanelLink[] =
-    user.role === "CUSTOMER" && user.status === "ACTIVE"
-      ? [
-          { href: "/panel/mensajes", label: "Mensajes", icon: MessagesSquare, counter: "messages" },
-          { href: "/panel/pedidos", label: "Pedidos", icon: FileText },
-          { href: "/panel/trabajos", label: "Trabajos", icon: Briefcase },
-          { href: "/panel/favoritos", label: "Favoritos", icon: Heart },
-          { href: "/panel/resenas", label: "Mis reseñas", icon: Star },
-        ]
-      : user.role === "PROFESSIONAL"
-        ? professionalLinks(user.status === "ACTIVE")
-        : [];
-  // Soporte, reportes y opinión exigen la cuenta activa; las sanciones se ven también por verificar.
-  const help: PanelLink[] =
-    user.status === "ACTIVE"
-      ? [
-          { href: "/panel/soporte", label: "Soporte", icon: LifeBuoy },
-          { href: "/panel/reportes", label: "Mis reportes", icon: Flag },
-          moderation,
-          { href: "/panel/opinion", label: "Tu opinión", icon: Sparkles },
-        ]
-      : [moderation];
-  return [
-    { label: "Tu actividad", links: [home, ...activity, notifications] },
-    { label: "Ayuda", links: help },
-    {
-      label: "Tu cuenta",
-      links: [
-        { href: "/panel/cuenta", label: "Mi cuenta", icon: UserRound },
-        { href: "/panel/verificacion", label: "Verificación", icon: Fingerprint },
-        security,
-      ],
-    },
-  ];
-}
-
-/**
- * Secciones del profesional. Chat, pedidos, trabajos y reseñas exigen la cuenta activa; agenda,
- * perfil, métricas y plan se usan también con la cuenta por verificar (el backend lo permite).
- */
-function professionalLinks(active: boolean): PanelLink[] {
-  const links: PanelLink[] = [];
-  if (active) {
-    links.push(
-      { href: "/panel/mensajes", label: "Mensajes", icon: MessagesSquare, counter: "messages" },
-      { href: "/panel/solicitudes", label: "Pedidos recibidos", icon: Inbox },
-      { href: "/panel/trabajos", label: "Trabajos", icon: Briefcase },
-    );
-  }
-  links.push({ href: "/panel/agenda", label: "Agenda", icon: CalendarClock }, { href: "/panel/perfil", label: "Mi perfil", icon: Store });
-  if (active) links.push({ href: "/panel/resenas", label: "Reseñas", icon: Star });
-  links.push({ href: "/panel/metricas", label: "Métricas", icon: BarChart3 }, { href: "/panel/plan", label: "Mi plan", icon: Crown });
-  return links;
-}
+const statusLabel: Partial<Record<Me["status"], string>> = {
+  ACTIVE: "Cuenta activa",
+  PENDING_VERIFICATION: "Cuenta por activar",
+  SUSPENDED: "Cuenta suspendida",
+  BANNED: "Cuenta bloqueada",
+};
 
 export function PanelShell({ children }: { children: ReactNode }) {
   // Suspense: RequireSession lee la URL, que en las rutas con parámetros ([id]) recién existe al pedirla.
@@ -159,33 +31,42 @@ export function PanelShell({ children }: { children: ReactNode }) {
 }
 
 /**
- * Marco del panel ("modo trabajo"): barra lateral azul noche con la persona arriba y los accesos
- * agrupados; en celular, una fila que se desplaza. El contenido va a la derecha sobre el fondo claro.
+ * Marco del panel ("modo trabajo"), pedido del fundador del 2026-11-11: en escritorio, el menú pegado
+ * a la izquierda, de alto completo y fijo al bajar (entre el 20 y el 30 % del ancho), y el contenido
+ * ocupando todo el resto de la pantalla. En celular, el menú es una fila que se desplaza arriba.
  */
 function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
   const pathname = usePathname();
   const groups = panelGroupsFor(user);
-  const isActive = (href: string) => (href === "/panel" ? pathname === "/panel" : pathname.startsWith(href));
+  const current = activeHref(groups, pathname);
   const row = useRef<HTMLDivElement>(null);
 
   // Celular: la fila muestra la sección actual. Se mueve solo la fila (scrollLeft), nunca la página.
   useEffect(() => {
     const container = row.current;
-    const current = container?.querySelector<HTMLElement>('[aria-current="page"]');
-    if (!container || !current || container.scrollWidth <= container.clientWidth) return;
-    const left = current.getBoundingClientRect().left - container.getBoundingClientRect().left + container.scrollLeft;
-    if (left < container.scrollLeft || left + current.offsetWidth > container.scrollLeft + container.clientWidth) {
+    const link = container?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!container || !link || container.scrollWidth <= container.clientWidth) return;
+    const left = link.getBoundingClientRect().left - container.getBoundingClientRect().left + container.scrollLeft;
+    if (left < container.scrollLeft || left + link.offsetWidth > container.scrollLeft + container.clientWidth) {
       container.scrollTo({ left: left - 16, behavior: "smooth" });
     }
   }, [pathname]);
 
   return (
-    // minmax(0, …): la columna no se estira con el menú horizontal (que se desplaza dentro de su espacio).
-    <div className="container-page grid grid-cols-[minmax(0,1fr)] gap-6 py-6 sm:py-10 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-10">
-      <nav aria-label="Panel" className="min-w-0 lg:sticky lg:top-20 lg:self-start">
-        <div className="rounded-3xl bg-brand-950 p-2 text-white shadow-raised lg:p-3">
-          <div className="hidden items-center gap-3 border-b border-white/10 px-2 pt-2 pb-4 lg:flex">
-            <span className="relative size-12 shrink-0 overflow-hidden rounded-2xl bg-brand-700 ring-2 ring-white/15">
+    // minmax(0, …): ninguna columna se estira con su contenido (la fila del celular se desplaza adentro).
+    // 4rem = alto del encabezado del sitio (sticky): el menú arranca justo debajo.
+    <div data-panel-frame className="grid grid-cols-[minmax(0,1fr)] lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[clamp(16.5rem,23%,24rem)_minmax(0,1fr)]">
+      <nav
+        aria-label="Panel"
+        className={cn(
+          "min-w-0 px-4 pt-4 sm:px-6 sm:pt-6",
+          "lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:bg-brand-950 lg:p-0",
+          "lg:[scrollbar-color:rgb(255_255_255/0.18)_transparent] lg:scrollbar-thin",
+        )}
+      >
+        <div className="rounded-2xl bg-brand-950 p-2 text-white lg:rounded-none lg:px-4 lg:pt-5 lg:pb-8 xl:px-6">
+          <div className="hidden items-center gap-3 px-2 pb-5 lg:flex">
+            <span className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-brand-700 ring-2 ring-white/15">
               {user.avatarUrl ? (
                 <RemoteImage src={user.avatarUrl} alt="" fill sizes="48px" className="object-cover" />
               ) : (
@@ -199,7 +80,10 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
               <span className="truncate font-semibold">
                 {user.firstName} {user.lastName}
               </span>
-              <span className="text-sm text-brand-200">{roleLabel[user.role]}</span>
+              <span className="truncate text-sm text-brand-200">
+                {roleLabel[user.role]}
+                {user.role !== "ADMIN" && statusLabel[user.status] && ` · ${statusLabel[user.status]}`}
+              </span>
             </span>
           </div>
 
@@ -208,21 +92,27 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
             el bloque contenedor de lo que va con position absolute adentro (el texto sr-only de los
             contadores); sin eso, ese texto queda fuera del recorte y agranda la página en el celular.
           */}
-          <div ref={row} className="relative -mx-2 flex gap-1 overflow-x-auto px-2 [scrollbar-width:none] lg:mx-0 lg:mt-3 lg:flex-col lg:gap-4 lg:overflow-visible lg:px-0">
+          <div
+            ref={row}
+            className="relative -mx-2 flex gap-1 overflow-x-auto px-2 scrollbar-none lg:mx-0 lg:flex-col lg:gap-5 lg:overflow-visible lg:border-t lg:border-white/10 lg:px-0 lg:pt-5"
+          >
             {groups.map((group) => (
-              <div key={group.label} className="flex shrink-0 lg:flex-col lg:gap-1">
-                <p className="hidden px-3 pb-1 text-xs font-semibold text-brand-300 lg:block">{group.label}</p>
-                <ul className="flex gap-1 lg:flex-col">
+              <div key={group.label} className="flex shrink-0 lg:flex-col lg:gap-0.5">
+                {/* El grupo que solo tiene el inicio no necesita título. */}
+                {group.links.some((link) => link.href !== "/panel") && (
+                  <p className="hidden px-3 pb-1 text-xs font-semibold tracking-wide text-brand-300 uppercase lg:block">{group.label}</p>
+                )}
+                <ul className="flex gap-1 lg:flex-col lg:gap-0.5">
                   {group.links.map((link) => {
-                    const active = isActive(link.href);
+                    const active = link.href === current;
                     return (
                       <li key={link.href} className="shrink-0">
                         <Link
                           href={link.href}
                           aria-current={active ? "page" : undefined}
                           className={cn(
-                            "group/link flex h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold whitespace-nowrap transition-[background-color,color] duration-200 ease-out-soft",
-                            active ? "bg-white text-brand-900 shadow-xs" : "text-brand-100 hover:bg-white/[0.08] hover:text-white",
+                            "group/link flex h-11 items-center gap-3 rounded-xl px-3.5 lg:h-10 text-sm font-semibold whitespace-nowrap transition-[background-color,color] duration-200 ease-out-soft lg:text-[0.9375rem]",
+                            active ? "bg-white text-brand-900 shadow-xs" : "text-brand-100 hover:bg-white/8 hover:text-white",
                           )}
                         >
                           <link.icon
@@ -232,7 +122,7 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
                             )}
                             aria-hidden="true"
                           />
-                          <span className="flex-1">{link.label}</span>
+                          <span className="flex-1 truncate">{link.label}</span>
                           {link.counter === "messages" && <MessagesCount />}
                           {link.counter === "notifications" && <NotificationsCount />}
                         </Link>
@@ -245,7 +135,7 @@ function PanelFrame({ user, children }: { user: Me; children: ReactNode }) {
           </div>
         </div>
       </nav>
-      <div className="min-w-0">{children}</div>
+      <div className="min-w-0 px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10 2xl:px-14">{children}</div>
     </div>
   );
 }

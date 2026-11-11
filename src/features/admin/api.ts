@@ -1,4 +1,5 @@
 import { api, type Schemas } from "@/lib/api/client";
+import type { operations } from "@/lib/api/schema";
 import type { Metrics } from "@/features/pro-work/api";
 
 /*
@@ -35,12 +36,71 @@ export const USERS_PAGE_SIZE = 20;
 export type Counts = Record<string, number | undefined>;
 export const counts = (value: Record<string, never>) => value as unknown as Counts;
 
+/** Los filtros van en la URL: el OpenAPI los tipa como parámetros de la operación, no como DTO. */
+type Query = NonNullable<operations["AdminPanelController_search_v1"]["parameters"]["query"]>;
+export type Joined = NonNullable<Query["joined"]>;
+export type ModerationFlag = NonNullable<Query["flags"]>[number];
+export type PlanFilter = NonNullable<Query["plan"]>;
+export type PageState = NonNullable<Query["pageState"]>;
+export type LoginFilter = NonNullable<Query["login"]>;
+export type UsersSort = NonNullable<Query["sort"]>;
+
+/** Filtros del listado (todos combinables; ver AdminUsersQueryDto en el backend). */
 export interface UsersQuery {
   q?: string;
   role?: AdminRole;
   status?: AccountStatus;
+  verification?: VerificationStatus;
+  joined?: Joined;
+  flags?: ModerationFlag[];
+  plan?: PlanFilter;
+  pageState?: PageState;
+  login?: LoginFilter;
+  sort?: UsersSort;
   page?: number;
 }
+
+export const joinedLabel: Record<Joined, string> = { today: "Hoy", "7d": "Últimos 7 días", "30d": "Últimos 30 días" };
+
+export const flagLabel: Record<ModerationFlag, string> = {
+  sanctioned: "Con sanción vigente",
+  strikes: "Con strikes",
+  reported: "Con reportes",
+  open_reports: "Reportes sin resolver",
+};
+
+export const planFilterLabel: Record<PlanFilter, string> = {
+  TRIAL: "En prueba gratis",
+  BASIC: "Basic pago",
+  MEDIUM: "Medium pago",
+  PREMIUM: "Premium pago",
+  NONE: "Sin plan vigente",
+};
+
+export const pageStateLabel: Record<PageState, string> = { published: "Página publicada", unpublished: "Página sin publicar" };
+
+export const loginLabel: Record<LoginFilter, string> = { google: "Con Google", password: "Solo email y contraseña" };
+
+export const sortLabel: Record<UsersSort, string> = {
+  recent: "Más nuevos primero",
+  oldest: "Más antiguos primero",
+  name: "Por nombre",
+  last_login: "Último ingreso",
+};
+
+/** Lo que le falta a la página de un profesional para publicarse (PublicationRequirement del backend). */
+export const requirementLabel: Record<string, string> = {
+  ACCOUNT_NOT_ACTIVE: "Confirmar el email (la cuenta está por activar)",
+  ACCOUNT_RESTRICTED: "La cuenta está suspendida, bloqueada o dada de baja",
+  IDENTITY_NOT_VERIFIED: "Verificar la identidad",
+  NO_AVATAR: "Subir una foto de perfil",
+  NO_BIO: "Escribir la descripción",
+  NO_PROFESSION: "Elegir al menos un oficio",
+  NO_SERVICE_AREA: "Elegir al menos una zona de trabajo",
+  NO_LIVE_PLAN: "Tener la prueba o un plan vigente",
+  PROFILE_DEACTIVATED: "Reactivar el perfil (está pausado)",
+  PROFILE_HIDDEN: "Tiene la sanción “perfil oculto” vigente",
+};
 
 export const adminKeys = {
   dashboard: ["admin", "dashboard"] as const,
@@ -52,8 +112,10 @@ export const adminKeys = {
 
 export const getDashboard = () => api<Dashboard>("/admin/dashboard");
 
-export const searchUsers = (query: UsersQuery) =>
-  api<AdminUserList>("/admin/users", { query: { ...query, limit: USERS_PAGE_SIZE } });
+export const searchUsers = ({ flags, ...query }: UsersQuery) =>
+  api<AdminUserList>("/admin/users", {
+    query: { ...query, ...(flags?.length ? { flags: flags.join(",") } : {}), limit: USERS_PAGE_SIZE },
+  });
 
 export const getUser = (id: string) => api<AdminUserDetail>(`/admin/users/${id}`);
 

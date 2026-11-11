@@ -1,59 +1,45 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CreditCard, Fingerprint, Flag, Gavel, LifeBuoy, Search, Users } from "lucide-react";
-import { revealDelay } from "@/components/motion/reveal";
+import { Search } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { Alert, Skeleton } from "@/components/ui/feedback";
-import { Tile, type TileProps } from "@/features/account/dashboard-tile";
+import type { PanelGroup } from "@/features/account/panel-nav";
+import { QuickAccess, type AccessStatuses } from "@/features/account/quick-access";
 import { errorMessage } from "@/lib/api/errors";
 import { adminKeys, counts, getDashboard, type Dashboard } from "./api";
 
 /**
- * Inicio del admin (E-005): primero lo que espera una decisión (reportes, apelaciones, soporte,
- * identidades y pagos sin aplicar) y después cómo está la plataforma. Las secciones de moderación,
- * soporte e ingresos llegan en la 7.2 y la 7.3: hasta entonces la tarjeta muestra el número sin enlace.
+ * Inicio del admin (E-005): los accesos rápidos, empezando por lo que espera una decisión (reportes,
+ * apelaciones, identidades y soporte, con cuántos esperan) y después cómo está la plataforma.
  */
-export function AdminDashboard() {
+export function AdminHome({ groups }: { groups: PanelGroup[] }) {
   const dashboard = useQuery({ queryKey: adminKeys.dashboard, queryFn: getDashboard });
-
-  if (dashboard.isError) {
-    return (
-      <Alert tone="danger" title="No pudimos cargar el resumen">
-        {errorMessage(dashboard.error)}
-      </Alert>
-    );
-  }
-
   const data = dashboard.data;
   const loading = dashboard.isPending;
-  const pending: TileProps[] = [
-    { href: "/panel/admin/reportes", icon: Flag, title: "Reportes", count: data?.openReports, detail: "sin resolver", highlight: (data?.openReports ?? 0) > 0, loading },
-    { href: "/panel/admin/apelaciones", icon: Gavel, title: "Apelaciones", count: data?.openAppeals, detail: "esperando decisión", highlight: (data?.openAppeals ?? 0) > 0, loading },
-    { href: "/panel/admin/soporte", icon: LifeBuoy, title: "Soporte", count: data?.openSupportTickets, detail: "consultas abiertas", highlight: (data?.openSupportTickets ?? 0) > 0, loading },
-    { href: "/panel/admin/identidades", icon: Fingerprint, title: "Identidades", count: data?.pendingVerifications, detail: "por revisar", highlight: (data?.pendingVerifications ?? 0) > 0, loading },
-    { href: "/panel/admin/ingresos?vista=mercadopago", icon: CreditCard, title: "Pagos", count: data?.paymentsToReview, detail: "aprobados sin aplicar", highlight: (data?.paymentsToReview ?? 0) > 0, loading },
-    // Suspensión, bloqueo o perfil oculto vigente (no cuenta advertencias). Sin enlace: el buscador
-    // filtra por estado de la cuenta, y un perfil oculto no cambia el estado.
-    { icon: Users, title: "Sancionados", count: data?.sanctionedUsers, detail: "con sanción vigente", loading },
-  ];
+  const waiting = (count: number | undefined, detail: string) => ({ count, detail, highlight: true, loading });
+  const statuses: AccessStatuses = dashboard.isError
+    ? {}
+    : {
+        "/panel/admin/reportes": waiting(data?.openReports, "sin resolver"),
+        "/panel/admin/apelaciones": waiting(data?.openAppeals, "sin decidir"),
+        "/panel/admin/identidades": waiting(data?.pendingVerifications, "por revisar"),
+        "/panel/admin/soporte": waiting(data?.openSupportTickets, "abiertas"),
+        "/panel/admin/ingresos": waiting(data?.paymentsToReview, "pagos sin aplicar"),
+        // Suspensión, bloqueo o perfil oculto vigente (no cuenta advertencias).
+        "/panel/admin/usuarios": { count: data?.sanctionedUsers, detail: "con sanción", loading },
+      };
 
   return (
     <>
-      <section aria-labelledby="para-revisar" className="flex flex-col gap-4">
-        <h2 id="para-revisar" className="text-xl font-semibold text-brand-900">
-          Para revisar
-        </h2>
-        <ul className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
-          {pending.map((tile, index) => (
-            <li key={tile.title} data-reveal style={revealDelay(index % 3, 70)}>
-              <Tile {...tile} />
-            </li>
-          ))}
-        </ul>
-      </section>
+      {dashboard.isError && (
+        <Alert tone="danger" title="No pudimos cargar lo pendiente">
+          {errorMessage(dashboard.error)}
+        </Alert>
+      )}
+      <QuickAccess groups={groups} statuses={statuses} />
 
-      <section aria-labelledby="la-plataforma" className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-7" data-reveal>
+      <section aria-labelledby="la-plataforma" className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 shadow-card sm:p-7" data-reveal>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 id="la-plataforma" className="text-xl font-semibold text-brand-900">
             La plataforma
@@ -63,7 +49,7 @@ export function AdminDashboard() {
             Buscar usuarios
           </ButtonLink>
         </div>
-        {loading || !data ? <Skeleton className="h-40 w-full" /> : <PlatformNumbers data={data} />}
+        {dashboard.isError ? null : loading || !data ? <Skeleton className="h-40 w-full" /> : <PlatformNumbers data={data} />}
       </section>
     </>
   );
@@ -109,7 +95,7 @@ function PlatformNumbers({ data }: { data: Dashboard }) {
     },
   ];
   return (
-    <div className="grid gap-6 sm:grid-cols-2">
+    <div className="grid gap-6 sm:grid-cols-2 2xl:grid-cols-4">
       {groups.map((group) => (
         <div key={group.title} className="flex flex-col gap-2">
           <h3 className="text-sm font-semibold text-muted-strong">{group.title}</h3>

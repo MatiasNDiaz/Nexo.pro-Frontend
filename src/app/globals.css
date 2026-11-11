@@ -369,6 +369,22 @@
   }
 }
 
+/*
+ * En el panel (menú pegado a la izquierda, de borde a borde), el encabezado también ocupa todo el ancho:
+ * el logo queda alineado con la foto del menú (mismo margen que el menú en cada ancho).
+ */
+@media (width >= 64rem) {
+  body:has([data-panel-frame]) .site-header-row {
+    max-width: none;
+    padding-inline: 1.5rem;
+  }
+}
+@media (width >= 80rem) {
+  body:has([data-panel-frame]) .site-header-row {
+    padding-inline: 2rem;
+  }
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;

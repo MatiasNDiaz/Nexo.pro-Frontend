@@ -13,8 +13,9 @@ import { formatListDate } from "@/lib/format";
 import { chatKeys, counterpartName, listConversations, type Conversation, type Message } from "./api";
 import { CounterpartAvatar } from "./counterpart-avatar";
 
-export function useConversations() {
-  return useQuery({ queryKey: chatKeys.conversations, queryFn: listConversations });
+/** `enabled`: el chat exige la cuenta activa (con la cuenta por activar el backend responde 403). */
+export function useConversations(enabled = true) {
+  return useQuery({ queryKey: chatKeys.conversations, queryFn: listConversations, enabled });
 }
 
 /** Lista de chats, la más reciente primero. `activeId` resalta la que está abierta (pantallas anchas). */

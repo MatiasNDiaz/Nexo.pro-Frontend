@@ -138,6 +138,12 @@ export function AccountSummary({ user }: { user: Me }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Badge tone="brand">{roleLabel[user.role]}</Badge>
+      {user.role !== "ADMIN" && user.status === "ACTIVE" && (
+        <Badge tone="success">
+          <CheckCircle2 className="size-3.5" aria-hidden="true" />
+          Tu cuenta está activa
+        </Badge>
+      )}
       {user.role !== "ADMIN" && (
         <Badge tone={user.verificationStatus === "APPROVED" ? "success" : "neutral"}>
           Identidad: {verificationLabel[user.verificationStatus]}

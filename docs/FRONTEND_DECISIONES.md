@@ -249,6 +249,19 @@ nuevas.
 - **Fotos:** de Pexels con la Pexels License. Se bajan con `.local/bajar-fotos.mjs`, que confirma en
   la página que sea una foto gratuita de Pexels y anota el autor para el crédito del pie.
 
+## Marco del panel y accesos rápidos (etapa 9, pedido del fundador del 11/11/2026)
+
+| Decisión | Motivo |
+| --- | --- |
+| En escritorio, el menú va pegado a la izquierda, de alto completo y fijo al bajar, con `clamp(16.5rem, 23%, 24rem)` de ancho (23 % en 1440 px, 20 % en 1920 px); el contenido ocupa todo el resto, sin el contenedor centrado del sitio | Pedido explícito: el panel entre el 20 y el 30 % y el resto de la pantalla para el contenido |
+| En el panel, el encabezado del sitio también va de borde a borde (`body:has([data-panel-frame]) .site-header-row` en `globals.css`) | El logo queda alineado con la foto del menú. Se hace con CSS y no con la URL, para no volver cliente al encabezado |
+| En celular el menú sigue siendo una fila que se desplaza | Una columna del 20 % no entra; el inicio ya muestra todas las secciones con su explicación |
+| Las secciones de cada rol se definen una sola vez (`src/features/account/panel-nav.ts`), agrupadas por tarea, cada una con una frase de qué se puede hacer ahí | El menú y los accesos rápidos no se pueden desordenar entre sí, y cada rol entiende sus funciones sin abrirlas |
+| Grupos: cliente "Contratar" (incluye Buscar profesionales), "Tus profesionales", "Ayuda", "Tu cuenta"; profesional "Tu trabajo", "Tu página" (con Diseño de mi página), "Tu negocio", "Ayuda", "Tu cuenta"; admin "Para revisar", "Personas y contenido", "Negocio", "Tu cuenta" | Ordenados por lo que la persona viene a hacer, no por cómo está armado el backend |
+| El inicio del panel son los accesos rápidos: tarjetas con la sección, qué se hace ahí y cuántas cosas esperan (ámbar si piden atención) | Reemplaza a las tarjetas de solo números: ahora cada tarjeta explica la función y lleva a ella |
+| La sección marcada en el menú es la de dirección más larga que coincide (`activeHref`) | En `/panel/perfil/diseno` se marca "Diseño de mi página" y no también "Mi perfil" |
+| Con la cuenta activa, el aviso verde grande pasa a ser una etiqueta junto al saludo | Lo que no pide acción no ocupa lugar; los pasos para activar la cuenta siguen igual de visibles |
+
 ## Lighthouse: avisos aceptados (etapa 8)
 
 - **"Falta la meta description"** en el catálogo y el perfil. Las dos páginas la tienen. Next 16

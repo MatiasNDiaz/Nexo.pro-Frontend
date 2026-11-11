@@ -181,7 +181,8 @@ test.describe("mensajes", () => {
     await mockApi(page, signedIn(activeCustomer, { "GET /chat/conversations": () => json(200, []) }));
     await page.goto("/panel/mensajes");
     await expect(page.getByRole("heading", { name: "Todavía no tenés conversaciones" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Buscar profesionales" })).toBeVisible();
+    // El primero es el del menú del panel; el último, el de la invitación.
+    await expect(page.getByRole("link", { name: "Buscar profesionales" }).last()).toBeVisible();
   });
 
   test("mandar un mensaje: lo agrega, confirma la lectura y lleva el token CSRF", async ({ page }) => {

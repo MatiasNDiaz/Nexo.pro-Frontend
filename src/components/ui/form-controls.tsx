@@ -41,6 +41,8 @@ interface FieldProps {
   error?: string;
   required?: boolean;
   className?: string;
+  /** Para ocultar la etiqueta a la vista ("sr-only") cuando el contexto ya la deja clara. */
+  labelClassName?: string;
   /** Recibe los atributos de accesibilidad que tiene que llevar el control. */
   children: (control: { id: string; "aria-describedby"?: string; "aria-invalid"?: true }) => ReactNode;
 }
@@ -49,14 +51,14 @@ interface FieldProps {
  * Etiqueta + control + ayuda + error. El error se anuncia (role="alert") y el control queda marcado
  * con aria-invalid y aria-describedby, así el lector de pantalla lee el problema al enfocarlo.
  */
-export function Field({ id, label, hint, error, required, className, children }: FieldProps) {
+export function Field({ id, label, hint, error, required, className, labelClassName, children }: FieldProps) {
   const hintId = hint ? `${id}-ayuda` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <label htmlFor={id} className="text-sm font-medium text-ink">
+      <label htmlFor={id} className={cn("text-sm font-medium text-ink", labelClassName)}>
         {label}
         {required && (
           <span className="ml-0.5 text-danger-600" aria-hidden="true">

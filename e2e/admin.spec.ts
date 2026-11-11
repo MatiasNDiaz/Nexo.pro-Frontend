@@ -38,6 +38,18 @@ const listItem = {
   role: "CUSTOMER",
   status: "ACTIVE",
   verificationStatus: "APPROVED",
+  avatarUrl: null,
+  phone: "+5493515067276",
+  google: true,
+  hasPassword: true,
+  emailVerifiedAt: "2026-10-01T12:05:00.000Z",
+  lastLoginAt: "2026-11-10T09:00:00.000Z",
+  location: "Nueva Córdoba, Córdoba",
+  professional: null,
+  activeSanctions: 0,
+  activeStrikeWeight: 1,
+  reportsAgainst: 1,
+  openReportsAgainst: 0,
   createdAt: "2026-10-01T12:00:00.000Z",
 };
 
@@ -73,7 +85,9 @@ test.describe("resumen del admin", () => {
     await mockApi(page, asAdmin());
     await page.goto("/panel");
     await expect(page.getByRole("heading", { name: "Para revisar" })).toBeVisible();
-    await expect(page.getByText("sin resolver")).toBeVisible();
+    // Cada acceso dice qué se hace ahí y cuántas cosas esperan.
+    await expect(page.getByRole("link", { name: /^Reportes .* 2 sin resolver$/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Identidades .* 4 por revisar$/ })).toBeVisible();
     await expect(page.getByRole("heading", { name: "La plataforma" })).toBeVisible();
     const nav = page.getByRole("navigation", { name: "Panel" });
     await expect(nav.getByRole("link", { name: "Usuarios" })).toBeVisible();
@@ -100,7 +114,13 @@ test.describe("búsqueda de usuarios", () => {
     await page.goto("/panel/admin/usuarios");
     await expect(page.getByText("1 usuario", { exact: true })).toBeVisible();
 
-    await page.getByRole("searchbox", { name: "Nombre, apellido o email" }).fill("cami");
+    // La fila muestra los datos para decidir sin abrir la ficha.
+    const row = page.getByRole("link", { name: /Camila Herrera/ });
+    await expect(row).toContainText("Nueva Córdoba, Córdoba");
+    await expect(row).toContainText("1 strike");
+    await expect(row.getByRole("img", { name: "Ingresa con Google" })).toBeVisible();
+
+    await page.getByRole("searchbox", { name: "Nombre, apellido, nombre comercial o email" }).fill("cami");
     await page.getByRole("button", { name: "Buscar" }).click();
     await expect(page).toHaveURL(/q=cami/);
     await page.getByRole("button", { name: "Profesionales" }).click();
@@ -109,9 +129,30 @@ test.describe("búsqueda de usuarios", () => {
       .poll(() => api.find("GET /admin/users").map((request) => new URL(request.url()).searchParams.toString()))
       .toContain("q=cami&role=PROFESSIONAL&limit=20");
 
-    await page.getByRole("link", { name: /Camila Herrera/ }).click();
+    await row.click();
     await expect(page.getByRole("heading", { level: 1, name: "Camila Herrera" })).toBeVisible();
     await expectNoHorizontalScroll(page);
+  });
+
+  test("moderación, filtros avanzados y orden se combinan en la URL y en el backend", async ({ page }) => {
+    const api = await mockApi(page, asAdmin({ "GET /admin/users": () => json(200, { data: [listItem], page: 1, limit: 20, total: 1 }) }));
+    await page.goto("/panel/admin/usuarios");
+    await page.getByRole("button", { name: "Con strikes" }).click();
+    await expect(page.getByRole("button", { name: "Con strikes" })).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Últimos 7 días" }).click();
+    await page.getByRole("button", { name: "Más filtros" }).click();
+    await chooseOption(page, "Plan (profesionales)", "En prueba gratis");
+    await chooseOption(page, "Orden", "Por nombre");
+    await expect(page).toHaveURL(/moderacion=strikes/);
+    await expect(page).toHaveURL(/alta=7d/);
+    await expect(page).toHaveURL(/plan=TRIAL/);
+    await expect(page).toHaveURL(/orden=name/);
+    await expect
+      .poll(() => api.find("GET /admin/users").map((request) => new URL(request.url()).searchParams.toString()))
+      .toContain("joined=7d&plan=TRIAL&sort=name&flags=strikes&limit=20");
+
+    await page.getByRole("button", { name: "Limpiar" }).click();
+    await expect(page).toHaveURL(/\/panel\/admin\/usuarios\?orden=name$/);
   });
 
   test("buscar y tocar un filtro enseguida no pierde la búsqueda", async ({ page }) => {
