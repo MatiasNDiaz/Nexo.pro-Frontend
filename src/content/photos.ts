@@ -20,16 +20,30 @@ const photo = (path: string, alt: string, author: string, id: number): Photo => 
   page: `https://www.pexels.com/photo/${id}/`,
 });
 
-/** Héroe del inicio: tomas horizontales de trabajo, una por oficio. */
+/**
+ * Héroe del inicio: una toma abierta por oficio (la persona trabajando en su lugar, no un primer plano
+ * de manos), de 3200 px para que se vea nítida en pantallas grandes. `focus` es el punto de interés:
+ * en el celular la foto se recorta en vertical y ese punto queda a la vista.
+ */
 // La primera es la más luminosa: es la que se ve al cargar (y la que se precarga).
 export const heroSlides = [
-  { photo: photo("hero/ladrillos", "Manos colocando ladrillos con la cuchara", "gowtham-agm", 19688828), trade: "Albañil" },
-  { photo: photo("hero/carpinteria", "Carpintero cepillando el marco de una ventana", "kseniachernaya", 5691541), trade: "Carpintero" },
-  { photo: photo("hero/caldera", "Técnico revisando una caldera", "heiko-ruth", 7859953), trade: "Gasista" },
-  { photo: photo("hero/jardin", "Jardinero podando con tijera", "magda-ehlers", 38936344), trade: "Jardinero" },
-  { photo: photo("hero/canerias", "Manos ajustando una cañería", "sejio402", 29226620), trade: "Plomero" },
-  { photo: photo("hero/soldadura", "Herrero soldando entre chispas", "kateryna-babaieva", 3678228), trade: "Herrero" },
+  { photo: photo("hero/electricista", "Electricista con casco trabajando en una pared", "shkrabaanthony", 4981793), trade: "Electricista", focus: "42% 40%" },
+  { photo: photo("hero/albanil", "Dos albañiles levantando una pared de ladrillos", "nishantaneja", 9172008), trade: "Albañil", focus: "45% 50%" },
+  { photo: photo("hero/carpintero", "Carpintero trabajando la madera en su taller", "hson", 32357250), trade: "Carpintero", focus: "68% 40%" },
+  { photo: photo("hero/gasista", "Técnico revisando una caldera", "2157750954", 34938442), trade: "Gasista", focus: "32% 45%" },
+  { photo: photo("hero/jardinero", "Jardinero trabajando la tierra entre los árboles", "karen-f-1376469", 16520685), trade: "Jardinero", focus: "74% 55%" },
+  { photo: photo("hero/plomero", "Plomero revisando la instalación de un baño", "kathleen-austin-kuhn-2152973960", 32497162), trade: "Plomero", focus: "55% 45%" },
+  { photo: photo("hero/herrero", "Herrero soldando con máscara entre chispas", "zeoxs", 12366518), trade: "Herrero", focus: "45% 45%" },
+  { photo: photo("hero/pintor", "Dos pintores preparando una pared con una escalera", "blue-bird", 7217983), trade: "Pintor", focus: "70% 40%" },
 ] as const;
+
+/** Banners anchos de las secciones del menú (encabezado de cada página). */
+export const banners = {
+  profesionales: photo("banners/profesionales", "Equipo de trabajadores en una obra", "denniz-futalan-339724", 4956920),
+  foro: photo("banners/foro", "Una clienta y un profesional revisando un plano en una casa en reforma", "mikael-blomkvist", 8961295),
+  contacto: photo("banners/contacto", "Persona escribiendo en la computadora, con un café y un cuaderno", "ketut-subiyanto", 4126739),
+  clientes: photo("banners/clientes", "Familia contándole a una profesional lo que necesita en su casa", "mart-production", 7415049),
+} satisfies Record<string, Photo>;
 
 /** Una foto por oficio, por slug del catálogo (GET /professions). */
 export const tradePhotos: Record<string, Photo> = {
@@ -47,12 +61,10 @@ export const tradePhotos: Record<string, Photo> = {
 
 /** Escenas de obra en casas, para encabezados y secciones. */
 export const scenes = {
-  pasillo: photo("escenas/pasillo", "Dos trabajadores con casco en el pasillo de una casa", "davegarcia", 36153946),
-  ventana: photo("escenas/ventana", "Trabajador preparando una ventana en un departamento", "kseniachernaya", 5768187),
-  escalera: photo("escenas/escalera", "Trabajador sobre una escalera en un departamento luminoso", "kseniachernaya", 5767799),
-  obraLuz: photo("escenas/obra-luz", "Trabajador pintando una habitación con luz natural", "tima-miroshnichenko", 6474133),
-  yeso: photo("escenas/yeso", "Dos trabajadores aplicando yeso en una habitación", "muhammeddiler", 23358344),
   aberturas: photo("escenas/aberturas", "Trabajador colocando una ventana", "kseniachernaya", 5691521),
+  artesano: photo("escenas/artesano", "Artesano con delantal en su taller", "odavidarts", 14937294),
+  familiaReforma: photo("escenas/familia-reforma", "Madre e hijo mirando el celular en plena reforma de su casa", "ivan-s", 5799025),
+  lampara: photo("escenas/lampara", "Hombre colgando una lámpara en el techo de su casa", "anete-lusina", 4792521),
 } satisfies Record<string, Photo>;
 
-export const allPhotos: Photo[] = [...heroSlides.map((s) => s.photo), ...Object.values(tradePhotos), ...Object.values(scenes)];
+export const allPhotos: Photo[] = [...heroSlides.map((s) => s.photo), ...Object.values(banners), ...Object.values(tradePhotos), ...Object.values(scenes)];

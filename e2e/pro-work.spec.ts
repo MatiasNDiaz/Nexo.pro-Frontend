@@ -242,7 +242,7 @@ test.describe("reseñas recibidas", () => {
     await expect(page.getByText("1 reseña publicada")).toBeVisible();
     await page.getByRole("textbox", { name: "Respondé en público" }).fill("¡Gracias, Camila!");
     await page.getByRole("button", { name: "Responder" }).click();
-    await expect(page.getByText("Tu respuesta")).toBeVisible();
+    await expect(page.getByText("Tu respuesta", { exact: true })).toBeVisible();
     await expect(page.getByText("¡Gracias, Camila!")).toBeVisible();
   });
 });

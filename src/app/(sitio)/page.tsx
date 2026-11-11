@@ -3,16 +3,19 @@ import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import { About } from "@/components/home/about";
 import { AccountStory } from "@/components/home/account-story";
+import { FinalCta } from "@/components/home/final-cta";
 import { HeroSlides } from "@/components/home/hero-slides";
 import { Opinions } from "@/components/home/opinions";
 import { PlansTable } from "@/components/home/plans-table";
+import { ProIntro } from "@/components/home/pro-intro";
 import { ShineLink } from "@/components/home/shine-link";
 import { WordsUp } from "@/components/motion/words-up";
 import { ButtonLink } from "@/components/ui/button";
 import { Listbox } from "@/components/ui/listbox";
-import { about, faqs } from "@/content/home";
-import { scenes, tradePhotos } from "@/content/photos";
+import { faqs } from "@/content/home";
+import { tradePhotos } from "@/content/photos";
 import { getLocalities, getProfessions } from "@/features/catalog/data";
 import { cn } from "@/lib/cn";
 
@@ -188,62 +191,18 @@ async function Trades() {
 
 function Professionals() {
   return (
-    <section id="planes" aria-labelledby="para-profesionales" className="scroll-mt-16 bg-brand-950 text-white">
+    <section id="planes" aria-labelledby="para-profesionales" className="relative isolate scroll-mt-16 overflow-hidden bg-brand-950 text-white">
+      {/* Luz cálida detrás del retrato: el azul noche no queda plano. */}
+      <span aria-hidden="true" className="absolute top-24 right-[-12rem] -z-1 size-[42rem] rounded-full bg-[radial-gradient(closest-side,rgb(59_130_246/0.22),transparent)]" />
+      <span aria-hidden="true" className="absolute top-[36rem] left-[-14rem] -z-1 size-[34rem] rounded-full bg-[radial-gradient(closest-side,rgb(244_163_64/0.12),transparent)]" />
       <div className="container-page py-20 sm:py-28">
-        <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-20">
-          <div className="flex flex-col items-start gap-6">
-            <h2 id="para-profesionales" className="max-w-[15ch] text-4xl leading-[1.02] font-bold sm:text-6xl">
-              ¿Sos profesional? Que te encuentren los que te buscan.
-            </h2>
-            <p className="max-w-[46ch] text-lg leading-relaxed text-brand-200">
-              Mostrá tus trabajos, elegí tus oficios y tus zonas, y respondé pedidos por chat. Empezás con 30 días de prueba con las
-              funciones de Basic; después elegís tu plan y lo pagás mes a mes.
-            </p>
-            <ShineLink href="/registro?rol=profesional">Crear mi perfil profesional</ShineLink>
-          </div>
-          <div className="relative aspect-[4/5] max-h-[34rem] w-full overflow-hidden rounded-3xl sm:aspect-[4/3] lg:aspect-[4/5]">
-            <Image src={scenes.escalera.src} alt={scenes.escalera.alt} fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
-          </div>
-        </div>
-        <div className="mt-20 sm:mt-28">
+        <ProIntro />
+        <div className="mt-24 sm:mt-32">
           <PlansTable />
           <p className="mt-6 text-sm text-brand-300">
             Sin permanencia: si no renovás el mes siguiente, tu perfil deja de mostrarse en el catálogo hasta que lo hagas.
           </p>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function About() {
-  return (
-    <section aria-labelledby="quienes-somos" className="bg-surface">
-      <div className="container-page grid gap-12 py-20 sm:py-28 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-20">
-        <div className="flex flex-col gap-8">
-          <h2 id="quienes-somos" className="text-4xl leading-[1.02] font-bold text-brand-900 sm:text-6xl">
-            Quiénes somos
-          </h2>
-          <p className="max-w-[52ch] text-lg leading-relaxed text-muted-strong">{about.who}</p>
-          <dl className="grid gap-6 border-t border-line pt-8 sm:grid-cols-3">
-            {about.values.map((value) => (
-              <div key={value.title} className="flex flex-col gap-1.5">
-                <dt className="font-display text-lg font-bold text-ink">{value.title}</dt>
-                <dd className="text-sm leading-relaxed text-muted-strong">{value.text}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-        {/* La foto y, encastrado abajo, el objetivo: una sola pieza. */}
-        <figure className="overflow-hidden rounded-3xl bg-brand-700">
-          <div className="relative aspect-[16/10]">
-            <Image src={scenes.obraLuz.src} alt={scenes.obraLuz.alt} fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover" />
-          </div>
-          <figcaption className="flex flex-col gap-3 p-6 sm:p-8">
-            <h3 className="font-display text-xl font-bold text-amber-400">Nuestro objetivo</h3>
-            <p className="font-display text-2xl leading-snug font-bold text-white sm:text-3xl">{about.goal}</p>
-          </figcaption>
-        </figure>
       </div>
     </section>
   );
@@ -282,37 +241,3 @@ function Faq() {
   );
 }
 
-/** Cierre en blanco (hace de pausa clara antes del pie oscuro), con un collage de dos fotos. */
-function FinalCta() {
-  return (
-    <section aria-labelledby="empeza" className="border-t border-line bg-surface">
-      <div className="container-page grid gap-12 py-20 sm:py-28 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-20">
-        <div data-reveal className="flex flex-col items-start gap-6">
-          <h2 id="empeza" className="max-w-[14ch] text-4xl leading-[1.02] font-bold text-brand-900 sm:text-6xl">
-            ¿Tenés algo para arreglar?
-          </h2>
-          <p className="max-w-[44ch] text-lg leading-relaxed text-muted-strong">
-            Encontrá a alguien de confianza cerca tuyo, pedile presupuesto por chat y seguí el trabajo hasta el final. Crear tu
-            cuenta es gratis.
-          </p>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
-            <ButtonLink href="/profesionales" variant="accent" size="lg">
-              Buscar un profesional
-            </ButtonLink>
-            <ButtonLink href="/registro" variant="secondary" size="lg">
-              Crear mi cuenta
-            </ButtonLink>
-          </div>
-        </div>
-        <div aria-hidden="true" className="relative mx-auto h-[22rem] w-full max-w-lg sm:h-[26rem]">
-          <div className="absolute top-0 left-0 h-[78%] w-[62%] overflow-hidden rounded-3xl shadow-raised">
-            <Image src={scenes.pasillo.src} alt="" fill sizes="(min-width: 1024px) 28vw, 60vw" className="object-cover" />
-          </div>
-          <div className="absolute right-0 bottom-0 h-[62%] w-[52%] overflow-hidden rounded-3xl shadow-raised ring-8 ring-surface">
-            <Image src={tradePhotos.pintor!.src} alt="" fill sizes="(min-width: 1024px) 24vw, 50vw" className="object-cover" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}

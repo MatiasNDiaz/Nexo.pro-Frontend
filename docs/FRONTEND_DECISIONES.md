@@ -220,6 +220,24 @@ nuevas.
 - **Pantallas de resultado:** la vuelta de Mercado Pago, "gracias por avisarnos", el contacto y el
   registro usan el mismo ícono animado.
 
+## Fotos, banners y secciones del inicio (etapa 8, pedido del fundador)
+
+- **Héroe:** 8 oficios en toma abierta (la persona trabajando, no un primer plano de manos), de
+  3200 px y a calidad 75.
+  - Antes eran fotos de 1800 px a calidad 60 con un 12 % de zoom: en pantallas grandes se veían
+    estiradas. Ahora el zoom es de 4 %.
+  - Cada foto tiene su punto de interés (`focus` en `content/photos.ts`) para el recorte vertical del
+    celular.
+- **Banners de las secciones del menú** (Profesionales, Clientes, Foro, Contacto): `PageHeader` con
+  `photo`.
+  - Foto de lado a lado con un velo azul noche donde va el texto; el título sube palabra por palabra.
+  - Sin foto, el encabezado claro de siempre.
+- **"¿Sos profesional?", "Quiénes somos" y el cierre:** escenas (`data-reveal="stage"` y las clases
+  `.stage-*` de globals.css). El bloque se ve siempre y sus piezas entran una vez al llegar con el
+  scroll. Sin JavaScript o con "menos movimiento", todo quieto y completo.
+- **Fotos:** de Pexels con la Pexels License. Se bajan con `.local/bajar-fotos.mjs`, que confirma en
+  la página que sea una foto gratuita de Pexels y anota el autor para el crédito del pie.
+
 ## Lighthouse: avisos aceptados (etapa 8)
 
 - **"Falta la meta description"** en el catálogo y el perfil. Las dos páginas la tienen. Next 16

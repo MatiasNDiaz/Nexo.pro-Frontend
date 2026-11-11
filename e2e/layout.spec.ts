@@ -73,13 +73,15 @@ test.describe("footer", () => {
 test.describe("animaciones al hacer scroll", () => {
   test("los bloques aparecen al llegar a ellos", async ({ page }) => {
     await page.goto("/");
-    const finalCta = page.locator("section[aria-labelledby='empeza'] [data-reveal]");
-    // Abajo de todo: todavía oculto (opacidad 0) hasta que se llega con el scroll.
+    // El cierre es una escena (data-reveal="stage"): el bloque se ve siempre y sus piezas entran al llegar.
+    const finalCta = page.locator("section[aria-labelledby='empeza'] [data-reveal='stage']");
+    const heading = page.locator("#empeza");
+    // Abajo de todo: el título todavía oculto (opacidad 0) hasta que se llega con el scroll.
     await expect(finalCta).not.toHaveAttribute("data-revealed");
-    await expect(finalCta).toHaveCSS("opacity", "0");
+    await expect(heading).toHaveCSS("opacity", "0");
     await finalCta.scrollIntoViewIfNeeded();
     await expect(finalCta).toHaveAttribute("data-revealed", "");
-    await expect(finalCta).toHaveCSS("opacity", "1");
+    await expect(heading).toHaveCSS("opacity", "1");
   });
 
   test("con movimiento reducido, todo se ve sin animación", async ({ browser }) => {

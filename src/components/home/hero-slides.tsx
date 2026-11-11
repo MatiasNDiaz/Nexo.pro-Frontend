@@ -123,7 +123,8 @@ export function HeroSlides({ children }: { children: ReactNode }) {
     if (!gsap || !el) return;
     const image = el.querySelector("img");
     gsap.set(el, { visibility: "visible", zIndex: 2 });
-    if (image) gsap.fromTo(image, { scale: 1.12 }, { scale: 1.02, duration: SECONDS + 0.8, ease: "sine.out" });
+    // Acercamiento leve (4 %): da movimiento sin agrandar la foto de más (antes 12 % y se veía "estirada").
+    if (image) gsap.fromTo(image, { scale: 1.04 }, { scale: 1, duration: SECONDS + 0.8, ease: "sine.out" });
     reveals[round % reveals.length]!(gsap, el).eventCallback("onComplete", () => {
       setCurrent(target);
       setTarget(null);
@@ -162,8 +163,21 @@ export function HeroSlides({ children }: { children: ReactNode }) {
               className="absolute inset-0"
               style={isCurrent ? { zIndex: 1 } : { zIndex: 0, visibility: "hidden" }}
             >
-              {/* Calidad 60: van detrás de un velo oscuro al 50 %, la diferencia no se ve y pesan bastante menos (LCP en celular). */}
-              <Image src={item.photo.src} alt={item.photo.alt} fill preload={index === 0} quality={60} sizes="100vw" className="object-cover" />
+              {/*
+                Fotos de 3200 px a calidad 75: nítidas en pantallas grandes (next/image entrega el tamaño de cada
+                pantalla, así que en el celular siguen pesando poco). `focus`: el punto que queda a la vista
+                cuando la foto se recorta en vertical.
+              */}
+              <Image
+                src={item.photo.src}
+                alt={item.photo.alt}
+                fill
+                preload={index === 0}
+                quality={75}
+                sizes="100vw"
+                className="object-cover"
+                style={{ objectPosition: item.focus }}
+              />
             </div>
           );
         })}

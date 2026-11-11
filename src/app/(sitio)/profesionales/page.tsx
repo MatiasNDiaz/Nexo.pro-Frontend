@@ -10,7 +10,7 @@ import { ViewBeacon } from "@/components/catalog/view-beacon";
 import { PageHeader } from "@/components/layout/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { Alert, EmptyState, Skeleton } from "@/components/ui/feedback";
-import { scenes } from "@/content/photos";
+import { banners } from "@/content/photos";
 import { getLocalities, getProfessions, searchCatalog } from "@/features/catalog/data";
 import {
   catalogHref,
@@ -47,7 +47,8 @@ export default function CatalogPage({ searchParams }: PageProps<"/profesionales"
   return (
     <>
       <PageHeader
-        photo={scenes.pasillo}
+        photo={banners.profesionales}
+        focus="50% 35%"
         title="Encontrá al profesional indicado"
         description="Todos tienen la identidad verificada por nuestro equipo. Filtrá por oficio y zona, o mirá quién está disponible ahora."
       />

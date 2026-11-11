@@ -62,7 +62,10 @@ test.describe("inicio", () => {
     await expect(page.getByRole("heading", { level: 2, name: "Quiénes somos" })).toBeVisible();
     await expect(page.getByRole("heading", { level: 3, name: "Nuestro objetivo" })).toBeVisible();
     await expect(page.getByRole("heading", { level: 2, name: "Lo que tenés con tu cuenta gratis." })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Crear mi cuenta gratis" })).toHaveAttribute("href", "/registro");
+    // Está en la historia de la cuenta y en el cierre: los dos llevan al registro.
+    const links = page.getByRole("link", { name: "Crear mi cuenta gratis" });
+    await expect(links).toHaveCount(2);
+    for (const link of await links.all()) await expect(link).toHaveAttribute("href", "/registro");
   });
 
   test("la historia de la cuenta avanza al tocar cada paso (celular)", async ({ page, isMobile }) => {

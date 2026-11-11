@@ -647,6 +647,146 @@
     transform: scale(1.08);
   }
 }
+/*
+ * Escenas animadas del inicio (components/home/pro-intro.tsx, about.tsx, final-cta.tsx). El
+ * contenedor lleva data-reveal="stage": se ve siempre y sus piezas entran cuando aparece en pantalla,
+ * cada una con su --stage-delay. Sin JavaScript (sin .reveal-on) o con menos movimiento, todo se ve
+ * quieto y completo.
+ *   .stage-in    sube, se enfoca y aparece
+ *   .stage-clip  la foto se descubre de abajo hacia arriba
+ *   .stage-open  la foto se abre desde el centro
+ *   .stage-line  una línea vertical que se dibuja
+ *   .stage-glow  un paso que se enciende una vez
+ *   .stage-float flota despacio (después de entrar)
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-on [data-reveal="stage"] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .reveal-on [data-reveal="stage"]:not([data-revealed]) :is(.stage-in, .stage-glow) {
+    opacity: 0;
+  }
+  .reveal-on [data-reveal="stage"]:not([data-revealed]) .stage-clip {
+    clip-path: inset(0 0 100% 0 round 1.5rem);
+  }
+  .reveal-on [data-reveal="stage"]:not([data-revealed]) .stage-open {
+    clip-path: inset(0 50% 0 50% round 1.5rem);
+  }
+  .reveal-on [data-reveal="stage"]:not([data-revealed]) .stage-line {
+    transform: scaleY(0);
+  }
+  .reveal-on [data-reveal="stage"][data-revealed] :is(.stage-in, .stage-clip, .stage-open, .stage-line, .stage-glow) {
+    animation-duration: 850ms;
+    animation-timing-function: var(--ease-out-soft);
+    animation-fill-mode: both;
+    animation-delay: var(--stage-delay, 0ms);
+  }
+  .reveal-on [data-reveal="stage"][data-revealed] .stage-in {
+    animation-name: stage-in;
+  }
+  .reveal-on [data-reveal="stage"][data-revealed] .stage-clip {
+    animation-name: stage-clip;
+    animation-duration: 1200ms;
+  }
+  .reveal-on [data-reveal="stage"][data-revealed] .stage-open {
+    animation-name: stage-open;
+    animation-duration: 1300ms;
+  }
+  .reveal-on [data-reveal="stage"][data-revealed] .stage-line {
+    animation-name: stage-line;
+    animation-duration: 1400ms;
+  }
+  .reveal-on [data-reveal="stage"][data-revealed] .stage-glow {
+    animation-name: stage-glow;
+    animation-duration: 1100ms;
+  }
+  .stage-float {
+    animation: stage-float 6s ease-in-out infinite;
+    animation-delay: var(--float-delay, 0s);
+  }
+}
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.97);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes stage-clip {
+  from {
+    clip-path: inset(0 0 100% 0 round 1.5rem);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 1.5rem);
+  }
+}
+@keyframes stage-open {
+  from {
+    clip-path: inset(0 50% 0 50% round 1.5rem);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 1.5rem);
+  }
+}
+@keyframes stage-line {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes stage-glow {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  45% {
+    opacity: 1;
+    transform: none;
+    box-shadow: 0 0 0 6px rgb(11 31 58 / 0.18);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    box-shadow: 0 0 0 0 rgb(11 31 58 / 0);
+  }
+}
+/* `translate` (no `transform`): así no pisa la entrada de .stage-in. */
+@keyframes stage-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+/* Banners de las secciones (components/layout/page-header.tsx). */
+@keyframes banner-settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes banner-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
 @keyframes toast-progress {
   from {
     transform: scaleX(1);

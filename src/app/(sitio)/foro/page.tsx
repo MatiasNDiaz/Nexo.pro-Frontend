@@ -9,7 +9,7 @@ import { ParticipateCta } from "@/components/forum/participate-cta";
 import { PageHeader } from "@/components/layout/page-header";
 import { revealDelay } from "@/components/motion/reveal";
 import { Alert, EmptyState, Skeleton } from "@/components/ui/feedback";
-import { scenes } from "@/content/photos";
+import { banners } from "@/content/photos";
 import { getLocalities, getProfessions } from "@/features/catalog/data";
 import { totalPages, type SearchParams } from "@/features/catalog/filters";
 import { listForum } from "@/features/forum/data";
@@ -28,7 +28,8 @@ export default function ForumPage({ searchParams }: PageProps<"/foro">) {
   return (
     <>
       <PageHeader
-        photo={scenes.yeso}
+        photo={banners.foro}
+        focus="62% 38%"
         title="Foro"
         description="Preguntas sobre arreglos y pedidos de clientes que buscan un profesional en su zona."
       />
