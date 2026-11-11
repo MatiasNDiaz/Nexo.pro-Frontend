@@ -17,6 +17,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { toast } from "@/components/ui/toast";
 import { newPasswordSchema } from "@/features/session/schemas";
 import { useSessionActions } from "@/features/session/session-provider";
+import { useSignOut } from "@/features/session/sign-out";
 import { errorMessage, isApiError } from "@/lib/api/errors";
 import { formatDate } from "@/lib/format";
 import {
@@ -197,7 +198,8 @@ function GoogleSection() {
 function DevicesSection() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { signOut, sessionEnded } = useSessionActions();
+  const { sessionEnded } = useSessionActions();
+  const signOut = useSignOut();
   const devices = useQuery({ queryKey: accountKeys.devices, queryFn: getDevices });
   const [confirmAll, setConfirmAll] = useState(false);
   const close = useMutation({
@@ -242,7 +244,7 @@ function DevicesSection() {
                 </div>
               </div>
               {device.current ? (
-                <Button variant="secondary" size="sm" onClick={async () => { await signOut(); router.push("/"); }}>
+                <Button variant="secondary" size="sm" onClick={signOut.ask}>
                   <LogOut className="size-4" aria-hidden="true" />
                   Cerrar sesión
                 </Button>
@@ -262,6 +264,7 @@ function DevicesSection() {
         </ul>
       )}
       {close.isError && <Alert tone="danger">{errorMessage(close.error)}</Alert>}
+      {signOut.dialog}
       <Button variant="ghost" onClick={() => setConfirmAll(true)} className="self-start">
         Cerrar sesión en todos los dispositivos
       </Button>

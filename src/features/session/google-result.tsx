@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link2, Mail, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -14,13 +14,13 @@ import { Field } from "@/components/ui/form-controls";
 import { PasswordInput } from "@/components/ui/password-input";
 import { env } from "@/config/env";
 import { errorMessage, isApiError } from "@/lib/api/errors";
-import { fetchGooglePending, linkGoogleWithPassword, registerWithGoogle, requestGoogleLinkEmail, type GooglePending } from "./api";
+import { fetchGooglePending, linkGoogleWithPassword, registerWithGoogle, requestGoogleLinkEmail, type GooglePending, type Me } from "./api";
 import { LinkResult } from "./link-result";
 import { ProfileFields } from "./profile-fields";
 import { RoleChooser } from "./register-form";
 import { profileSchema, toRegistrationBody, type ProfileValues } from "./schemas";
 import { applyServerErrors } from "./server-errors";
-import { useSessionActions } from "./session-provider";
+import { sessionQueryKey, useSessionActions, welcome } from "./session-provider";
 
 /** Motivos de error que manda el backend en `?codigo=` (google-auth.service.ts). */
 const errorReasons: Record<string, string> = {
@@ -65,13 +65,20 @@ export function GoogleResult() {
 /** La cuenta de Google ya estaba vinculada: las cookies de sesión ya quedaron puestas. */
 function GoogleSession() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { refreshSession } = useSessionActions();
   const started = useRef(false);
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    void refreshSession().then(() => router.replace("/panel"));
-  }, [refreshSession, router]);
+    // La página se abre con la sesión ya puesta por Google: se saluda acá (el proveedor de sesión solo
+    // saluda cuando la sesión empieza durante la visita).
+    void refreshSession().then(() => {
+      const me = queryClient.getQueryData<Me | null>(sessionQueryKey);
+      if (me) welcome(me);
+      router.replace("/panel");
+    });
+  }, [queryClient, refreshSession, router]);
   return <LinkResult tone="pending" title="Ingresando…" />;
 }
 

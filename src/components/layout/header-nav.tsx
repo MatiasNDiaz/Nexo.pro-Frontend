@@ -2,12 +2,12 @@
 
 import { LayoutDashboard, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { PHOTO_NAV } from "@/components/catalog/profile-photo-transition";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { NotificationBell } from "@/features/notifications/notification-bell";
-import { useSessionActions } from "@/features/session/session-provider";
+import { useSignOut } from "@/features/session/sign-out";
 import { AccountMenu } from "./account-menu";
 import { Sheet } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/feedback";
@@ -111,28 +111,16 @@ function DesktopLink({ item, active }: { item: NavItem; active: boolean }) {
 }
 
 function SignOutButton({ onDone }: { onDone?: () => void }) {
-  const { signOut } = useSessionActions();
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
+  // Pregunta antes de salir; al terminar cierra el menú (onDone) y avisa.
+  const signOut = useSignOut(onDone);
   return (
-    <Button
-      variant="secondary"
-      fullWidth
-      loading={pending}
-      onClick={async () => {
-        setPending(true);
-        try {
-          await signOut();
-        } finally {
-          setPending(false);
-          onDone?.();
-          router.push("/");
-        }
-      }}
-    >
-      <LogOut className="size-4" aria-hidden="true" />
-      Cerrar sesión
-    </Button>
+    <>
+      <Button variant="secondary" fullWidth onClick={signOut.ask}>
+        <LogOut className="size-4" aria-hidden="true" />
+        Cerrar sesión
+      </Button>
+      {signOut.dialog}
+    </>
   );
 }
 

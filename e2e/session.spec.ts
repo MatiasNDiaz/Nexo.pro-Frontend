@@ -24,6 +24,8 @@ test.describe("ingreso", () => {
     await expect(page).toHaveURL(/\/panel$/);
     await expect(page.getByRole("heading", { level: 1, name: "Hola, Ana" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Activá tu cuenta" })).toBeVisible();
+    // Bienvenida al ingresar (no al recargar con la sesión abierta).
+    await expect(page.getByRole("region", { name: "Avisos" }).getByRole("status")).toContainText("¡Hola, Ana!");
 
     const [login] = api.find("POST /auth/login");
     expect(login!.headers()["x-requested-with"]).toBe("XMLHttpRequest");
@@ -101,6 +103,7 @@ test.describe("sesión", () => {
     await page.goto("/panel");
     await expect(page.getByRole("heading", { level: 1, name: "Hola, Ana" })).toBeVisible();
     await expect(page.getByText("Tu cuenta está activa")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Avisos" }).getByRole("status")).toHaveCount(0);
     const [refresh] = api.find("POST /auth/refresh");
     expect(refresh!.headers()["x-csrf-token"]).toBe("csrf-1");
     expect(api.find("POST /auth/refresh")).toHaveLength(1);
@@ -126,7 +129,21 @@ test.describe("sesión", () => {
       await page.getByRole("button", { name: /Ana/ }).click();
       await page.getByRole("button", { name: "Cerrar sesión" }).click();
     }
+    // Pregunta antes de salir; "Quedarme" no cierra nada.
+    const ask = page.getByRole("alertdialog", { name: "¿Seguro que querés salir?" });
+    await ask.getByRole("button", { name: "Quedarme" }).click();
+    await expect(ask).toBeHidden();
+    expect(api.find("POST /auth/logout")).toHaveLength(0);
+    if (isMobile) {
+      if (!(await page.getByRole("dialog", { name: "Menú" }).isVisible())) await page.getByRole("button", { name: "Abrir menú" }).click();
+      await page.getByRole("dialog", { name: "Menú" }).getByRole("button", { name: "Cerrar sesión" }).click();
+    } else {
+      await page.getByRole("button", { name: /Ana/ }).click();
+      await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    }
+    await ask.getByRole("button", { name: "Cerrar sesión" }).click();
     await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole("region", { name: "Avisos" }).getByRole("status")).toContainText("Cerraste sesión");
     expect(api.find("POST /auth/logout")[0]!.headers()["x-csrf-token"]).toBe("csrf-1");
     if (isMobile) await page.getByRole("button", { name: "Abrir menú" }).click();
     await expect(page.getByRole("link", { name: "Ingresar" }).first()).toBeVisible();

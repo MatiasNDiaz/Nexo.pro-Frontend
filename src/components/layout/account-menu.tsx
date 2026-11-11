@@ -2,11 +2,10 @@
 
 import { ChevronDown, LayoutDashboard, LogOut } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/card";
 import type { Me } from "@/features/session/api";
-import { useSessionActions } from "@/features/session/session-provider";
+import { useSignOut } from "@/features/session/sign-out";
 import { cn } from "@/lib/cn";
 
 const itemClass =
@@ -18,12 +17,10 @@ const itemClass =
  */
 export function AccountMenu({ user }: { user: Me }) {
   const [open, setOpen] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
-  const { signOut } = useSessionActions();
-  const router = useRouter();
+  const signOut = useSignOut();
 
   useEffect(() => {
     if (!open) return;
@@ -43,17 +40,6 @@ export function AccountMenu({ user }: { user: Me }) {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
-
-  const handleSignOut = async () => {
-    setSigningOut(true);
-    try {
-      await signOut();
-    } finally {
-      setSigningOut(false);
-      setOpen(false);
-      router.push("/");
-    }
-  };
 
   return (
     <div ref={containerRef} className="relative">
@@ -89,13 +75,21 @@ export function AccountMenu({ user }: { user: Me }) {
             </Link>
           </li>
           <li>
-            <button type="button" className={itemClass} onClick={handleSignOut} disabled={signingOut}>
+            <button
+              type="button"
+              className={itemClass}
+              onClick={() => {
+                setOpen(false);
+                signOut.ask();
+              }}
+            >
               <LogOut className="size-4 text-brand-600" aria-hidden="true" />
-              {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+              Cerrar sesión
             </button>
           </li>
         </ul>
       </div>
+      {signOut.dialog}
     </div>
   );
 }
