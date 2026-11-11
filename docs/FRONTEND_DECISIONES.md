@@ -197,6 +197,29 @@
 - **Prueba:** `e2e/smoke.spec.ts` recorre las páginas públicas y falla ante cualquier
   `securitypolicyviolation`.
 
+## Avisos y confirmaciones (etapa 8)
+
+Pedido del fundador: avisos al estilo SweetAlert2, pero con la interfaz del sitio. Sin dependencias
+nuevas.
+
+- **Aviso flotante** (`components/ui/toast.tsx`):
+  - Ubicación: abajo en celular; arriba a la derecha, debajo del encabezado, en pantallas grandes.
+  - Ícono animado (`feedback-icon.tsx`) y barra de tiempo, que se frena con el mouse o el foco.
+  - Duración: éxito 4 s, error 7 s. Como mucho 3 a la vez; si el mismo aviso se repite, se reinicia
+    en lugar de apilarse.
+  - Accesibilidad: los errores se anuncian con `role="alert"` y el resto con `role="status"`.
+  - Si hay un modal abierto, el aviso espera a que se cierre.
+- **Cómo se usa:** cada mutación declara su aviso en `meta` (`lib/mutation-feedback.ts`):
+  `meta: { success: "Guardamos tus datos" }`. Puede ser un texto, `{ title, description }` o una
+  función de la respuesta.
+- **Errores:** por defecto se muestran al lado del formulario o del botón, que es más claro. Con
+  `meta.error` van al aviso flotante solo en las acciones sueltas que no tienen lugar para el error
+  (favoritos, "me gusta", marcar todo como leído).
+- **Confirmaciones:** `ConfirmDialog`, `ReasonDialog`, la baja de cuenta y las acciones peligrosas del
+  admin usan el formato de aviso: ícono grande, texto centrado y `role="alertdialog"`.
+- **Pantallas de resultado:** la vuelta de Mercado Pago, "gracias por avisarnos", el contacto y el
+  registro usan el mismo ícono animado.
+
 ## Lighthouse: avisos aceptados (etapa 8)
 
 - **"Falta la meta description"** en el catálogo y el perfil. Las dos páginas la tienen. Next 16
