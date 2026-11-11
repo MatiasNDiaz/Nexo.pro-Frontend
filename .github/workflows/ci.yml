@@ -11,7 +11,9 @@ permissions:
 jobs:
   quality:
     name: Lint, tipos, tests y e2e
-    runs-on: ubuntu-latest
+    # Versión fija: con "ubuntu-latest" pasando a Ubuntu 26 (desde el 19/10/2026), `playwright install
+    # --with-deps` no encuentra los paquetes de Chromium y la CI falla antes de las pruebas (11/11/2026).
+    runs-on: ubuntu-24.04
     env:
       # Valores públicos de prueba: el build de `npm run build` los exige (src/config/env.ts). Ninguno es
       # secreto. Las pruebas e2e compilan con los suyos (playwright.config.ts).

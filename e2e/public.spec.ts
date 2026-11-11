@@ -1,6 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
 import { API, apiError } from "./support/mock-api";
-import { chooseOption } from "./support/listbox";
 
 /** Contenido dentro de <main> (ver la nota de catalog.spec.ts sobre el streaming). */
 const main = (page: Page) => page.getByRole("main");
