@@ -40,8 +40,8 @@ export const heroSlides = [
 /** Banners anchos de las secciones del menú (encabezado de cada página). */
 export const banners = {
   profesionales: photo("banners/profesionales", "Equipo de trabajadores en una obra", "denniz-futalan-339724", 4956920),
-  foro: photo("banners/foro", "Una clienta y un profesional revisando un plano en una casa en reforma", "mikael-blomkvist", 8961295),
-  contacto: photo("banners/contacto", "Persona escribiendo en la computadora, con un café y un cuaderno", "ketut-subiyanto", 4126739),
+  foro: photo("banners/foro-consulta","Una clienta y un profesional revisando un plano en una casa en reforma", "mikael-blomkvist", 8961295),
+  contacto: photo("banners/contacto-escribinos","Persona escribiendo en la computadora, con un café y un cuaderno", "ketut-subiyanto", 4126739),
   clientes: photo("banners/clientes", "Familia contándole a una profesional lo que necesita en su casa", "mart-production", 7415049),
 } satisfies Record<string, Photo>;
 
