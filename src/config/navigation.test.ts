@@ -45,6 +45,12 @@ describe("isActive", () => {
     expect(isActive("/foro", "/foro/123")).toBe(true);
     expect(isActive("/panel", "/panelito")).toBe(false);
   });
+
+  it("con la lista, solo se marca la sección más específica", () => {
+    const items = mainNavFor({ status: "authenticated", user: makeMe({ role: "PROFESSIONAL" }) });
+    expect(items.filter((item) => isActive(item.href, "/panel/clientes/123", items)).map((item) => item.label)).toEqual(["Clientes"]);
+    expect(items.filter((item) => isActive(item.href, "/panel/agenda", items)).map((item) => item.label)).toEqual(["Panel"]);
+  });
 });
 
 describe("whatsappUrl", () => {

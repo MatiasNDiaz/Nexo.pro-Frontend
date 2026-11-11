@@ -2210,6 +2210,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CustomersController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CustomersController_card_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/reports": {
         parameters: {
             query?: never;
@@ -4221,6 +4253,37 @@ export interface components {
         UpdateForumReplyDto: {
             body?: string;
             proposedPrice?: Record<string, never> | null;
+        };
+        CustomerCardDto: {
+            /** Format: uuid */
+            userId: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string | null;
+            /**
+             * Format: date-time
+             * @description Fecha de registro
+             */
+            memberSince: string;
+            /** @description Publicaciones visibles en el foro */
+            postCount: number;
+            /** @description "Solicito profesional" sin resolver */
+            openRequestCount: number;
+            /**
+             * Format: date-time
+             * @description Su publicación más reciente
+             */
+            lastPostAt: string | null;
+            /** @description Oficios de sus publicaciones */
+            professions: components["schemas"]["NamedRefDto"][];
+            /** @description Localidades de sus publicaciones */
+            localities: components["schemas"]["NamedRefDto"][];
+        };
+        CustomerDirectoryPageDto: {
+            data: components["schemas"]["CustomerCardDto"][];
+            page: number;
+            limit: number;
+            total: number;
         };
         CreateReportDto: {
             /** @enum {string} */
@@ -8238,6 +8301,8 @@ export interface operations {
                 professionId?: string;
                 localityId?: string;
                 resolved?: boolean;
+                /** @description Solo las de esta persona (la ficha de un cliente en "Clientes") */
+                authorId?: string;
                 page?: components["schemas"]["Object"];
                 limit?: components["schemas"]["Object"];
             };
@@ -8671,6 +8736,57 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CustomersController_list_v1: {
+        parameters: {
+            query?: {
+                /** @description Nombre o apellido */
+                q?: string;
+                /** @description Publicó algo con ese oficio */
+                professionId?: string;
+                /** @description Publicó algo en esa localidad */
+                localityId?: string;
+                /** @description Solo con "Solicito profesional" sin resolver */
+                withOpenRequests?: boolean;
+                page?: components["schemas"]["Object"];
+                limit?: components["schemas"]["Object"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerDirectoryPageDto"];
+                };
+            };
+        };
+    };
+    CustomersController_card_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerCardDto"];
+                };
             };
         };
     };

@@ -32,7 +32,7 @@ export function HeaderNav() {
         <ul className="flex items-center gap-1">
           {items.map((item) => (
             <li key={item.href}>
-              <DesktopLink item={item} active={isActive(item.href, pathname)} />
+              <DesktopLink item={item} active={isActive(item.href, pathname, items)} />
             </li>
           ))}
         </ul>
@@ -62,7 +62,7 @@ export function HeaderNav() {
         <nav aria-label="Principal (móvil)" className="flex flex-col gap-6 p-4">
           <ul className="flex flex-col gap-1">
             {items.map((item) => {
-              const active = isActive(item.href, pathname);
+              const active = isActive(item.href, pathname, items);
               return (
                 <li key={item.href}>
                   <Link

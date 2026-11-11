@@ -1,15 +1,9 @@
-import { ComingSoon, comingSoonMetadata } from "@/components/layout/coming-soon";
-import { banners } from "@/content/photos";
+import { redirect } from "next/navigation";
 
-export const metadata = comingSoonMetadata("Clientes");
-
+/**
+ * "Clientes" vive en el panel (ADR 0037 del backend): es solo para profesionales con sesión. Esta
+ * dirección queda por los enlaces viejos; el panel pide ingresar si hace falta.
+ */
 export default function Page() {
-  return (
-    <ComingSoon
-      title="Clientes"
-      description="Pedidos de clientes que buscan un profesional de tu oficio y zona."
-      stage="etapa 6"
-      photo={banners.clientes}
-    />
-  );
+  redirect("/panel/clientes");
 }

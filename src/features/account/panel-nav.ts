@@ -24,6 +24,7 @@ import {
   Store,
   UserRound,
   Users,
+  UsersRound,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -121,17 +122,20 @@ function customerGroups(active: boolean): PanelGroup[] {
  */
 function professionalGroups(active: boolean): PanelGroup[] {
   const agenda: PanelLink = { href: "/panel/agenda", label: "Agenda", description: "Cuándo atendés y tu estado: disponible, trabajando o ausente.", icon: CalendarClock };
+  // Cualquier profesional con sesión, también por activar (ADR 0037 del backend).
+  const customers: PanelLink = { href: "/panel/clientes", label: "Clientes", description: "Todos los clientes y lo que preguntan y piden en el foro.", icon: UsersRound };
   return [
     {
       label: "Tu trabajo",
       links: active
         ? [
             { href: "/panel/solicitudes", label: "Pedidos recibidos", description: "Clientes que te pidieron presupuesto: respondé y cotizá.", icon: Inbox },
+            customers,
             messages,
             { href: "/panel/trabajos", label: "Trabajos", description: "Agendá, empezá y terminá los trabajos que te confirmaron.", icon: Briefcase },
             agenda,
           ]
-        : [agenda],
+        : [customers, agenda],
     },
     {
       label: "Tu página",

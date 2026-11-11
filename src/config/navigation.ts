@@ -8,7 +8,8 @@ export interface NavItem {
 
 const home: NavItem = { href: "/", label: "Inicio" };
 const professionals: NavItem = { href: "/profesionales", label: "Profesionales" };
-const clients: NavItem = { href: "/clientes", label: "Clientes" };
+// En el panel: es solo para profesionales con sesión (ADR 0037 del backend).
+const clients: NavItem = { href: "/panel/clientes", label: "Clientes" };
 const forum: NavItem = { href: "/foro", label: "Foro" };
 const contact: NavItem = { href: "/contacto", label: "Contacto" };
 const dashboard: NavItem = { href: "/panel", label: "Panel" };
@@ -34,8 +35,16 @@ export function mainNavFor(viewer: Viewer): NavItem[] {
   }
 }
 
-/** ¿El enlace corresponde a la ruta actual? Inicio solo coincide exacto; el resto, también con subrutas. */
-export function isActive(href: string, pathname: string): boolean {
+function matches(href: string, pathname: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/**
+ * ¿El enlace corresponde a la ruta actual? Inicio solo coincide exacto; el resto, también con subrutas.
+ * Con `items`, gana el más específico: en /panel/clientes se marca "Clientes" y no también "Panel".
+ */
+export function isActive(href: string, pathname: string, items: NavItem[] = []): boolean {
+  if (!matches(href, pathname)) return false;
+  return !items.some((other) => other.href.length > href.length && matches(other.href, pathname));
 }

@@ -262,6 +262,26 @@ nuevas.
 | La sección marcada en el menú es la de dirección más larga que coincide (`activeHref`) | En `/panel/perfil/diseno` se marca "Diseño de mi página" y no también "Mi perfil" |
 | Con la cuenta activa, el aviso verde grande pasa a ser una etiqueta junto al saludo | Lo que no pide acción no ocupa lugar; los pasos para activar la cuenta siguen igual de visibles |
 
+## Mi página del profesional (etapa 9)
+
+| Decisión | Motivo |
+| --- | --- |
+| `/panel/mi-pagina` muestra la página con `GET /professionals/me/public-page`: publicada o no, y no cuenta como visita | El profesional ve cómo lo ven y qué le falta antes de que lo encuentren |
+| Lo que falta se dice en segunda persona y cada cosa lleva a donde se resuelve (`requirementSteps`); "perfil pausado" lleva a Soporte | No hay una acción para pausar o reactivar el perfil desde el panel |
+| La vista previa va con `inert` | Es para mirar: los botones de contacto no hacen nada en la vista previa |
+| El editor de diseño usa la misma página propia | Se puede diseñar antes de publicar; antes decía "lo vas a poder diseñar cuando aparezca en el catálogo" |
+| Las reseñas públicas se piden solo con la página publicada | Sin publicar no existen y el pedido daría 404 |
+
+## Clientes (etapa 10, ADR 0037 del backend)
+
+| Decisión | Motivo |
+| --- | --- |
+| Vive en `/panel/clientes` y `/panel/clientes/[id]`; `/clientes` redirige ahí y el encabezado del profesional apunta ahí | Es solo para profesionales con sesión (decisión del fundador): no tiene sentido como página pública |
+| Todos los clientes activos, con nombre, foto, "en Repara Ya desde", y el resumen de sus publicaciones; nada de teléfono, email ni barrio de la cuenta | Respuestas del fundador del 11/11/2026 (todos los clientes; los mismos datos que el foro; cualquier profesional con sesión) |
+| La ficha lista sus publicaciones con la misma tarjeta del foro (`GET /forum/posts?authorId=`), con pestañas por tipo | Cada publicación abre su hilo del foro, donde el profesional responde (con plan vigente, regla del ADR 0028) |
+| Los filtros del catálogo viven en la URL; la casilla "Con pedidos abiertos" responde al toque y después sigue a la URL | Volver de una ficha deja la búsqueda igual; en celular la URL tarda un instante en cambiar y la casilla parecía no responder |
+| En el encabezado se marca solo la sección más específica (`isActive` con la lista) | En `/panel/clientes` se marcaban "Clientes" y "Panel" a la vez |
+
 ## Lighthouse: avisos aceptados (etapa 8)
 
 - **"Falta la meta description"** en el catálogo y el perfil. Las dos páginas la tienen. Next 16
