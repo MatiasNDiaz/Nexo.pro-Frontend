@@ -619,7 +619,49 @@
   }
 }
 
+/*
+ * Avisos y confirmaciones (components/ui/feedback-icon.tsx y toast.tsx). El trazo se dibuja con
+ * stroke-dashoffset sobre pathLength=1: primero el círculo y después la marca.
+ */
+.fx-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: fx-draw 520ms var(--ease-out-soft) forwards;
+}
+.fx-draw-late {
+  animation-delay: 280ms;
+}
+.fx-draw-later {
+  animation-delay: 430ms;
+}
+@keyframes fx-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.fx-pulse {
+  animation: fx-pulse 700ms var(--ease-out-soft) 2;
+}
+@keyframes fx-pulse {
+  50% {
+    transform: scale(1.08);
+  }
+}
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Con "menos movimiento", la marca se ve terminada desde el principio. */
+  .fx-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
   ::view-transition-old(*),
   ::view-transition-new(*),
   ::view-transition-group(*) {

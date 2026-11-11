@@ -2,12 +2,16 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { Toaster } from "@/components/ui/toast";
 import { RealtimeProvider } from "@/features/chat/realtime";
 import { SessionProvider } from "@/features/session/session-provider";
 import { ApiError } from "@/lib/api/client";
+import { createFeedbackMutationCache } from "@/lib/mutation-feedback";
 
 function createQueryClient() {
   return new QueryClient({
+    // Avisos de éxito o error declarados en cada mutación (`meta`, lib/mutation-feedback.ts).
+    mutationCache: createFeedbackMutationCache(),
     defaultOptions: {
       queries: {
         staleTime: 30_000,
@@ -31,6 +35,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <SessionProvider>
         <RealtimeProvider>{children}</RealtimeProvider>
       </SessionProvider>
+      <Toaster />
     </QueryClientProvider>
   );
 }

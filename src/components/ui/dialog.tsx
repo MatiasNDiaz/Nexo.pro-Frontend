@@ -70,8 +70,12 @@ function CloseButton({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Modal centrado (en celular se apoya abajo, al alcance del pulgar). */
-export function Dialog({ open, onClose, title, description, children, className }: DialogBaseProps) {
+/**
+ * Modal centrado (en celular se apoya abajo, al alcance del pulgar). Con `icon`, formato de aviso
+ * (estilo SweetAlert): ícono grande, título y texto centrados; con `role="alertdialog"` para las
+ * confirmaciones.
+ */
+export function Dialog({ open, onClose, title, description, children, className, icon, role }: DialogBaseProps & { icon?: ReactNode; role?: "alertdialog" }) {
   const { ref, onBackdropClick } = useNativeDialog(open, onClose);
   const titleId = useId();
   const descriptionId = useId();
@@ -79,6 +83,7 @@ export function Dialog({ open, onClose, title, description, children, className 
   return (
     <dialog
       ref={ref}
+      role={role}
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
       onClick={onBackdropClick}
@@ -87,25 +92,47 @@ export function Dialog({ open, onClose, title, description, children, className 
         "translate-y-6 opacity-0 open:translate-y-0 open:opacity-100 starting:open:translate-y-6 starting:open:opacity-0",
         discrete,
         backdrop,
+        icon ? "sm:max-w-md" : null,
         className,
       )}
     >
-      <div className="flex flex-col gap-4 p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h2 id={titleId} className="text-xl font-semibold text-ink">
+      {icon ? (
+        <div className="relative flex flex-col items-center gap-4 px-5 pt-8 pb-5 text-center sm:px-7 sm:pb-7">
+          <div className="absolute top-3 right-3">
+            <CloseButton onClose={onClose} />
+          </div>
+          {/* La clave reinicia la animación del ícono cada vez que se abre. */}
+          <div key={open ? "abierto" : "cerrado"}>{icon}</div>
+          <div className="flex flex-col gap-1.5">
+            <h2 id={titleId} className="text-xl font-semibold text-balance text-ink">
               {title}
             </h2>
             {description && (
-              <p id={descriptionId} className="text-sm text-muted">
+              <p id={descriptionId} className="text-sm leading-relaxed text-pretty text-muted-strong">
                 {description}
               </p>
             )}
           </div>
-          <CloseButton onClose={onClose} />
+          <div className="w-full">{children}</div>
         </div>
-        {children}
-      </div>
+      ) : (
+        <div className="flex flex-col gap-4 p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <h2 id={titleId} className="text-xl font-semibold text-ink">
+                {title}
+              </h2>
+              {description && (
+                <p id={descriptionId} className="text-sm text-muted">
+                  {description}
+                </p>
+              )}
+            </div>
+            <CloseButton onClose={onClose} />
+          </div>
+          {children}
+        </div>
+      )}
     </dialog>
   );
 }
