@@ -1,3 +1,4 @@
+import type { PublicProfile } from "@/features/catalog/types";
 import { api, type Schemas } from "@/lib/api/client";
 
 /*
@@ -22,13 +23,29 @@ export const RATE_MAX = 99_999_999;
 export const HEADLINE_MAX = 80;
 export const SOCIAL_URL_MAX = 300;
 
+/** Lo que le falta a la página para publicarse (PublicationRequirement del backend), en orden. */
+export type PublicationRequirement = Schemas["OwnPublicPageDto"]["missing"][number];
+
+/**
+ * La página propia aunque todavía no esté publicada. `profile` va con el tipo escrito a mano de la
+ * página pública (catalog/types.ts): el OpenAPI tipa mal la disponibilidad (ver FRONTEND_DECISIONES).
+ */
+export interface OwnPublicPage {
+  published: boolean;
+  missing: PublicationRequirement[];
+  profile: PublicProfile;
+}
+
 export const proKeys = {
   me: ["professional", "me"] as const,
   subscription: ["subscription", "me"] as const,
+  publicPage: ["professional", "public-page"] as const,
 };
 
 export const getMyProfile = () => api<ProfessionalMe>("/professionals/me");
 export const getSubscription = () => api<Subscription>("/subscriptions/me");
+/** No cuenta como visita en las métricas. */
+export const getOwnPublicPage = () => api<OwnPublicPage>("/professionals/me/public-page");
 
 export const updateProfile = (input: Schemas["UpdateProfessionalProfileDto"]) =>
   api<ProfessionalMe>("/professionals/me", { method: "PATCH", body: input });

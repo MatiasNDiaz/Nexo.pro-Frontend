@@ -4,6 +4,7 @@ import {
   Briefcase,
   CalendarClock,
   Crown,
+  Eye,
   FileText,
   Fingerprint,
   Flag,
@@ -135,6 +136,7 @@ function professionalGroups(active: boolean): PanelGroup[] {
     {
       label: "Tu página",
       links: [
+        { href: "/panel/mi-pagina", label: "Ver mi página", description: "Cómo te ven los clientes, qué te falta para publicarla y tu enlace.", icon: Eye },
         { href: "/panel/perfil", label: "Mi perfil", description: "Descripción, oficios, zonas, fotos, videos y certificados.", icon: Store },
         { href: "/panel/perfil/diseno", label: "Diseño de mi página", description: "Colores y estilo de cada parte de tu página (Medium y Premium).", icon: Palette },
         ...(active ? [{ href: "/panel/resenas" as Route, label: "Reseñas", description: "Lo que cuentan tus clientes. Respondé cada una.", icon: Star }] : []),

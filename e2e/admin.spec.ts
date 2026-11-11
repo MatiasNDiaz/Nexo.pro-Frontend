@@ -177,6 +177,28 @@ test.describe("búsqueda de usuarios", () => {
 });
 
 test.describe("ficha del usuario", () => {
+  test("de un profesional: cómo ingresa, dónde está y qué le falta a su página", async ({ page }) => {
+    const professional = { slug: "camila-herrera-x1", businessName: "Herrera Pinturas", published: false, professions: ["Pintor"], planCode: null, subscriptionStatus: null };
+    await mockApi(
+      page,
+      asAdmin({
+        [`GET /admin/users/${USER_ID}`]: () =>
+          json(200, detail({ role: "PROFESSIONAL", professional, publicationMissing: ["IDENTITY_NOT_VERIFIED", "NO_LIVE_PLAN"], hasPassword: false })),
+        [`GET /admin/professionals/${USER_ID}/profile`]: () => apiError(404, "PROFILE_NOT_FOUND"),
+        [`GET /admin/users/${USER_ID}/metrics`]: () => apiError(404, "PROFILE_NOT_FOUND"),
+      }),
+    );
+    await page.goto(`/panel/admin/usuarios/${USER_ID}`);
+    await expect(page.getByRole("heading", { level: 1, name: "Camila Herrera" })).toBeVisible();
+    await expect(page.getByText("Herrera Pinturas")).toBeVisible();
+    await expect(page.getByText("Solo con Google")).toBeVisible();
+    await expect(page.getByText("Nueva Córdoba, Córdoba")).toBeVisible();
+    const section = page.getByRole("region", { name: "Página pública" });
+    await expect(section.getByText("Sin publicar: le faltan 2 cosas")).toBeVisible();
+    await expect(section.getByRole("listitem")).toHaveText(["Verificar la identidad", "Tener la prueba o un plan vigente"]);
+    await expectNoHorizontalScroll(page);
+  });
+
   test("suspender pide motivo y muestra la sanción vigente", async ({ page }) => {
     let current = detail();
     let body: Record<string, unknown> | null = null;

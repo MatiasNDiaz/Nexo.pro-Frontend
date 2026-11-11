@@ -15,7 +15,7 @@ import { refreshPublicProfile } from "@/features/catalog/refresh-profile";
 import type { PublicProfile, ReviewPage } from "@/features/catalog/types";
 import { api } from "@/lib/api/client";
 import { errorMessage, isApiError } from "@/lib/api/errors";
-import { getMyProfile, getSubscription, proKeys, setTheme, type ProfessionalMe } from "./api";
+import { getMyProfile, getOwnPublicPage, getSubscription, proKeys, setTheme, type ProfessionalMe } from "./api";
 import { SectionStyleMenu } from "./section-style-menu";
 
 const levelOf = (sub: Awaited<ReturnType<typeof getSubscription>> | undefined): ThemeLevel =>
@@ -30,22 +30,19 @@ export function DesignEditor() {
   const me = useQuery({ queryKey: proKeys.me, queryFn: getMyProfile });
   const subscription = useQuery({ queryKey: proKeys.subscription, queryFn: getSubscription });
   const slug = me.data?.slug;
-  // La página pública (sin caché: la pide el navegador). Las visitas propias no cuentan en las métricas.
-  const profile = useQuery({
-    queryKey: ["design", "public", slug],
-    queryFn: () => api<PublicProfile>(`/catalog/professionals/${slug}`),
-    enabled: !!slug,
-    retry: (count, error) => !isApiError(error) && count < 2,
-  });
+  // La página propia, publicada o no (GET /professionals/me/public-page): se puede diseñar antes de
+  // publicarla. No cuenta como visita en las métricas.
+  const page = useQuery({ queryKey: proKeys.publicPage, queryFn: getOwnPublicPage });
+  // Las reseñas son públicas: solo existen con la página publicada.
   const reviews = useQuery({
     queryKey: ["design", "reviews", slug],
     queryFn: () => api<ReviewPage>(`/catalog/professionals/${slug}/reviews`, { query: { page: 1, limit: REVIEWS_PAGE_SIZE } }),
-    enabled: !!slug,
+    enabled: !!slug && !!page.data?.published,
   });
 
   const header = <PanelTitle title="Diseño de tu página" description="Tocá ⋮ en cada parte para cambiar sus colores, su tamaño o cómo aparece. Después, Aplicar estilos." />;
 
-  if (me.isPending || subscription.isPending || (slug && profile.isPending)) {
+  if (me.isPending || subscription.isPending || page.isPending) {
     return (
       <div className="flex flex-col gap-6" aria-busy="true" aria-label="Cargando tu página">
         {header}
@@ -75,23 +72,45 @@ export function DesignEditor() {
       </div>
     );
   }
-  if (profile.isError || !profile.data) {
+  if (page.isError) {
     return (
       <div className="flex flex-col gap-6">
         {header}
-        <Alert tone="warning" title="Tu página todavía no está publicada">
-          {isApiError(profile.error) && profile.error.status === 404
-            ? "La vas a poder diseñar cuando aparezca en el catálogo (con tu cuenta activa y tu plan vigente)."
-            : errorMessage(profile.error)}
+        <Alert tone="danger" title="No pudimos cargar tu página">
+          {errorMessage(page.error)}
         </Alert>
       </div>
     );
   }
 
-  return <Editor key={me.data.slug} me={me.data} profile={profile.data} reviews={reviews.data ?? null} level={level} header={header} />;
+  return (
+    <Editor
+      key={me.data.slug}
+      me={me.data}
+      profile={page.data.profile}
+      published={page.data.published}
+      reviews={reviews.data ?? null}
+      level={level}
+      header={header}
+    />
+  );
 }
 
-function Editor({ me, profile, reviews, level, header }: { me: ProfessionalMe; profile: PublicProfile; reviews: ReviewPage | null; level: ThemeLevel; header: ReactNode }) {
+function Editor({
+  me,
+  profile,
+  published,
+  reviews,
+  level,
+  header,
+}: {
+  me: ProfessionalMe;
+  profile: PublicProfile;
+  published: boolean;
+  reviews: ReviewPage | null;
+  level: ThemeLevel;
+  header: ReactNode;
+}) {
   const queryClient = useQueryClient();
   // Base: el tema guardado sin lo que el plan actual no incluye (es lo que se va a poder guardar).
   const saved = themeForLevel(me.theme, level);
@@ -125,6 +144,14 @@ function Editor({ me, profile, reviews, level, header }: { me: ProfessionalMe; p
   return (
     <div className="flex flex-col gap-6">
       {header}
+      {!published && (
+        <Alert tone="warning" title="Tu página todavía no está publicada">
+          Lo que diseñes se guarda y se va a ver cuando se publique.{" "}
+          <Link href="/panel/mi-pagina" className="font-semibold underline">
+            Mirá qué te falta
+          </Link>
+        </Alert>
+      )}
 
       {/* Barra del editor: queda a la vista al bajar por la página. */}
       <div className="sticky top-16 z-30 flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-white/95 p-3 shadow-raised backdrop-blur sm:top-20">

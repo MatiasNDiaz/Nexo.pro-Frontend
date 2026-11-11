@@ -81,11 +81,59 @@ function signedIn(plan: "BASIC" | "MEDIUM" | "PREMIUM", handlers: Record<string,
     "GET /chat/conversations": () => json(200, []),
     "GET /professionals/me": () => json(200, professionalMe),
     "GET /subscriptions/me": () => json(200, subscription(plan)),
-    [`GET /catalog/professionals/${SLUG}`]: () => json(200, publicProfile),
+    "GET /professionals/me/public-page": () => json(200, { published: true, missing: [], profile: publicProfile }),
     [`GET /catalog/professionals/${SLUG}/reviews`]: () => json(200, { data: [], average: null, count: 0, page: 1, limit: 10 }),
     ...handlers,
   };
 }
+
+test.describe("mi página", () => {
+  test("publicada: se ve como la ven los clientes y se copia el enlace", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await mockApi(page, signedIn("PREMIUM"));
+    await page.goto("/panel/mi-pagina");
+    await expect(page.getByRole("heading", { name: "Tu página está publicada" })).toBeVisible();
+    await expect(page.getByText(`/profesionales/${SLUG}`)).toBeVisible();
+    // La vista previa es la página real, solo para mirar.
+    await expect(page.locator("article[data-section='pagina']").getByText("Instalaciones eléctricas.").first()).toBeAttached();
+    await page.getByRole("button", { name: "Copiar enlace" }).click();
+    await expect(page.getByRole("region", { name: "Avisos" }).getByRole("status")).toContainText("Enlace copiado");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(new RegExp(`/profesionales/${SLUG}$`));
+    await expect(page.getByRole("navigation", { name: "Panel" }).getByRole("link", { name: "Ver mi página" })).toHaveAttribute("aria-current", "page");
+    await expectNoHorizontalScroll(page);
+  });
+
+  test("sin publicar: dice qué falta y dónde se resuelve, sin pedir las reseñas públicas", async ({ page }) => {
+    const api = await mockApi(
+      page,
+      signedIn("BASIC", {
+        "GET /professionals/me/public-page": () =>
+          json(200, { published: false, missing: ["IDENTITY_NOT_VERIFIED", "NO_AVATAR", "NO_LIVE_PLAN"], profile: { ...publicProfile, identityVerified: false } }),
+      }),
+    );
+    await page.goto("/panel/mi-pagina");
+    await expect(page.getByRole("heading", { name: "Tu página todavía no se ve en el catálogo" })).toBeVisible();
+    await expect(page.getByText("Te faltan 3 cosas")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Verificar" })).toHaveAttribute("href", "/panel/verificacion");
+    await expect(page.getByRole("link", { name: "Subir foto" })).toHaveAttribute("href", "/panel/cuenta");
+    await expect(page.getByRole("link", { name: "Ver planes" })).toHaveAttribute("href", "/panel/plan");
+    expect(api.find(`GET /catalog/professionals/${SLUG}/reviews`)).toHaveLength(0);
+    await expectNoHorizontalScroll(page);
+  });
+
+  test("el editor de diseño funciona con la página sin publicar y avisa", async ({ page }) => {
+    await mockApi(
+      page,
+      signedIn("PREMIUM", {
+        "GET /professionals/me/public-page": () => json(200, { published: false, missing: ["NO_AVATAR"], profile: publicProfile }),
+      }),
+    );
+    await page.goto("/panel/perfil/diseno");
+    await expect(page.getByText("Tu página todavía no está publicada")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Mirá qué te falta" })).toHaveAttribute("href", "/panel/mi-pagina");
+    await expect(page.getByRole("button", { name: "Aplicar estilos" })).toBeVisible();
+  });
+});
 
 const menuOf = (page: Page, label: string) => page.getByRole("button", { name: new RegExp(`Estilo de “${label}”`) });
 

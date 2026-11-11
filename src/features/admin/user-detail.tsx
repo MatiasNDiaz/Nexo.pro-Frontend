@@ -5,7 +5,10 @@ import {
   ArrowLeft,
   Ban,
   CheckCircle2,
+  Circle,
   Crown,
+  ExternalLink,
+  EyeOff,
   KeyRound,
   LogOut,
   Mail,
@@ -22,6 +25,8 @@ import type { Route } from "next";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { GoogleMark } from "@/components/forms/google-button";
+import { ForumAvatar } from "@/components/forum/forum-author";
 import { Button } from "@/components/ui/button";
 import { Alert, Badge, EmptyState, Skeleton } from "@/components/ui/feedback";
 import { SettingsSection } from "@/features/account/settings-section";
@@ -36,6 +41,7 @@ import {
   getUser,
   getUserMetrics,
   paymentLabel,
+  requirementLabel,
   roleLabel,
   sanctionLabel,
   statusLabel,
@@ -125,6 +131,7 @@ export function UserDetailScreen() {
             </Alert>
           )}
           <Notice message={notice} />
+          {user.data.role === "PROFESSIONAL" && !user.data.deletedAt && <PublicPage user={user.data} />}
           <Actions user={user.data} onOpen={open} />
           <Moderation user={user.data} onOpen={open} />
           {user.data.role === "PROFESSIONAL" && !user.data.deletedAt && <ProContent userId={user.data.id} />}
@@ -140,14 +147,20 @@ export function UserDetailScreen() {
 function Header({ user }: { user: AdminUserDetail }) {
   const status = statusLabel[user.status];
   const anonymized = user.deletedAt !== null;
+  const login = user.google ? (user.hasPassword ? "Google y contraseña" : "Solo con Google") : "Email y contraseña";
   return (
     <header className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-7">
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge tone={user.role === "PROFESSIONAL" ? "electric" : "neutral"}>{roleLabel[user.role]}</Badge>
-          <Badge tone={status.tone}>{status.label}</Badge>
+      <div className="flex items-center gap-4">
+        {!anonymized && <ForumAvatar name={fullName(user)} avatarUrl={user.avatarUrl} size="lg" />}
+        <div className="flex min-w-0 flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone={user.role === "PROFESSIONAL" ? "electric" : "neutral"}>{roleLabel[user.role]}</Badge>
+            <Badge tone={status.tone}>{status.label}</Badge>
+            {user.pendingAvatarUrl && <Badge tone="amber">Foto nueva en revisión</Badge>}
+          </div>
+          <h1 className="text-3xl font-bold break-words text-brand-900">{anonymized ? "Usuario eliminado" : fullName(user)}</h1>
+          {user.professional?.businessName && <p className="font-medium text-brand-800">{user.professional.businessName}</p>}
         </div>
-        <h1 className="text-3xl font-bold break-words text-brand-900">{anonymized ? "Usuario eliminado" : fullName(user)}</h1>
       </div>
       {anonymized ? (
         <Alert tone="info">La cuenta se anonimizó el {formatDate(user.deletedAt!)}: ya no tiene datos personales. Solo queda su historial.</Alert>
@@ -160,7 +173,16 @@ function Header({ user }: { user: AdminUserDetail }) {
           </Detail>
           <Detail label="Teléfono">{user.phone}</Detail>
           <Detail label="Identidad">{verificationLabel[user.verificationStatus as VerificationStatus] ?? user.verificationStatus}</Detail>
+          <Detail label="Ingresa con">
+            <span className="inline-flex items-center gap-1.5">
+              {user.google && <GoogleMark className="size-4" />}
+              {login}
+            </span>
+          </Detail>
+          <Detail label="Ubicación">{user.location ?? "Sin cargar"}</Detail>
+          <Detail label="Email confirmado">{user.emailVerifiedAt ? formatDate(user.emailVerifiedAt) : "Todavía no"}</Detail>
           <Detail label="Cuenta creada">{formatDate(user.createdAt)}</Detail>
+          <Detail label="Último ingreso">{user.lastLoginAt ? formatDateTime(user.lastLoginAt) : "Nunca entró"}</Detail>
           <Detail label="Reportes">
             {user.reportsAgainst} en contra ({user.validReportsAgainst} válidos) · {user.reportsMade} hechos
           </Detail>
@@ -172,6 +194,49 @@ function Header({ user }: { user: AdminUserDetail }) {
         <Alert tone="warning">Baja en curso: se anonimiza el {formatDate(user.deletionScheduledFor)}. Hasta entonces la podés restaurar.</Alert>
       )}
     </header>
+  );
+}
+
+/** Si cualquiera ve su página en el catálogo y, si no, qué le falta (las mismas reglas del catálogo). */
+function PublicPage({ user }: { user: AdminUserDetail }) {
+  const pro = user.professional;
+  const missing = user.publicationMissing;
+  if (!pro || !missing) return null;
+  return (
+    <SettingsSection id="pagina-publica" title="Página pública" description="Lo que ven los clientes en el catálogo. Se calcula con las mismas reglas que el catálogo.">
+      {missing.length === 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-success-50/70 p-4">
+          <span className="flex items-center gap-2.5 font-semibold text-ink">
+            <CheckCircle2 className="size-5 text-success-600" aria-hidden="true" />
+            Publicada: aparece en el catálogo
+          </span>
+          <Link
+            href={`/profesionales/${pro.slug}` as Route}
+            target="_blank"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline"
+          >
+            Ver la página
+            <ExternalLink className="size-4" aria-hidden="true" />
+            <span className="sr-only">(se abre en otra pestaña)</span>
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <p className="flex items-center gap-2.5 font-semibold text-ink">
+            <EyeOff className="size-5 text-amber-700" aria-hidden="true" />
+            Sin publicar: {missing.length === 1 ? "le falta una cosa" : `le faltan ${missing.length} cosas`}
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {missing.map((requirement) => (
+              <li key={requirement} className="flex items-center gap-2.5 rounded-xl bg-amber-50 px-3.5 py-2.5 text-sm text-ink ring-1 ring-amber-400/40">
+                <Circle className="size-4 shrink-0 text-amber-700" aria-hidden="true" />
+                {requirementLabel[requirement] ?? requirement}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </SettingsSection>
   );
 }
 
