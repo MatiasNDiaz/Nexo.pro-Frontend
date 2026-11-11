@@ -5,8 +5,7 @@ import { CatalogBackTransition } from "@/components/catalog/catalog-return";
 import { PendingProfilePhoto } from "@/components/catalog/photo-stash";
 import { Skeleton } from "@/components/ui/feedback";
 import { env } from "@/config/env";
-import { tradePhotos } from "@/content/photos";
-import { getProfessions, getProfileReviews, getPublicProfile } from "@/features/catalog/data";
+import { getProfileReviews, getPublicProfile } from "@/features/catalog/data";
 import { areasSummary, displayName, primaryProfession } from "@/features/catalog/labels";
 import { AVATAR, COVER, ProfileView } from "@/features/catalog/profile-view";
 import type { PublicProfile } from "@/features/catalog/types";
@@ -51,23 +50,16 @@ export default function ProfilePage({ params }: PageProps<"/profesionales/[slug]
 
 async function Profile({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [profile, reviews, professions] = await Promise.all([
-    loadProfile(slug),
-    SLUG.test(slug) ? getProfileReviews(slug) : null,
-    getProfessions().catch(() => []),
-  ]);
+  const [profile, reviews] = await Promise.all([loadProfile(slug), SLUG.test(slug) ? getProfileReviews(slug) : null]);
   if (!profile) notFound();
-
-  // Sin banner: una foto del oficio principal (las ilustrativas del sitio) teñida con su color.
-  const primarySlug = professions.find((p) => p.name === primaryProfession(profile))?.slug;
-  const fallbackPhoto = (primarySlug && tradePhotos[primarySlug]) || tradePhotos.electricista!;
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdFor(profile)) }} />
       {/* "Atrás" hacia el catálogo con la foto volviendo a su tarjeta. */}
       <CatalogBackTransition />
-      <ProfileView profile={profile} reviews={reviews} fallbackPhoto={fallbackPhoto} />
+      {/* Sin banner propio, ProfileView muestra la portada de los perfiles básicos (content/photos.ts). */}
+      <ProfileView profile={profile} reviews={reviews} />
     </>
   );
 }

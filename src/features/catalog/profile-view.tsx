@@ -27,6 +27,7 @@ import { RemoteImage } from "@/components/catalog/remote-image";
 import { ReviewItem } from "@/components/catalog/review-item";
 import { WorkGallery } from "@/components/catalog/work-gallery";
 import { revealDelay } from "@/components/motion/reveal";
+import { basicProfileBanner } from "@/content/photos";
 import { REVIEWS_PAGE_SIZE } from "@/features/catalog/filters";
 import { displayName, exceptionLabel, rateModeLabel, socialLabel, weekdayLabel } from "@/features/catalog/labels";
 import { sectionAttributes, themeAnimations, themeFonts, themeStyle, type ProfileTheme, type SectionKey } from "@/features/catalog/profile-theme";
@@ -56,14 +57,12 @@ export type SectionFrame = (key: SectionKey, node: ReactNode) => ReactNode;
 export function ProfileView({
   profile,
   reviews,
-  fallbackPhoto,
   theme = profile.theme,
   frame = (_, node) => node,
   preview = false,
 }: {
   profile: PublicProfile;
   reviews: ReviewPage | null;
-  fallbackPhoto: { src: string };
   theme?: ProfileTheme;
   frame?: SectionFrame;
   preview?: boolean;
@@ -96,7 +95,10 @@ export function ProfileView({
   return (
     <article className="pb-20" style={{ ...themeStyle(theme), ...page.style } as CSSProperties} data-section="pagina">
       <header>
-        {/* Portada: el banner del profesional (foto o, en Premium, video) o la foto de su oficio. */}
+        {/*
+          Portada: el banner del profesional (foto o, en Premium, video). Sin banner propio (todos los
+          Basic: su plan no lo incluye), la portada de Repara Ya para perfiles básicos.
+        */}
         <div className={cn(COVER, "bg-[linear-gradient(135deg,var(--pro-from),var(--pro-to))]")}>
           {profile.banner?.kind === "IMAGE" ? (
             <RemoteImage src={profile.banner.url} alt="" fill preload={!preview} sizes="100vw" className="object-cover motion-safe:animate-[ken-burns_24s_var(--ease-in-out-strong)_infinite_alternate]" />
@@ -104,12 +106,14 @@ export function ProfileView({
             <video src={bannerVideo} autoPlay muted loop playsInline aria-hidden="true" className="absolute inset-0 size-full object-cover" />
           ) : (
             <Image
-              src={fallbackPhoto.src}
+              src={basicProfileBanner.src}
               alt=""
               fill
               preload={!preview}
+              quality={75}
               sizes="100vw"
-              className="object-cover opacity-55 mix-blend-luminosity motion-safe:animate-[ken-burns_24s_var(--ease-in-out-strong)_infinite_alternate]"
+              className="object-cover motion-safe:animate-[ken-burns_24s_var(--ease-in-out-strong)_infinite_alternate]"
+              style={{ objectPosition: "70% 60%" }}
             />
           )}
           <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-brand-950/70 via-brand-950/10 to-transparent" />

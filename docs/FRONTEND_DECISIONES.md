@@ -235,6 +235,17 @@ nuevas.
 - **"¿Sos profesional?", "Quiénes somos" y el cierre:** escenas (`data-reveal="stage"` y las clases
   `.stage-*` de globals.css). El bloque se ve siempre y sus piezas entran una vez al llegar con el
   scroll. Sin JavaScript o con "menos movimiento", todo quieto y completo.
+- **Imágenes propias del fundador** (2026-11-11): los banners de Profesionales, Foro y Contacto y la
+  portada de los perfiles sin portada propia (todos los Basic) están en `public/images/banners`
+  (`own` en `content/photos.ts`). Se pasaron de PNG a JPEG de calidad 88; los originales quedaron en
+  `.local/originales-banners`. No se acreditan a Pexels en el pie.
+- **Foro rediseñado:**
+  - Lista en una columna, con la columna lateral (publicar y "Cómo funciona"). Cada tipo tiene su
+    ícono y color (`forumTypeStyle`).
+  - Respuestas como conversación: avatar, línea que une las respuestas y globos. Las de
+    profesionales llevan su marca y su precio en ámbar; las de quien publicó, "Quien publicó".
+- **Contacto rediseñado:** a la izquierda los canales y atajos; a la derecha el formulario, con el
+  motivo en botones-etiqueta (radios nativos).
 - **Fotos:** de Pexels con la Pexels License. Se bajan con `.local/bajar-fotos.mjs`, que confirma en
   la página que sea una foto gratuita de Pexels y anota el autor para el crédito del pie.
 

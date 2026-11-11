@@ -12,7 +12,7 @@ test.describe("foro", () => {
     const wanted = main(page).getByRole("article").filter({ hasText: "Busco electricista" });
     await expect(wanted.getByText("Busco profesional")).toBeVisible();
     await expect(wanted.getByText("Nueva Córdoba, Córdoba")).toBeVisible();
-    await expect(wanted.getByText(/Ofrezco a partir de \$\s?50\.000/)).toBeVisible();
+    await expect(wanted.getByText(/Ofrece desde \$\s?50\.000/)).toBeVisible();
     await expect(main(page).getByRole("article").filter({ hasText: "instalación de gas" }).getByText("Resuelta")).toBeVisible();
     // Sin sesión invita a ingresar para participar.
     await expect(main(page).getByRole("link", { name: "Ingresar" })).toHaveAttribute("href", "/ingresar?siguiente=%2Fforo");
@@ -43,7 +43,7 @@ test.describe("foro", () => {
     // El texto aparece en el párrafo y en el título para lectores de pantalla: se mira el párrafo.
     await expect(main(page).locator("p").filter({ hasText: "<script>window.__xss = true</script>" })).toBeVisible();
     expect(await page.evaluate(() => (window as unknown as { __xss?: boolean }).__xss)).toBeUndefined();
-    await expect(main(page).getByText("Propone: $")).toBeVisible();
+    await expect(main(page).getByText(/^Propone \$/)).toBeVisible();
     await expect(main(page).getByText("Respuesta eliminada", { exact: true })).toBeVisible();
     // La respuesta a un mensaje borrado queda anidada debajo del lugar vacío.
     const removed = main(page).locator("li").filter({ has: page.getByText("Respuesta eliminada", { exact: true }) });
@@ -69,7 +69,7 @@ test.describe("contacto", () => {
 
     await main(page).getByRole("textbox", { name: "Nombre" }).fill("Ana Pérez");
     await main(page).getByRole("textbox", { name: "Email" }).fill("ana@example.com");
-    await chooseOption(main(page), "Motivo", "Reclamo");
+    await main(page).getByRole("group", { name: "Motivo" }).getByText("Reclamo").click();
     await main(page).getByRole("textbox", { name: "Mensaje" }).fill("Quiero hacer un reclamo sobre un trabajo.");
     const request = page.waitForRequest((r) => r.url().endsWith("/support/contact") && r.method() === "POST");
     await main(page).getByRole("button", { name: "Enviar mensaje" }).click();
@@ -100,7 +100,7 @@ test.describe("contacto", () => {
     await page.goto("/contacto");
     await main(page).getByRole("textbox", { name: "Nombre" }).fill("Ana Pérez");
     await main(page).getByRole("textbox", { name: "Email" }).fill("ana@example.com");
-    await chooseOption(main(page), "Motivo", "Otro");
+    await main(page).getByRole("group", { name: "Motivo" }).getByText("Otro", { exact: true }).click();
     await main(page).getByRole("textbox", { name: "Mensaje" }).fill("Mensaje de prueba suficientemente largo.");
     await main(page).getByRole("button", { name: "Enviar mensaje" }).click();
     await expect(main(page).getByText(/varios mensajes desde tu conexión/)).toBeVisible();

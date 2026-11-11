@@ -1,6 +1,7 @@
 /*
- * Fotos del sitio (public/images). Todas de Pexels con la Pexels License (uso comercial gratis, sin
- * atribución obligatoria; verificada el 2026-11-08). Son ilustrativas: no muestran a profesionales de
+ * Fotos del sitio (public/images). Las de Pexels, con la Pexels License (uso comercial gratis, sin
+ * atribución obligatoria; verificada el 2026-11-08); los banners de Profesionales, Foro y Contacto y
+ * la portada de los perfiles Basic son imágenes propias que aportó el fundador (`own`). Son ilustrativas: no muestran a profesionales de
  * Repara Ya, no se presentan como tales ni sugieren que las personas recomiendan el servicio (la
  * licencia lo prohíbe). Igual se da crédito en el pie de página.
  */
@@ -37,13 +38,19 @@ export const heroSlides = [
   { photo: photo("hero/pintor", "Dos pintores preparando una pared con una escalera", "blue-bird", 7217983), trade: "Pintor", focus: "70% 40%" },
 ] as const;
 
+/** Imágenes propias de Repara Ya (las aportó el fundador): no van en el crédito de Pexels del pie. */
+const own = (path: string, alt: string): Photo => ({ src: `/images/${path}.jpg`, alt, author: "Repara Ya", page: "" });
+
 /** Banners anchos de las secciones del menú (encabezado de cada página). */
 export const banners = {
-  profesionales: photo("banners/profesionales", "Equipo de trabajadores en una obra", "denniz-futalan-339724", 4956920),
-  foro: photo("banners/foro-consulta","Una clienta y un profesional revisando un plano en una casa en reforma", "mikael-blomkvist", 8961295),
-  contacto: photo("banners/contacto-escribinos","Persona escribiendo en la computadora, con un café y un cuaderno", "ketut-subiyanto", 4126739),
+  profesionales: own("banners/profesionales-oficios", "Equipo de profesionales de distintos oficios sonriendo frente a una casa, con sus herramientas"),
+  foro: own("banners/foro-consultas", "Clientes consultando desde el celular y un profesional respondiéndoles"),
+  contacto: own("banners/contacto-mensajes", "Personas frente a una computadora, con mensajes de consulta y respuesta"),
   clientes: photo("banners/clientes", "Familia contándole a una profesional lo que necesita en su casa", "mart-production", 7415049),
 } satisfies Record<string, Photo>;
+
+/** Portada de los perfiles sin portada propia (todos los Basic: su plan no la incluye). */
+export const basicProfileBanner = own("banners/perfil-basico", "");
 
 /** Una foto por oficio, por slug del catálogo (GET /professions). */
 export const tradePhotos: Record<string, Photo> = {
@@ -67,4 +74,7 @@ export const scenes = {
   lampara: photo("escenas/lampara", "Hombre colgando una lámpara en el techo de su casa", "anete-lusina", 4792521),
 } satisfies Record<string, Photo>;
 
-export const allPhotos: Photo[] = [...heroSlides.map((s) => s.photo), ...Object.values(banners), ...Object.values(tradePhotos), ...Object.values(scenes)];
+/** Las fotos de Pexels (para el crédito del pie de página); las propias no se acreditan a Pexels. */
+export const allPhotos: Photo[] = [...heroSlides.map((s) => s.photo), ...Object.values(banners), ...Object.values(tradePhotos), ...Object.values(scenes)].filter(
+  (photo) => photo.page.startsWith("https://www.pexels.com/"),
+);

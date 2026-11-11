@@ -35,10 +35,13 @@ async function Post({ params }: { params: Promise<{ id: string }> }) {
   if (!post) notFound();
 
   return (
-    <div className="container-page flex max-w-3xl flex-col gap-6 py-8 sm:py-12">
+    <div className="container-page flex max-w-4xl flex-col gap-8 py-8 sm:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdFor(post)) }} />
-      <Link href="/foro" className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline">
-        <ArrowLeft className="size-4" aria-hidden="true" />
+      <Link
+        href="/foro"
+        className="group inline-flex h-10 w-fit items-center gap-2 rounded-xl px-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
+      >
+        <ArrowLeft className="size-4 transition-transform duration-200 ease-out-soft group-hover:-translate-x-0.5" aria-hidden="true" />
         Volver al foro
       </Link>
 

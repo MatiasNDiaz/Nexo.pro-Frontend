@@ -7,11 +7,8 @@ import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Alert, Badge, Skeleton } from "@/components/ui/feedback";
-import { tradePhotos } from "@/content/photos";
 import { PanelTitle } from "@/features/account/settings-section";
-import { useProfessions } from "@/features/catalogs/queries";
 import { REVIEWS_PAGE_SIZE } from "@/features/catalog/filters";
-import { primaryProfession } from "@/features/catalog/labels";
 import { sectionLabels, themeForLevel, type SectionKey, type SectionStyle, type ThemeLevel, type ThemeSections } from "@/features/catalog/profile-theme";
 import { ProfileView } from "@/features/catalog/profile-view";
 import { refreshPublicProfile } from "@/features/catalog/refresh-profile";
@@ -96,7 +93,6 @@ export function DesignEditor() {
 
 function Editor({ me, profile, reviews, level, header }: { me: ProfessionalMe; profile: PublicProfile; reviews: ReviewPage | null; level: ThemeLevel; header: ReactNode }) {
   const queryClient = useQueryClient();
-  const professions = useProfessions();
   // Base: el tema guardado sin lo que el plan actual no incluye (es lo que se va a poder guardar).
   const saved = themeForLevel(me.theme, level);
   const [draft, setDraft] = useState<ThemeSections>(saved.sections ?? {});
@@ -125,9 +121,6 @@ function Editor({ me, profile, reviews, level, header }: { me: ProfessionalMe; p
     // Al elegir una animación, se repite en la sección para verla.
     if (style.animation) requestAnimationFrame(() => replay(canvas.current, key));
   };
-
-  const primarySlug = professions.data?.find((p) => p.name === primaryProfession(profile))?.slug;
-  const fallbackPhoto = (primarySlug && tradePhotos[primarySlug]) || tradePhotos.electricista!;
 
   return (
     <div className="flex flex-col gap-6">
@@ -178,7 +171,6 @@ function Editor({ me, profile, reviews, level, header }: { me: ProfessionalMe; p
         <ProfileView
           profile={profile}
           reviews={reviews}
-          fallbackPhoto={fallbackPhoto}
           preview
           theme={{ ...saved, sections: draft }}
           frame={(key, node) => (

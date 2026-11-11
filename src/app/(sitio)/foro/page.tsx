@@ -1,9 +1,10 @@
-import { MessagesSquare, SearchX } from "lucide-react";
+import { Hammer, HelpCircle, LayoutList, MessagesSquare, SearchX, type LucideIcon } from "lucide-react";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Pagination } from "@/components/catalog/pagination";
 import { ForumFiltersBar } from "@/components/forum/forum-filters";
+import { ForumGuide } from "@/components/forum/forum-guide";
 import { ForumPostCard } from "@/components/forum/forum-post-card";
 import { ParticipateCta } from "@/components/forum/participate-cta";
 import { PageHeader } from "@/components/layout/page-header";
@@ -29,39 +30,54 @@ export default function ForumPage({ searchParams }: PageProps<"/foro">) {
     <>
       <PageHeader
         photo={banners.foro}
-        focus="62% 38%"
+        focus="50% 30%"
         title="Foro"
-        description="Preguntas sobre arreglos y pedidos de clientes que buscan un profesional en su zona."
+        description="Preguntas sobre arreglos y pedidos de clientes que buscan un profesional en su zona. Contá qué te pasa y te responden otros clientes y profesionales de Córdoba."
+        highlights={[
+          { icon: HelpCircle, label: "Preguntá gratis" },
+          { icon: Hammer, label: "Pedidos con presupuesto" },
+          { icon: MessagesSquare, label: "Responden clientes y profesionales" },
+        ]}
       />
-      <div className="container-page flex flex-col gap-6 py-8 sm:py-10">
-        <ParticipateCta returnTo="/foro" text="Ingresá para hacer una pregunta o publicar lo que necesitás." showPublish />
-        <Suspense fallback={<Skeleton className="h-28 w-full rounded-2xl" />}>
-          <Controls searchParams={searchParams} />
-        </Suspense>
-        {/* Alto mínimo: si un filtro trae menos publicaciones, la página no se acorta y la pantalla no salta. */}
-        <div className="min-h-[70vh]">
-          <Suspense fallback={<ResultsSkeleton />}>
-            <Results searchParams={searchParams} />
+      {/* La lista a la izquierda; a la derecha (escritorio), publicar y cómo funciona, a la vista al bajar. */}
+      {/* Una sola columna lateral: arriba en celular (publicar), a la derecha en escritorio (con la guía). */}
+      <div className="container-page grid gap-6 py-8 sm:py-10 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10">
+        <aside className="flex flex-col gap-5 self-start lg:sticky lg:top-24 lg:order-2">
+          <ParticipateCta returnTo="/foro" text="Ingresá para hacer una pregunta o publicar lo que necesitás." showPublish stacked />
+          <div className="hidden lg:block">
+            <ForumGuide />
+          </div>
+        </aside>
+        <div className="flex min-w-0 flex-col gap-6 lg:order-1">
+          <Suspense fallback={<Skeleton className="h-28 w-full rounded-2xl" />}>
+            <Controls searchParams={searchParams} />
           </Suspense>
+          {/* Alto mínimo: si un filtro trae menos publicaciones, la página no se acorta y la pantalla no salta. */}
+          <div className="min-h-[70vh]">
+            <Suspense fallback={<ResultsSkeleton />}>
+              <Results searchParams={searchParams} />
+            </Suspense>
+          </div>
         </div>
       </div>
     </>
   );
 }
 
-const tabs: { label: string; type: ForumFilters["type"] }[] = [
-  { label: "Todas", type: null },
-  { label: "Preguntas", type: "QUESTION" },
-  { label: "Busco profesional", type: "PROFESSIONAL_WANTED" },
+const tabs: { label: string; type: ForumFilters["type"]; icon: LucideIcon }[] = [
+  { label: "Todas", type: null, icon: LayoutList },
+  { label: "Preguntas", type: "QUESTION", icon: HelpCircle },
+  { label: "Busco profesional", type: "PROFESSIONAL_WANTED", icon: Hammer },
 ];
 
 async function Controls({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const filters = parseForumFilters(await searchParams);
   const lists = await Promise.all([getProfessions(), getLocalities()]).catch(() => null);
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-4 shadow-card">
-      <nav aria-label="Tipo de publicación" className="-mx-1 overflow-x-auto">
-        <ul className="flex gap-1 px-1">
+    <div className="flex flex-col gap-5 rounded-3xl border border-line bg-surface p-4 shadow-card sm:p-5">
+      {/* Pestañas como control segmentado: la elegida se levanta sobre el riel. */}
+      <nav aria-label="Tipo de publicación" className="-mx-1 overflow-x-auto px-1">
+        <ul className="inline-flex gap-1 rounded-2xl bg-canvas p-1 ring-1 ring-line">
           {tabs.map((tab) => {
             const active = filters.type === tab.type;
             return (
@@ -72,10 +88,12 @@ async function Controls({ searchParams }: { searchParams: Promise<SearchParams> 
                   scroll={false}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "inline-flex h-10 items-center rounded-xl px-4 text-sm font-semibold whitespace-nowrap transition-colors",
-                    active ? "bg-brand-700 text-white" : "text-brand-800 hover:bg-brand-50",
+                    "inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold whitespace-nowrap transition-[background-color,color,box-shadow] duration-200 sm:px-4",
+                    active ? "bg-surface text-brand-900 shadow-card ring-1 ring-line" : "text-muted-strong hover:text-brand-800",
                   )}
                 >
+                  {/* En celular sin ícono: así las tres pestañas entran enteras. */}
+                  <tab.icon className={cn("hidden size-4 sm:block", active ? "text-brand-700" : "")} aria-hidden="true" />
                   {tab.label}
                 </Link>
               </li>
@@ -124,9 +142,9 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
       <h2 id="publicaciones" className="text-sm font-medium text-muted-strong">
         {plural(page.total, "publicación", "publicaciones")}
       </h2>
-      <ul className="grid gap-4 lg:grid-cols-2">
+      <ul className="flex flex-col gap-4">
         {page.data.map((post, index) => (
-          <li key={post.id} data-reveal style={revealDelay(index % 2, 80)} className="flex">
+          <li key={post.id} data-reveal style={revealDelay(index, 70, 280)} className="flex">
             <ForumPostCard post={post} />
           </li>
         ))}
@@ -142,9 +160,9 @@ async function Results({ searchParams }: { searchParams: Promise<SearchParams> }
 
 function ResultsSkeleton() {
   return (
-    <div className="grid gap-4 lg:grid-cols-2" aria-busy="true" aria-label="Cargando publicaciones">
+    <div className="flex flex-col gap-4" aria-busy="true" aria-label="Cargando publicaciones">
       {Array.from({ length: 4 }, (_, i) => (
-        <Skeleton key={i} className="h-52 w-full rounded-2xl" />
+        <Skeleton key={i} className="h-48 w-full rounded-3xl" />
       ))}
     </div>
   );

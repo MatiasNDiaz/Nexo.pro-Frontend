@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { WordsUp } from "@/components/motion/words-up";
@@ -21,6 +22,7 @@ export function PageHeader({
   actions,
   photo,
   focus = "50% 50%",
+  highlights,
   className,
 }: {
   title: ReactNode;
@@ -29,6 +31,8 @@ export function PageHeader({
   photo?: Photo;
   /** Punto de la foto que tiene que quedar a la vista al recortarla (object-position). */
   focus?: string;
+  /** Datos clave de la sección, debajo de la bajada (solo con `photo`). */
+  highlights?: { icon: LucideIcon; label: string }[];
   className?: string;
 }) {
   if (!photo) {
@@ -56,23 +60,38 @@ export function PageHeader({
           className="object-cover motion-safe:animate-[banner-settle_1600ms_var(--ease-out-soft)_both]"
           style={{ objectPosition: focus }}
         />
-        {/* Velo: abajo (celular) y a la izquierda (escritorio), donde va el texto. */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgb(7_21_42/0.94)_0%,rgb(7_21_42/0.72)_42%,rgb(7_21_42/0.3)_100%)] lg:bg-[linear-gradient(to_right,rgb(7_21_42/0.92)_0%,rgb(7_21_42/0.7)_38%,rgb(7_21_42/0.15)_75%)]" />
-        {/* Brillo cálido muy leve arriba a la derecha: la foto no queda apagada del todo. */}
-        <div className="absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(closest-side,rgb(244_163_64/0.18),transparent)]" />
+        {/*
+          Velo suave (pedido del fundador: menos azul). Con el texto centrado abajo, se oscurece la franja
+          inferior de borde a borde y la parte de arriba (las caras) queda casi limpia.
+        */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgb(7_21_42/0.9)_0%,rgb(7_21_42/0.62)_38%,rgb(7_21_42/0.12)_72%,rgb(7_21_42/0.05)_100%)]" />
       </div>
-      <div className="container-page flex min-h-[22rem] flex-col justify-end gap-4 pt-24 pb-10 sm:min-h-[25rem] sm:pb-12 lg:min-h-[27rem] lg:pb-16">
-        <h1 className="max-w-[18ch] text-4xl leading-[1.02] font-bold tracking-[-0.02em] text-balance sm:text-6xl">
+      {/* Alto: las fotos entran casi enteras. Contenido centrado (pedido del fundador). */}
+      <div className="container-page flex min-h-[28rem] flex-col items-center justify-end gap-4 pt-24 pb-10 text-center sm:min-h-[32rem] sm:pb-12 lg:min-h-[38rem] lg:pb-14">
+        <h1 className="max-w-[20ch] text-4xl leading-[1.02] font-bold tracking-[-0.02em] text-balance [text-shadow:0_2px_18px_rgb(7_21_42/0.5)] sm:text-6xl">
           {typeof title === "string" ? <WordsUp text={title} /> : title}
         </h1>
         {description && (
-          <p className="max-w-[52ch] text-lg leading-relaxed text-brand-100 [text-shadow:0_1px_10px_rgb(7_21_42/0.5)] animate-fade-up [animation-delay:350ms]">
+          <p className="max-w-[58ch] text-lg leading-relaxed text-pretty text-brand-100 [text-shadow:0_1px_10px_rgb(7_21_42/0.55)] animate-fade-up [animation-delay:350ms]">
             {description}
           </p>
         )}
-        {actions && <div className="mt-2 flex flex-wrap gap-3 animate-fade-up [animation-delay:450ms]">{actions}</div>}
-        {/* Línea de acento que se dibuja de izquierda a derecha al final de la entrada. */}
-        <span aria-hidden="true" className="mt-3 block h-1 w-16 origin-left rounded-full bg-amber-400 motion-safe:animate-[banner-line_700ms_var(--ease-out-soft)_550ms_both]" />
+        {highlights && highlights.length > 0 && (
+          <ul className="mt-2 flex flex-wrap justify-center gap-2 animate-fade-up [animation-delay:450ms]">
+            {highlights.map((item) => (
+              <li
+                key={item.label}
+                className="flex items-center gap-2 rounded-full bg-brand-950/55 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur-sm"
+              >
+                <item.icon className="size-4 text-amber-400" aria-hidden="true" />
+                {item.label}
+              </li>
+            ))}
+          </ul>
+        )}
+        {actions && <div className="mt-2 flex flex-wrap justify-center gap-3 animate-fade-up [animation-delay:500ms]">{actions}</div>}
+        {/* Línea de acento que se dibuja desde el centro al final de la entrada. */}
+        <span aria-hidden="true" className="mt-3 block h-1 w-16 rounded-full bg-amber-400 motion-safe:animate-[banner-line_700ms_var(--ease-out-soft)_600ms_both]" />
       </div>
     </header>
   );

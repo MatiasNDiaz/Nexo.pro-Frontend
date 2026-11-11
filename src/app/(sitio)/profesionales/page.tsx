@@ -1,4 +1,4 @@
-import { SearchX, Users } from "lucide-react";
+import { MessageSquareText, SearchX, ShieldCheck, Star, Users } from "lucide-react";
 import type { Metadata, Route } from "next";
 import { Suspense } from "react";
 import { CatalogFiltersBar } from "@/components/catalog/catalog-filters";
@@ -48,9 +48,14 @@ export default function CatalogPage({ searchParams }: PageProps<"/profesionales"
     <>
       <PageHeader
         photo={banners.profesionales}
-        focus="50% 35%"
+        focus="50% 30%"
         title="Encontrá al profesional indicado"
-        description="Todos tienen la identidad verificada por nuestro equipo. Filtrá por oficio y zona, o mirá quién está disponible ahora."
+        description="Electricistas, plomeros, gasistas, pintores y más oficios de Córdoba. Todos tienen la identidad verificada por nuestro equipo: filtrá por oficio y zona, o mirá quién está disponible ahora."
+        highlights={[
+          { icon: ShieldCheck, label: "Identidad verificada" },
+          { icon: MessageSquareText, label: "Presupuestos por chat, sin cargo" },
+          { icon: Star, label: "Reseñas de trabajos terminados" },
+        ]}
       />
       {/*
         La grilla de profesionales tiene el mismo ancho que el encabezado (container-page). Los filtros
