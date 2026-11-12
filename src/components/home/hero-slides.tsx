@@ -83,7 +83,25 @@ export function HeroSlides({ children }: { children: ReactNode }) {
     if (!el) return;
     const observer = new IntersectionObserver(([entry]) => setOffscreen(!entry?.isIntersecting), { threshold: 0.1 });
     observer.observe(el);
-    return () => observer.disconnect();
+    // Al volver al inicio (Next conserva la página oculta y vuelve a montar los efectos), sigue.
+    gsapRef.current?.globalTimeline.resume();
+    /*
+     * Apenas la persona toca un enlace para irse, el carrusel se congela: la transición de la foto
+     * (clip-path, se pinta en el hilo principal) le quitaba el procesador a la navegación. En un
+     * celular con CPU x4, salir del inicio tardaba el doble (medido el 11/11/2026).
+     */
+    // `click` (no pointerdown): apoyar el dedo en un enlace para deslizar la página no es irse.
+    const leaving = (event: MouseEvent) => {
+      const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
+      if (!link || el.contains(link) || link.target === "_blank" || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      gsapRef.current?.globalTimeline.pause();
+      setOffscreen(true);
+    };
+    document.addEventListener("click", leaving, { capture: true });
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("click", leaving, { capture: true });
+    };
   }, []);
 
   const goTo = useCallback(

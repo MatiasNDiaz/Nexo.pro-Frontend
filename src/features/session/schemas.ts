@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /*
  * Validaciones del navegador. Copian las reglas del backend (docs/BACKEND_ENDPOINTS.md, Anexo A:

@@ -574,11 +574,26 @@
 ::view-transition {
   pointer-events: none; /* Los clics durante la transición llegan a la página. */
 }
-::view-transition-old(.page-exit) {
-  animation: 140ms var(--ease-in-soft) both page-out;
+/*
+ * Entrada de cada página al navegar (components/motion/page-enter.tsx): animación CSS de opacidad y
+ * transform, sin View Transition de página completa (costaba ~500 ms del hilo principal en celular).
+ * `backwards`: al terminar no queda ningún transform aplicado (un transform en el contenedor haría que
+ * lo `position: fixed` de adentro se ubique respecto de él).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    animation: page-in 300ms var(--ease-out-soft) backwards;
+  }
 }
-::view-transition-new(.page-enter) {
-  animation: 320ms var(--ease-out-soft) 100ms both page-in;
+/*
+ * Cuando vuela la foto del profesional (única View Transition que queda), la página vieja se va rápido
+ * y la nueva no se funde: ya entra con su propia animación (page-enter).
+ */
+::view-transition-old(root) {
+  animation: 120ms var(--ease-in-soft) both page-out;
+}
+::view-transition-new(root) {
+  animation: none;
 }
 /* El header y la barra inferior quedan fijos: son el ancla visual mientras cambia el contenido. */
 ::view-transition-group(site-header) {

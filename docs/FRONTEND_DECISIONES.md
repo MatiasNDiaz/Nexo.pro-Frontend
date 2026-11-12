@@ -282,6 +282,21 @@ nuevas.
 | Los filtros del catálogo viven en la URL; la casilla "Con pedidos abiertos" responde al toque y después sigue a la URL | Volver de una ficha deja la búsqueda igual; en celular la URL tarda un instante en cambiar y la casilla parecía no responder |
 | En el encabezado se marca solo la sección más específica (`isActive` con la lista) | En `/panel/clientes` se marcaban "Clientes" y "Panel" a la vez |
 
+## Rapidez al navegar (etapa 11, pedido del fundador del 11/11/2026)
+
+Medido con la build de producción, en un celular simulado con CPU x4 (.local/rendimiento.mjs: cada navegación 3 veces, mediana). Lo que frenaba no era el servidor sino el hilo principal del teléfono.
+
+| Decisión | Motivo (antes → después en celular) |
+| --- | --- |
+| Sin View Transition de página completa: cada página entra con una animación CSS (`PageEnter`, `page-enter` en globals.css); solo la foto del profesional sigue volando con View Transition | El navegador sacaba una "foto" de la página vieja y de la nueva en cada navegación (~500 ms). Profesionales → detalle: 3,3 s → 0,8 s |
+| La entrada de página no se anima en la primera carga y usa `animation-fill-mode: backwards` | La primera página llega del servidor ya pintada; al terminar no queda un transform que cambie el `position: fixed` de adentro |
+| El panel lateral (`Sheet`: menú del celular y filtros) es un `<dialog>` NO modal (`show()`), con foco atrapado, Esc, foco de vuelta al botón, `aria-modal` y fondo propio; va por portal al `<body>` | `showModal()` deja inerte toda la página y recalcula los estilos de cada elemento al abrir y al cerrar (50–180 ms); `show()` tarda 4–14 ms. Dentro del encabezado (con backdrop-filter) `position: fixed` quedaría relativo a él |
+| Los avisos flotantes van por encima del fondo del panel (z-70) | Se siguen viendo con el menú abierto |
+| El carrusel del inicio se congela al tocar un enlace para irse (`click`, no `pointerdown`) y sigue al volver | La transición de la foto (clip-path) se pinta en el hilo principal y le sacaba el procesador a la navegación |
+| `src/config/env.ts` valida sin zod; zod se importa siempre desde `src/lib/zod.ts` (regla de ESLint) | env.ts está en todas las páginas y arrastraba zod (~110 KB) a cada una; ahora zod solo va en las páginas con formularios |
+
+Resultado en celular: Inicio → Foro 5,0 → 1,6 s; Foro → Clientes 3,7 → 1,2 s; Inicio → Profesionales 4,5 → 1,4 s; Clientes → ficha 1,4 → 0,5 s. En escritorio todas las navegaciones quedaron entre 110 y 210 ms (antes hasta 1,3 s).
+
 ## Lighthouse: avisos aceptados (etapa 8)
 
 - **"Falta la meta description"** en el catálogo y el perfil. Las dos páginas la tienen. Next 16

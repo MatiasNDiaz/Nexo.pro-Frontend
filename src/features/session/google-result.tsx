@@ -6,7 +6,7 @@ import { Link2, Mail, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { Turnstile } from "@/components/forms/turnstile";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Alert, Skeleton } from "@/components/ui/feedback";

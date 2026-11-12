@@ -5,7 +5,7 @@ import { AlertTriangle, Bug, HelpCircle, Lightbulb, MessageSquareWarning, Send }
 import { useState } from "react";
 import { FeedbackIcon } from "@/components/ui/feedback-icon";
 import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { Turnstile } from "@/components/forms/turnstile";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";

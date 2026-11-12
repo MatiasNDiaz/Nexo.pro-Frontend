@@ -243,7 +243,7 @@ export function Toaster() {
   return (
     <section
       aria-label="Avisos"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center p-4 sm:inset-x-auto sm:top-14 sm:right-0 sm:bottom-auto sm:p-6"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-70 flex justify-center p-4 sm:inset-x-auto sm:top-14 sm:right-0 sm:bottom-auto sm:p-6"
     >
       <ol className="flex w-full max-w-sm flex-col gap-3">
         {list.map((item) => (

@@ -1,14 +1,10 @@
-import { ViewTransition, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { PageEnter } from "@/components/motion/page-enter";
 
 /**
- * A diferencia del layout, el template se vuelve a montar en cada navegación: así cada cambio de
- * página tiene su salida y su entrada (fundido corto con un leve desplazamiento; ver globals.css).
- * `default="none"` evita animar en transiciones que no son de navegación.
+ * A diferencia del layout, el template se vuelve a montar en cada navegación: así cada página nueva
+ * tiene su entrada (fundido corto con un leve desplazamiento; ver PageEnter y globals.css).
  */
 export default function SiteTemplate({ children }: { children: ReactNode }) {
-  return (
-    <ViewTransition enter="page-enter" exit="page-exit" default="none">
-      <div className="flex flex-1 flex-col">{children}</div>
-    </ViewTransition>
-  );
+  return <PageEnter>{children}</PageEnter>;
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useId, useRef, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useSyncExternalStore, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
 
 interface DialogBaseProps {
@@ -138,7 +139,73 @@ export function Dialog({ open, onClose, title, description, children, className,
   );
 }
 
-/** Panel lateral (menú móvil desde la derecha; filtros desde la izquierda, donde están en escritorio). */
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/**
+ * <dialog> NO modal (show()) con el comportamiento de un modal hecho a mano: foco atrapado adentro,
+ * Esc cierra y el foco vuelve al botón que lo abrió. Motivo (medido el 11/11/2026 en un celular con
+ * CPU x4): showModal() deja inerte toda la página y el navegador recalcula los estilos de cada
+ * elemento al abrir y al cerrar (50 a 180 ms); show() tarda 4 a 14 ms. El fondo lo pone el Sheet.
+ */
+function useLightDialog(open: boolean, onClose: () => void) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      dialog.show();
+      // Como showModal: el foco va al primer control (en el Sheet, el de cerrar o el primer enlace).
+      dialog.querySelector<HTMLElement>(FOCUSABLE)?.focus({ preventScroll: true });
+    }
+    if (!open && dialog.open) {
+      dialog.close();
+      opener.current?.focus({ preventScroll: true });
+    }
+    return () => {
+      if (dialog.open) dialog.close();
+    };
+  }, [open]);
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      onClose();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const items = [...event.currentTarget.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0]!;
+    const last = items[items.length - 1]!;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  return { ref, onKeyDown };
+}
+
+/** ¿Ya estamos en el navegador? (el portal necesita `document`; en el servidor el panel está cerrado). */
+const useIsClient = () =>
+  useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+/**
+ * Panel lateral (menú móvil desde la derecha; filtros desde la izquierda, donde están en escritorio).
+ * No modal por rendimiento (ver useLightDialog), con `aria-modal` para los lectores de pantalla y un
+ * fondo que cierra al tocarlo. Va por un portal al <body>: dentro del encabezado (que tiene
+ * backdrop-filter), `position: fixed` quedaría relativo al encabezado y no a la pantalla.
+ */
 export function Sheet({
   open,
   onClose,
@@ -148,34 +215,47 @@ export function Sheet({
   className,
   side = "right",
 }: DialogBaseProps & { side?: "left" | "right" }) {
-  const { ref, onBackdropClick } = useNativeDialog(open, onClose);
+  const { ref, onKeyDown } = useLightDialog(open, onClose);
   const titleId = useId();
+  const isClient = useIsClient();
+  if (!isClient) return null;
 
-  return (
-    <dialog
-      ref={ref}
-      aria-labelledby={titleId}
-      onClick={onBackdropClick}
-      className={cn(
-        "fixed inset-y-0 m-0 h-dvh max-h-none w-[min(22rem,88vw)] max-w-none bg-surface p-0 shadow-raised",
-        side === "right"
-          ? "right-0 left-auto translate-x-full open:translate-x-0 starting:open:translate-x-full"
-          : "right-auto left-0 -translate-x-full open:translate-x-0 starting:open:-translate-x-full",
-        discrete,
-        backdrop,
-        className,
-      )}
-    >
-      <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
-          <h2 id={titleId} className="text-base font-semibold text-ink">
-            {title}
-          </h2>
-          <CloseButton onClose={onClose} />
+  return createPortal(
+    <>
+      <div
+        aria-hidden="true"
+        onClick={onClose}
+        className={cn(
+          "fixed inset-0 z-60 bg-brand-950/55 transition-opacity duration-250 ease-out-soft",
+          open ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      />
+      <dialog
+        ref={ref}
+        aria-labelledby={titleId}
+        aria-modal="true"
+        onKeyDown={onKeyDown}
+        className={cn(
+          "fixed inset-y-0 z-61 m-0 h-dvh max-h-none w-[min(22rem,88vw)] max-w-none bg-surface p-0 shadow-raised",
+          side === "right"
+            ? "right-0 left-auto translate-x-full open:translate-x-0 starting:open:translate-x-full"
+            : "right-auto left-0 -translate-x-full open:translate-x-0 starting:open:-translate-x-full",
+          discrete,
+          className,
+        )}
+      >
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
+            <h2 id={titleId} className="text-base font-semibold text-ink">
+              {title}
+            </h2>
+            <CloseButton onClose={onClose} />
+          </div>
+          {description && <p className="px-5 pt-4 text-sm text-muted">{description}</p>}
+          <div className="flex-1 overflow-y-auto">{children}</div>
         </div>
-        {description && <p className="px-5 pt-4 text-sm text-muted">{description}</p>}
-        <div className="flex-1 overflow-y-auto">{children}</div>
-      </div>
-    </dialog>
+      </dialog>
+    </>,
+    document.body,
   );
 }
